@@ -45,9 +45,9 @@ Read the data from the external file and calculate the sample means, standard de
 time_block_metrics <- function(data_file,time_block){
   # data_file: Refers to the data set.
   # time_point: Refers to the specific time blocks (character string).
-  mean <- round(mean(data_file[,time_block]), digits = 4)
-  sd <- round(sd(data_file[,time_block]), digits = 4)
-  var <- round(var(data_file[,time_block]), digits = 4)
+  mean <- mean(data_file[,time_block])
+  sd <- sd(data_file[,time_block])
+  var <- var(data_file[,time_block])
   metrics <- data.frame(cbind(mean,sd,var))
   colnames(metrics) <- c("mean","sd","var")
   return(metrics)
@@ -62,9 +62,17 @@ time_blocks <- c("Time1","Time2","Time3","Time4","Time5","Time6")
 
 # Calculating mean, standard deviation, and variance for all subjects 
 # and by group. 
-all_metrics <- as.matrix(sapply(time_blocks, function(x) time_block_metrics(cort_data,x)))
-c_metrics <- as.matrix(sapply(time_blocks, function(x) time_block_metrics(cort_data_c,x)))
-p_metrics <- as.matrix(sapply(time_blocks, function(x) time_block_metrics(cort_data_p,x)))
+all_metrics <- matrix(unlist(sapply(time_blocks, function(x) time_block_metrics(cort_data,x))),ncol = 6)
+colnames(all_metrics) <- c("Time1","Time2","Time3","Time4","Time5","Time6")
+rownames(all_metrics) <- c("Mean","SD","Var")
+
+c_metrics <- matrix(unlist(sapply(time_blocks, function(x) time_block_metrics(cort_data_c,x))),ncol = 6)
+colnames(c_metrics) <- c("Time1","Time2","Time3","Time4","Time5","Time6")
+rownames(c_metrics) <- c("Mean","SD","Var")
+
+p_metrics <- matrix(unlist(sapply(time_blocks, function(x) time_block_metrics(cort_data_p,x))),ncol = 6)
+colnames(p_metrics) <- c("Time1","Time2","Time3","Time4","Time5","Time6")
+rownames(p_metrics) <- c("Mean","SD","Var")
 
 # Combining outcomes together. 
 metrics_raw <- rbind(all_metrics,c_metrics,p_metrics)
@@ -117,15 +125,11 @@ Construct a means and standard deviation graph of the time points with the means
 
 # Making a data frame for plotting the mean and standard deviation 
 # for group c.  
-c_group_metrics <- data.frame(rbind(time1_c,time2_c,time3_c,
-                                  time4_c,time5_c,time6_c))[,1:2]
-
-# Renaming columns.
-colnames(c_group_metrics) <- c("mean","sd")
+c_group_metrics <- data.frame(t(c_metrics[1:2,]))
 
 # Calculating both upper and lower standard deviation for c group. 
-c_group_metrics$lower_sd <- c_group_metrics$mean - c_group_metrics$sd
-c_group_metrics$upper_sd <- c_group_metrics$mean + c_group_metrics$sd
+c_group_metrics$lower_SD <- c_group_metrics$Mean - c_group_metrics$SD
+c_group_metrics$upper_SD <- c_group_metrics$Mean + c_group_metrics$SD
 
 # Adding in timepoints for each measurement. 
 c_group_metrics$time_point <- c(1,2,3,4,5,6)
@@ -133,17 +137,13 @@ c_group_metrics$time_point <- c(1,2,3,4,5,6)
 # Adding in group designation.
 c_group_metrics$Group <- "c"
 
-# Making a data frame for plotting the mean and standard deviaiton 
+# Making a data frame for plotting the mean and standard deviation 
 # for group p. 
-p_group_metrics <- data.frame(rbind(time1_p,time2_p,time3_p,
-                                    time4_p,time5_p,time6_p))[,1:2]
-
-# Renaming columns.
-colnames(p_group_metrics) <- c("mean","sd")
+p_group_metrics <- data.frame(t(p_metrics[1:2,]))
 
 # Calculating both upper and lower standard deviation for p group.
-p_group_metrics$lower_sd <- p_group_metrics$mean - p_group_metrics$sd
-p_group_metrics$upper_sd <- p_group_metrics$mean + p_group_metrics$sd
+p_group_metrics$lower_SD <- p_group_metrics$Mean - p_group_metrics$SD
+p_group_metrics$upper_SD <- p_group_metrics$Mean + p_group_metrics$SD
 
 # Adding in time points for each measurement.
 p_group_metrics$time_point <- c(1,2,3,4,5,6)
@@ -160,16 +160,16 @@ groups_metric <- rbind(c_group_metrics,p_group_metrics)
 # at each individual time point, with colored lines connecting each group. 
 
 group_metric_plot <- ggplot(groups_metric, aes(x = time_point,
-                                               y = mean,
+                                               y = Mean,
                                                fill = Group)) +
   geom_point(position = position_dodge(width = 0.5), colour = "black") +
   geom_line(aes(color = Group), position = position_dodge(width = 0.5)) +
-  geom_errorbar(aes(ymin = lower_sd, ymax = upper_sd, color = Group), 
+  geom_errorbar(aes(ymin = lower_SD, ymax = upper_SD, color = Group), 
                 width = 0.1,
                 position = position_dodge(width = 0.5),) +
   labs(title = "Mean and Standard Deviation of Cortisol by Group at Each Time Point",
        x = "Time Point", y = "Cortisol Mean",
-       caption = "Bars indicate 1 standard deviation.") + 
+       caption = "Bars indicate 1 standard deviation. Point offset from time point to avoid overlap") + 
   scale_color_brewer(palette = "Dark2") +
   scale_x_continuous(breaks = seq(1,6,1)) +
   theme_bw()
@@ -267,7 +267,7 @@ par(mfrow = c(1,1))
 
 ```
 
-Spearman correlationw as used due to significant outliers. 
+Spearman correlation was used due to significant outliers. 
 
 \newpage
 

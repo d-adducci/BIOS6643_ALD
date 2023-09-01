@@ -280,6 +280,8 @@ $$A = A^T$$
 #### Question 7
 Verify that the diagonal elements of the covariance matrix are the variances of each time point by comparing your variance-covariance matrix to the table created in problem 1. 
 
+The diagonal elements of the covariance matrix (Covariance Between Cortisol and Time Point) are the variances of each time point in the table (Table 1: Cortisol Measurements Between Groups). 
+
 
 
 
@@ -289,4 +291,4 @@ Verify that the diagonal elements of the covariance matrix are the variances of 
 
 # Homework 1 Part 2
 
-Test of push
+

@@ -42,28 +42,43 @@ Read the data from the external file and calculate the sample means, standard de
 
 # START QUESTION 1 CODE
 
-time_block_metrics <- function(data_file,group,time_block){
+time_block_metrics <- function(data_file,time_block){
   # data_file: Refers to the data set.
-  # group: refers to which case control group is desired (character string). 
   # time_point: Refers to the specific time blocks (character string).
-  data_file_select <- data_file[data_file$casecontrol == group,]
-  mean <- mean(data_file_select[,time_block])
-  sd <- sd(data_file_select[,time_block])
-  var <- var(data_file_select[,time_block])
-  metrics <- cbind(mean,sd,var)
+  mean <- mean(data_file[,time_block])
+  sd <- sd(data_file[,time_block])
+  var <- var(data_file[,time_block])
+  metrics <- data.frame(cbind(mean,sd,var))
   colnames(metrics) <- c("mean","sd","var")
   return(metrics)
 }
 
+# Selecting out subjects who are grouped as time "c". 
+cort_data_c <- cort_data[cort_data$casecontrol == "c",]
+cort_data_p <- cort_data[cort_data$casecontrol == "p",]
+
+# Initializing time block column names to input into above function. 
+time_blocks <- c("Time1","Time2","Time3","Time4","Time5","Time6")
+
+# Calculating 
+all_metrics <- sapply(time_blocks, function(x) time_block_metrics(cort_data,x))
+c_metrics <- sapply(time_blocks, function(x) time_block_metrics(cort_data_c,x))
+p_metrics <- sapply(time_blocks, function(x) time_block_metrics(cort_data_p,x))
+
 # Calculating mean, standard deviation, and variance for each group. 
-time1_c <- time_block_metrics(cort_data,"c","Time1")
-time1_p <- time_block_metrics(cort_data,"p","Time1")
-time2_c <- time_block_metrics(cort_data,"c","Time2")
-time2_p <- time_block_metrics(cort_data,"p","Time2")
-time3_c <- time_block_metrics(cort_data,"c","Time3")
-time3_p <- time_block_metrics(cort_data,"p","Time3")
-time4_c <- time_block_metrics(cort_data,"c","Time4")
-time4_p <- time_block_metrics(cort_data,"p","Time4")
+time_1_all <- time_block_metrics(cort_data,"Time1")
+time1_c <- time_block_metrics(cort_data_c,"Time1")
+time1_p <- time_block_metrics(cort_data_p,"Time1")
+time_2_all <- time_block_metrics[cort_data,"Time2"]
+time2_c <- time_block_metrics(cort_data_c,"Time2")
+time2_p <- time_block_metrics(cort_data_p,"Time2")
+time3_all <- time_block_metrics(cort_data,"Time3")
+time3_c <- time_block_metrics(cort_data_c,"Time3")
+time3_p <- time_block_metrics(cort_data_p,"Time3")
+time4_all <- time_block_metrics(cort_data,"Time4")
+time4_c <- time_block_metrics(cort_data_c,"Time4")
+time4_p <- time_block_metrics(cort_data_p,"Time4")
+time4_all
 time5_c <- time_block_metrics(cort_data,"c","Time5")
 time5_p <- time_block_metrics(cort_data,"p","Time5")
 time6_c <- time_block_metrics(cort_data,"c","Time6")

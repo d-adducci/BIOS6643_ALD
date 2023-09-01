@@ -1,0 +1,290 @@
+---
+title: "Homework 1 - BIOS 6643"
+author: "Dominic Adducci"
+date: "2023-08-30"
+output:
+  pdf_document: default
+---
+
+```{r, echo = F, include = F}
+
+# Loading necessary libraries into R
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(kableExtra)
+library(RColorBrewer)
+library(corrplot)
+library(Hmisc)
+
+```
+
+```{r, echo = F}
+
+# Loading data set (cortdata.csv) into R. 
+cort_data <- read.csv("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - Analysis of Longitudinal Data/Homework 1/cortdata.csv")
+
+```
+
+\newpage
+
+# Homework 1 Part 1
+
+#### Question 1
+
+Read the data from the external file and calculate the sample means, standard deviations, and variances at each time point. Make an investigator worthy table of the data. 
+
+```{r, echo = F}
+
+# START QUESTION 1 CODE
+
+time_block_metrics <- function(data_file,group,time_block){
+  # data_file: Refers to the data set.
+  # group: refers to which case control group is desired (character string). 
+  # time_point: Refers to the specific time blocks (character string).
+  data_file_select <- data_file[data_file$casecontrol == group,]
+  mean <- mean(data_file_select[,time_block])
+  sd <- sd(data_file_select[,time_block])
+  var <- var(data_file_select[,time_block])
+  metrics <- cbind(mean,sd,var)
+  colnames(metrics) <- c("mean","sd","var")
+  return(metrics)
+}
+
+# Calculating mean, standard deviation, and variance for each group. 
+time1_c <- time_block_metrics(cort_data,"c","Time1")
+time1_p <- time_block_metrics(cort_data,"p","Time1")
+time2_c <- time_block_metrics(cort_data,"c","Time2")
+time2_p <- time_block_metrics(cort_data,"p","Time2")
+time3_c <- time_block_metrics(cort_data,"c","Time3")
+time3_p <- time_block_metrics(cort_data,"p","Time3")
+time4_c <- time_block_metrics(cort_data,"c","Time4")
+time4_p <- time_block_metrics(cort_data,"p","Time4")
+time5_c <- time_block_metrics(cort_data,"c","Time5")
+time5_p <- time_block_metrics(cort_data,"p","Time5")
+time6_c <- time_block_metrics(cort_data,"c","Time6")
+time6_p <- time_block_metrics(cort_data,"p","Time6")
+
+
+time_metrics <- rbind(time1_c,time1_p,time2_c,time2_p,time3_c,time3_p,
+                      time4_c,time4_p,time5_c,time5_p,time6_c,time6_p)
+
+rownames(time_metrics) <- c("c","p","c","p","c","p","c","p","c","p","c","p")
+
+# Making a table to illustrate the mean, standard deviation, and variance of
+# each time block. 
+time_metric_table <- kbl(time_metrics,
+                         caption = "Cortisol Measurements Between Groups",
+                         col.names = c("Mean","Standard Deviation","Variance"),
+                         booktabs = T, align = "cc",
+                         linesep = c("","\\addlinespace")) %>%
+  kable_styling(full_width = F,latex_options = "HOLD_position") %>%
+  pack_rows("Time 1 = 22:00-01:50",1,2) %>%
+  pack_rows("Time 2 = 02:00-05:50",3,4) %>%
+  pack_rows("Time 3 = 06:00-09:50",5,6) %>%
+  pack_rows("Time 4 = 10:00-13:50",7,8) %>%
+  pack_rows("Time 5 = 14:00-17:50",9,10) %>%
+  pack_rows("Time 6 = 18:00-21:50",11,12) %>%
+  footnote(general = "'c' and 'p' refer to case control groups",)
+
+time_metric_table
+
+# END QUESTION 1 CODE
+
+```
+
+
+#### Question 2
+
+Interpret the patterns observed in the means and variances for each group in a few sentences. 
+
+For group c the mean cortisol measurement increases until time block 3, after which it starts to steadily decrease. This group also has the lowest standard deviation and variance at time block 5. The group trend for standard deviation and variance is that there is a decrease between time block 1 and 2, a slight increase at time block 3, and the a steady decrease between time block 4 and 5, then an increase at time block 6. 
+
+For group p the mean cortisol measurement increases until time block 3, after which it starts to steadily decrease. This group also has the lowest standard deviation and variance at time block 1. For this group there is a steady increase in standard deviation and variance from time block 1 to time block 3. There is then a steep decrease at time 4, and then an alternating pattern of increase and decrease in standard deviation and variance between time blocks 4 and 6. 
+
+Group c always has a lower mean at each time point compared to group p. Group c has higher standard deviation and variance compared to group p at time block 1 and 6, and lower standard deviation and variance at for all other time blocks. 
+
+\newpage
+
+#### Question 3
+Construct a means and standard deviation graph of the time points with the means connected by a line of a difference color for each group. Interpret the time patterns in the graph. What are your initial thoughts on whether the hypothesis that there are differences in the circadian rhythms between groups will be accepted by your formal analysis? 
+
+```{r, echo = F}
+
+# START QUESTION 3 CODE
+
+# Making a data frame for plotting the mean and standard deviation 
+# for group c.  
+c_group_metrics <- data.frame(rbind(time1_c,time2_c,time3_c,
+                                  time4_c,time5_c,time6_c))[,1:2]
+
+# Renaming columns.
+colnames(c_group_metrics) <- c("mean","sd")
+
+# Calculating both upper and lower standard deviation for c group. 
+c_group_metrics$lower_sd <- c_group_metrics$mean - c_group_metrics$sd
+c_group_metrics$upper_sd <- c_group_metrics$mean + c_group_metrics$sd
+
+# Adding in timepoints for each measurement. 
+c_group_metrics$time_point <- c(1,2,3,4,5,6)
+
+# Adding in group designation.
+c_group_metrics$Group <- "c"
+
+# Making a data frame for plotting the mean and standard deviaiton 
+# for group p. 
+p_group_metrics <- data.frame(rbind(time1_p,time2_p,time3_p,
+                                    time4_p,time5_p,time6_p))[,1:2]
+
+# Renaming columns.
+colnames(p_group_metrics) <- c("mean","sd")
+
+# Calculating both upper and lower standard deviation for p group.
+p_group_metrics$lower_sd <- p_group_metrics$mean - p_group_metrics$sd
+p_group_metrics$upper_sd <- p_group_metrics$mean + p_group_metrics$sd
+
+# Adding in time points for each measurement.
+p_group_metrics$time_point <- c(1,2,3,4,5,6)
+
+# Adding in group designation.
+p_group_metrics$Group <- "p"
+
+
+# Combining both groups together into a single data frame. 
+groups_metric <- rbind(c_group_metrics,p_group_metrics)
+
+
+# Making a plot that shows both the group means and standard deviation
+# at each individual time point, with colored lines connecting each group. 
+
+group_metric_plot <- ggplot(groups_metric, aes(x = time_point,
+                                               y = mean,
+                                               fill = Group)) +
+  geom_point(position = position_dodge(width = 0.5), colour = "black") +
+  geom_line(aes(color = Group), position = position_dodge(width = 0.5)) +
+  geom_errorbar(aes(ymin = lower_sd, ymax = upper_sd, color = Group), 
+                width = 0.1,
+                position = position_dodge(width = 0.5),) +
+  labs(title = "Mean and Standard Deviation of Cortisol by Group at Each Time Point",
+       x = "Time Point", y = "Cortisol Mean",
+       caption = "Bars indicate 1 standard deviation.") + 
+  scale_color_brewer(palette = "Dark2") +
+  scale_x_continuous(breaks = seq(1,6,1)) +
+  theme_bw()
+
+group_metric_plot
+
+# END QUESTION 3 CODE.
+
+```
+
+Both groups follow the same general trend, where mean cortisol is lowest at time point 1 (22:00-01:50), and steadily increases until time point 3 (06:00-09:50). Both groups steadily decrease in mean cortisol until the final time point (time point 6, 18:00-21:50). This trend follows the circadian rhythm, where cortisol peaks in the middle of the day, and decreases during night. 
+
+Between groups the mean cortisol levels are nearly the same for time points 1 and 6. For all other time points in the measurement period group "c" has lower mean cortisol levels compared to group p. The standard deviation for each group varies between time points. For time points 1 and 6 group "c" has a much larger standard deviation compared to group "p". For time points 2, 3, and 5 group "p" has a larger standard deviation. Time point 4 has similar standard deviations between groups. 
+
+Mean cortisol levels in general, with the exception of the time point 1 and 6, are lower for group "c" compared to group "p". While this initially seems to suggest that there is a difference in cortisol between women who suffer from depression and those who do not, the standard deviation vary between groups at each time point enough to possible be obscuring what is happening when only looking at means cortisol levels for each time block. Possible explanations for this behavior could be additional variables which may be affecting cortisol levels beyond a diagnosis of depression.  
+
+#### Question 4
+Construct a spaghetti plot of each group (one panel for each group). Describe the variation in cortisol levels within a person. Describe the variation in the cortisol levels between people. Which source of variation has more variation? Justify with 1-2 sentences. 
+
+```{r, echo = F, message = F}
+
+# START QUESTION 4 CODE
+
+# Transforming original data frame from wide to long format.
+cort_data_long <- cort_data %>% pivot_longer(cols = "Time1":"Time6", 
+                                             names_to = "time",
+                                             values_to = "mean_cortisol")
+
+# Making spaghetti plots.
+cort_spaghetti <- ggplot(cort_data_long, aes(x = factor(time), 
+                                             y = mean_cortisol)) +
+  geom_line(alpha = 0.5, aes(group = SubjectId)) +
+  facet_grid(.~casecontrol) +
+  labs(title = "Spaghetti Plots of Mean Cortisol at Each Time Point by Group",
+       x = "Time", y = "Mean Cortisol") +
+  theme_bw()
+
+
+cort_spaghetti
+  
+# END QUESTION 4 CODE
+
+```
+
+In general the pattern of variation within individuals is the same for both groups, with the middle portion of the day having the highest mean cortisol levels for most individuals, and night/early morning having the lowest. The variation between individuals also changes depending on the time point. For group "c" the general pattern is that the first and last measurements have the least amount of variation between individuals, and for group "p" the variation between individuals is generally lowest at times 1 and 6, with spreading and coalescing of values throughout the measurement period. Additionally, there are a few outliers who may be strongly influencing variance measurements at each time point. 
+
+In general there seems to be more variation between subjects compared to within an individual. This is somewhat obscured by the fact that the individuals tend to follow the same trend in mean cortisol levels throughout the day, but overall there are wide variances between individuals during the middle portion of the experimental period. 
+
+\newpage
+
+#### Question 5
+Calculate the 6x6 covariance and correlation matrices for the six time points of cortisol levels. 
+
+```{r, echo = F, fig.width = 8, fig.height = 8}
+
+# START QUESTION 5
+
+# calculating covariance matrix of the six time points for cortisol levels. 
+# Using 'corrplot' function from the 'corrplot' library to plot both the 
+# covariance and correlation matrix. 
+
+par(mfrow = c(2,1))
+
+# Selecting out necessary columns for each time point to calculate the
+# covariance and correlation matrices. 
+time_cort <- cort_data %>% select(Time1:Time6)
+
+# Calculating covariance matrix and plotting.
+time_cort_cov <- cov(time_cort)
+
+time_cort_cov_plot <- corrplot(time_cort_cov,method="circle",tl.col="black",
+                               addCoef.col="black",number.cex=0.90,tl.cex =0.75,
+                               col=COL2('RdYlBu'),is.corr = F,tl.pos='lt',
+                               number.digits=3,
+                               title="Covariance Between Cortisol and Time Point",
+                               cl.align.text="l",
+                               # Margin add
+                               mar=c(0,0,2,0))
+
+
+# Calculating correlation matrix and plotting. spearman correlation was chosen
+# due to the outliers in the data. 
+time_cor_corr <- rcorr(as.matrix(time_cort_cov), type = "spearman")
+
+
+time_cort_corr_plot <- corrplot(time_cor_corr$r,method = "circle",tl.col = "black",
+                                addCoef.col = "black",number.cex=0.90,tl.cex=0.75,
+                                col=COL2("RdYlBu"),tl.pos="lt",number.digits=3,
+                                title="Correlation Between Cortisol and Time Point",
+                                cl.align.text="l",
+                                # Margin add
+                                mar=c(0,0,2,0))
+
+par(mfrow = c(1,1))
+
+```
+
+Spearman correlationw as used due to significant outliers. 
+
+\newpage
+
+#### Question 6
+The covariance matrix is symmetric. Explain why in 1-2 sentences with a mathematical justification. 
+
+The covariance matrix is symmetric because the transposition of this matrix is the same as the original matrix. In mathematical terms, using "A" to refer to the covariance matrix:
+$$A = A^T$$
+
+#### Question 7
+Verify that the diagonal elements of the covariance matrix are the variances of each time point by comparing your variance-covariance matrix to the table created in problem 1. 
+
+
+
+
+
+
+\newpage
+
+# Homework 1 Part 2
+
+

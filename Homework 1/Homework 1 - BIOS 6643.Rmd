@@ -40,7 +40,7 @@ Read the data from the external file and calculate the sample means, standard de
 
 ```{r, echo = F}
 
-# START QUESTION 1 CODE
+# START PART 1 QUESTION 1 CODE
 
 time_block_metrics <- function(data_file,time_block){
   # data_file: Refers to the data set.
@@ -99,7 +99,7 @@ time_metric_table <- kbl(metrics,
 
 time_metric_table
 
-# END QUESTION 1 CODE
+# END PART 1 QUESTION 1 CODE
 
 ```
 
@@ -121,7 +121,7 @@ Construct a means and standard deviation graph of the time points with the means
 
 ```{r, echo = F}
 
-# START QUESTION 3 CODE
+# START Part 1 QUESTION 3 CODE
 
 # Making a data frame for plotting the mean and standard deviation 
 # for group c.  
@@ -176,7 +176,7 @@ group_metric_plot <- ggplot(groups_metric, aes(x = time_point,
 
 group_metric_plot
 
-# END QUESTION 3 CODE.
+# END Part 1 QUESTION 3 CODE.
 
 ```
 
@@ -191,7 +191,7 @@ Construct a spaghetti plot of each group (one panel for each group). Describe th
 
 ```{r, echo = F, message = F}
 
-# START QUESTION 4 CODE
+# START Part 1 QUESTION 4 CODE
 
 # Transforming original data frame from wide to long format.
 cort_data_long <- cort_data %>% pivot_longer(cols = "Time1":"Time6", 
@@ -210,7 +210,7 @@ cort_spaghetti <- ggplot(cort_data_long, aes(x = factor(time),
 
 cort_spaghetti
   
-# END QUESTION 4 CODE
+# END Part 1 QUESTION 4 CODE
 
 ```
 
@@ -225,7 +225,7 @@ Calculate the 6x6 covariance and correlation matrices for the six time points of
 
 ```{r, echo = F, fig.width = 8, fig.height = 8}
 
-# START QUESTION 5
+# START PART 1 QUESTION 5
 
 # calculating covariance matrix of the six time points for cortisol levels. 
 # Using 'corrplot' function from the 'corrplot' library to plot both the 
@@ -265,6 +265,8 @@ time_cort_corr_plot <- corrplot(time_cor_corr$r,method = "circle",tl.col = "blac
 
 par(mfrow = c(1,1))
 
+# END PART 1 QUESTION 5
+
 ```
 
 Spearman correlation was used due to significant outliers. 
@@ -290,5 +292,148 @@ The diagonal elements of the covariance matrix (Covariance Between Cortisol and 
 \newpage
 
 # Homework 1 Part 2
+
+#### Question 1
+For the following matrices and vectors write down the dimensions in rxc notation (rows x columns). ' and T both mean transpose for this problem. 
+
+
+```{r, echo = F}
+
+# START PART 2 CODE
+
+# Function for writing a matrix in LaTeX from a r matrix. 
+# Code found at https://stackoverflow.com/questions/45591286/for-r-markdown-how-do-i-display-a-matrix-from-r-variable
+
+write_matrix <- function(x) {
+  begin <- "\\begin{bmatrix}"
+  end <- "\\end{bmatrix}"
+  X <-
+    apply(x, 1, function(x) {
+      paste(
+        paste(x, collapse = "&"),
+        "\\\\"
+      )
+    })
+  paste(c(begin, X, end), collapse = "")
+}
+
+
+# START PART 2 QUESTION 1 CODE
+
+# Making matrices. 
+q1_pa_mat <- matrix(c(2,4,-2), nrow = 3)
+
+q1_pc_mat <- matrix(c(2,1,1,
+                      4,-6,0,
+                      -2,7,2),nrow = 3,byrow = TRUE)
+
+q1_pd_mat <- matrix(c(2,1,
+                      4,-6,
+                      -2,7),nrow = 3, byrow = TRUE)
+
+p1_pe_mat_1 <- matrix(c(2,1,
+                      4,-6,
+                      -2,7),nrow = 3, byrow = TRUE)
+
+p1_pe_mat_2 <- matrix(c(2,4,-2,
+                        1,-6,7),nrow = 2, byrow = TRUE)
+
+# END PART 2 QUESTION 1 CODE
+
+```
+
+#### Part A
+
+$$ `r # write_matrix(q1_pa_mat)` $$
+
+(3x1) matrix. 
+
+#### Part B
+
+$$ (2,4,-2)' $$
+
+Transposing this vector would result in a vector with (3x1) dimensions. 
+
+#### Part C
+
+$$`r write_matrix(q1_pc_mat)`$$
+
+(3x3) matrix.
+
+#### Part D
+
+$$ `r write_matrix(q1_pd_mat)` $$
+
+(3x2) matrix.
+
+#### Part E
+
+$$ `r write_matrix(p1_pe_mat_1)`^T = `r write_matrix(p1_pe_mat_2)` $$
+
+After transposing the resulting matrix is (2x3).
+
+\newpage
+
+#### Question 2
+Can we multiple these matrices? If no, explain how you figured out the computation was not possible. If yes, what will be the dimensions in rxc notation. 
+
+```{r, echo = F}
+
+# START PART 2 QUESTION 2 CODE
+
+# Making matrices. 
+
+q2_pa_mat_1 <- matrix(c(2,
+                      4,
+                      -2),nrow = 3, byrow = TRUE)
+
+q2_pa_mat_2 <- matrix(c(1,4,10),nrow = 1, byrow = TRUE)
+
+# END PART 2 QUESTION 2 CODE
+
+```
+
+#### Part A
+
+$$ `r write_matrix(q2_pa_mat_1)` `r write_matrix(q2_pa_mat_2)`$$
+
+Multiplying matrices with dimensions of $(3 \times 1)$ and $(1 \times 3)$ is possible because the number of columns in the first matrix is the same as the number of rows in the second matrix. The resulting matrix is $(3 \times 3)$
+
+#### Part B
+
+$$ `r write_matrix(q2_pa_mat_2)` `r write_matrix(q2_pa_mat_1)`$$
+
+Multiplying matrices with dimensions orientation of $(1 \times 3)$ and $(3 \times 1)$ is possible because the number of columns in the first matrix is the same as the number of rows in the second matrix. The resulting matrix is $(1 \times 1)$
+
+#### Part C
+
+$$ `r write_matrix(q1_pc_mat)` `r write_matrix(p1_pe_mat_1)`$$
+
+Multiplying matrices with the dimensions orientation of $(3 \times 3)$ and $(3 \times 2)$ is possible because the number of columns in the first matrix is the same as the number of rows in the second matrix. The resulting matrix is $(3 \times 2)$.
+
+#### Part D
+
+$$ `r write_matrix(p1_pe_mat_1)` `r write_matrix(q1_pc_mat)` $$
+
+Multiplying matrices with the dimensions orientation of $(3 \times 2)$ and $(3 \times 3)$ is not possible because the number of columns in the first matrix is not the same as the number of rows. 
+
+#### Part E
+
+$$ `r write_matrix(p1_pe_mat_1)`^T `r write_matrix(q1_pc_mat)` $$
+
+Multiplying matrices with the dimensions orientation of $(3 \times 2)^T = (2 \times 3)$ and $(3 \times 3)$ is possible because the number of columns in the first matrix is the same as the second matrix. The resulting matrix is $(2 \times 3)$. 
+
+\newpage
+
+#### Question 3
+Let X be an nxp matrix of covariate data. Can I invert X? Explain. 
+
+The covariance matrix is always square, but also need to be either positive definite or positive semi-definite in order to invert.  
+
+#### Question 4
+Let Y be an nx1 vector. Let X be an nxp matrix of covariates, let Z be an nxq matrix of additional covariates, let $\beta$ be an px1 vector of fixed (not random) parameters, and let b be an qx1 vector. Using an analysis of the dimensions determine whether the following operations are possible or equations make sense. When no, explain the issue. When yes, provide a dimension evaluation showing the resulting dimensions of the dimensions match on both sides of an equation. 
+
+#### Part A
+$ Y = X \beta$
 
 

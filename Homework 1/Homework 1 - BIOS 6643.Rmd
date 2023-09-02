@@ -521,16 +521,20 @@ Assume we have a regression model $Y_i = \beta_0 + \beta_1 X_{1,i} + \beta_2 X_{
 
 # START PART 2 SECTION 7 CODE
 
-# Initializing vecotrs.
+# Initializing vectors.
 i <- matrix(c(1,2,3,4,5,6),nrow = 1, byrow = TRUE)
 x_i1 <- matrix(c(7,4,16,3,21,8),nrow = 1, byrow = TRUE)
 x_i2 <- matrix(c(33,41,7,49,5,31),nrow = 1, byrow = TRUE)
 y_i <- matrix(c(42,33,75,28,91,55),nrow = 1, byrow = TRUE)
 
+# Creating X matrix and Y matrix so they can be used in operations correctly.
+x <- t(rbind(x_i1,x_i2))
+y <- t(y_i)
+
 # Combining vectors and naming rows and columns.
 p2_q7_df <- data.frame(rbind(x_i1,x_i2,y_i))
 colnames(p2_q7_df) <- c("1","2","3","4","5","6")
-p2_q7_df$i <- c("X1i","Xi2","Yi")
+p2_q7_df$i <- c("X1i","X2i","Yi")
 p2_q7_df <- p2_q7_df %>% relocate(i,.before = 1)
 
 # Making a table showing the vectors. 
@@ -543,10 +547,100 @@ p2_q7_table
 ```
 Using matrix methods (which you can program in R-bust must show the matrix calculations in R), obtain (a) $\hat{\beta} = (X^TX)^{-1} X^T Y$, the least squares estimate; (b) estimate the hat matrix $H = X(X^TX)^{-1}X^T$; (c) estimate $\hat{Y}$; (d) residual vector $\hat{E_i}$.
 
+All R code used for calculating the following are found in the Appendix at the end of this file. 
+
+#### Part A
+
+$\hat{\beta} = (X^TX)^{-1} X^T Y$, the least squares estimate.
+
+```{r, echo = F}
+
+# START Part 2 Question 7 Part A CODE
+
+least_square_estimates <- solve(t(x) %*% x) %*% t(x) %*% y
+
+# END PART 2 QUESTION 7 PART A CODE
+
+```
+
+Solved in one step by R (code found in appendix), but one way steps can be broken down as follows:
+
+* $(X^TX)^{-1}$; Solved by inverting X then multiplying this by X. Because the number of columns of $X^T$ is the same as the number of rows of X this operation can occur. This results in a square matrix with dimensions (2x2) that can be inverted (not all square matrices can be inverted). After inverting the subsequent matrix is (2x2). 
+
+* $(X^TX)^{-1}X^T$: The expression solved above had dimensions of (2x2), while $X^T$ has dimensions of (2x6). Because the number of columns of $(X^TX)^{-1}$ is equal to the number of rows of $X^T$ this operation can occur, and returns a matrix with dimensions of (2x6). 
+
+* $(X^TX)^{-1} X^T Y$: The expression solved above has dimensions of (2x6) and Y has dimensions of (6x1). Because the number of columns of $(X^TX)^{-1} X^T$ is the same as the number of rows in $Y$ this operation can occur, and returns a matrix with dimensions of (2x1). 
+
+Because matrix multiplication is associative the order these steps were performed does not matter. The total operation returns the following (2x1) matrix:
+
+$$ LSE = `r write_matrix(round(least_square_estimates,4)) ` $$
+
+#### Part B
+
+estimate the hat matrix $H = X(X^TX)^{-1}X^T$
+
+```{r, echo = F}
+
+# START PART 2 QUESTION 7 PART B CODE
+
+hat_mat <- (x %*% solve((t(x) %*% x)) %*% t(x))
+
+# END PART 2 QUESTION 7 PART B CODE
+
+```
+
+Solved in one step by R (code found in appendix), but one way steps can be broken down as follows:
+
+* $(X^TX)^{-1}$: Same as in the above part, solved by inverting X then multiplying this by X. Because the number of columns of $X^T$ is the same as the number of rows of X this can be down. This results in a square matrix with dimensions (2x2) that can be inverted (not all square matrices can be inverted). After inverting the subsequent matrix is (2x2).
+
+* $X(X^TX)^{-1}$: X has dimensions of (6x2) and the expression above has dimensions of (2x2). Because the number of columns of X is the same as the number of rows of $(X^TX)^{-1}$ this operation can occur. The resulting matrix has dimensions of (6x2).
+
+* $X(X^TX)^{-1}X^T$: The expression solved above has dimensions of (6x2) and $X^T$ has dimensions of (2x6). Because the number of columns of $X(X^TX)^{-1}$ is the same as the number of rows of $X^T$ this operation can occur. The resulting matrix has dimensions of (6x6). 
+
+Because matrix multiplication is associative the order these steps were performed does not matter. The total operation returns the following (6x6) matrix:
+
+$$H = `r write_matrix(round(hat_mat,4)) `$$
+
+#### Part C
+
+estimate $\hat{Y}$
+
+```{r, echo = F}
+
+# START PART 2 QUESTION 7 PART C CODE
+
+y_hat <- x %*% least_square_estimates
+
+# END PART 2 QUESTION 7 PART C CODE
+
+```
+
+Solved in one step by R, code found in appendix. $\hat{Y}$ is found by multiplying X, the subjects covariate matrix, by $\hat{\beta}$, the vector of coefficients. This returns the estimated outcomes for each subject, $\hat{Y}$. 
+
+$$\hat{Y} = X \hat{\beta}$$
+
+Where X has dimensions of (6x2) and $\hat{\beta}$ has dimensions of (2x1). Because the number of columns in X is the same as the number of rows in $\hat{\beta}$ this operation can occur, resulting in the (6x1) matrix shown below. 
+
+$$ `r write_matrix(round(y_hat,4)) ` $$
 
 
+#### Part D
 
+residual vector $\hat{E_i}$
 
+```{r, echo = F}
+
+e_hat <- y_hat - y
+
+```
+
+The residual vector $\hat{E_i}$ is found by subtracting the actual outcomes by the predicted outcomes:
+
+$$E_i = \hat{Y_i} - Y_i$$
+
+$\hat{Y_i}$ has dimensions of (6x1) and Y has dimensions of (6x1). Because they have matching dimensions the above operation can occur, which results in a (6x1) matrix, shown below. 
+
+$$E_i =  `r write_matrix(round(e_hat,4)) ` $$
 
 
 

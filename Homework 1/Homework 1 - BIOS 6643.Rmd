@@ -433,7 +433,44 @@ The covariance matrix is always square, but also need to be either positive defi
 #### Question 4
 Let Y be an nx1 vector. Let X be an nxp matrix of covariates, let Z be an nxq matrix of additional covariates, let $\beta$ be an px1 vector of fixed (not random) parameters, and let b be an qx1 vector. Using an analysis of the dimensions determine whether the following operations are possible or equations make sense. When no, explain the issue. When yes, provide a dimension evaluation showing the resulting dimensions of the dimensions match on both sides of an equation. 
 
-#### Part A
-$ Y = X \beta$
+#### Part A: 
 
+$$ Y = X \beta $$
+
+* Dimensions of Y: (nx1)
+* Dimensions of X: (nxp)
+* Dimensions of $\beta$: (px1)
+
+The operation on the right hand side of the equivalence is possible because the number of columns of X are the same as the number of rows of $\beta$, and this operation results in a matrix with (nx1) dimensions, the same as vector Y. The operation makes sense because multiplying the matrix of covariate values (X) for the subjects by the vector of coefficients ($\beta$) returns the outcome values for the subjects (Y). 
+
+#### Part B
+
+$$Y = Zb$$
+
+* Dimensions of Y: (nx1)
+* Dimensions of Z: (nxq)
+* Dimensions of b: (qx1)
+
+The operation on the right hand side of the equivalence is possible because the number of columns of Z are the same as the number of rows of *b*, and this operation results in a matrix with (nx1) dimensions, the same as vector Y. The operation makes sense because multiplying the matrix for subject-specific/random effects (Z) by the vector of random effects (b) returns the outcome values for the subjects (Y). This is a model with no fixed effects. 
+
+#### Part C
+
+$$Z^{-1}Y = b$$
+
+* Dimensions of $Z^{-1}$: (nxq)
+* Dimensions of Y: (nx1)
+* Dimensions of b: (qx1)
+
+Inverting Z is only possible if Z is a square matrix (and even then it may not be possible). Additionally, multiplying $Z^{-1}$ by Y is not possible because the number rows of $Z^{-1}$ is not the same as the number of columns in Y. The equation is attempting to return the vector of random effects from the subject outcome (Y) and the matrix for subject-specific/random effects (Z).
+
+#### Part D
+
+$$X^TY = X^TX \beta$$
+
+* Dimensions of $X^T$: (pxn)
+* Dimensions of $Y$: (nx1)
+* Dimensions of $X$: (nxp)
+* Dimensions of $\beta$: (px1)
+
+The operations on both side of the equivalence are possible because the number of columns in $X^T$ is the same as the number of rows in Y, and the number of columns in $X^T$ are the same as the number of rows in X and the number of columns in X is the same as the number of rows in $\beta$. Matrix multiplication is associative so order of these multiplications does not matter. The equivalence is possible because X$\beta$ is equivalent to Y. The resulting matrices of both sides of the equivalence have dimensions of (px1). 
 

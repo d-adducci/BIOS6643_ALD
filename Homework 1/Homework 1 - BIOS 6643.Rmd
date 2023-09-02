@@ -519,7 +519,7 @@ Because there is a negative variance this could not be a variance-covariance mat
 Assume we have a regression model $Y_i = \beta_0 + \beta_1 X_{1,i} + \beta_2 X_{2,i} + E_i$ and we observe the following data:
 ```{r, echo = F }
 
-# START PART 2 SECTION 7 CODE
+# START PART 2 QUESTION 7 CODE
 
 # Initializing vectors.
 i <- matrix(c(1,2,3,4,5,6),nrow = 1, byrow = TRUE)
@@ -630,7 +630,13 @@ residual vector $\hat{E_i}$
 
 ```{r, echo = F}
 
+# START PART 2 QUESTION 7 PART D CODE
+
 e_hat <- y_hat - y
+
+# END PART 2 QUESTION 7 PART D CODE
+
+# END PART 2 QUESTION 7 CODE
 
 ```
 
@@ -641,6 +647,10 @@ $$E_i = \hat{Y_i} - Y_i$$
 $\hat{Y_i}$ has dimensions of (6x1) and Y has dimensions of (6x1). Because they have matching dimensions the above operation can occur, which results in a (6x1) matrix, shown below. 
 
 $$E_i =  `r write_matrix(round(e_hat,4)) ` $$
+
+
+#### Question 8
+Assume we have a regression model $Y_i = \beta_0 + \beta_1 X_{1,i} + \beta_2 X_{2,i} + E_i, i = 1...n$. Use matrix notation to show how to standardize the outcome ($Y'_i$) and show how to standardize the covariate matrix (X'). We will now have the following regression $Y_i'=\beta'_0 + \beta'_1X'_{1,i} + \beta_2' X_{2,i}' + E'_i$. Derive the relationship between $\hat{\beta}$ and $\hat{\beta'}$.
 
 
 

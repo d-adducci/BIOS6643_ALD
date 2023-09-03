@@ -218,7 +218,7 @@ cort_spaghetti
 
 In general the pattern of variation within individuals is the same for both groups, with the middle portion of the day having the highest mean cortisol levels for most individuals, and night/early morning having the lowest. The variation between individuals also changes depending on the time point. For group "c" the general pattern is that the first and last measurements have the least amount of variation between individuals, and for group "p" the variation between individuals is generally lowest at times 1 and 6, with spreading and coalescing of values throughout the measurement period. Additionally, there are a few outliers who may be strongly influencing variance measurements at each time point. 
 
-In general there seems to be more variation between subjects compared to within an individual. This is somewhat obscured by the fact that the individuals tend to follow the same trend in mean cortisol levels throughout the day, but overall there are wide variances between individuals during the middle portion of the experimental period. 
+In general there seems to be more variation within an individual versus between individuals. Most individuals tend to follow the same general pattern in mean cortisol levels throughout the day. Many individual subjects experience large changes in mean cortisol level between night and day. 
 
 \newpage
 
@@ -253,10 +253,10 @@ time_cort_cov_plot <- corrplot(time_cort_cov,method="circle",tl.col="black",
 
 # Calculating correlation matrix and plotting. spearman correlation was chosen
 # due to the outliers in the data. 
-time_cor_corr <- rcorr(as.matrix(time_cort_cov), type = "spearman")
+time_cor_corr <- cor(time_cort)
 
 
-time_cort_corr_plot <- corrplot(time_cor_corr$r,method = "circle",tl.col = "black",
+time_cort_corr_plot <- corrplot(time_cor_corr,method = "circle",tl.col = "black",
                                 addCoef.col = "black",number.cex=0.90,tl.cex=0.75,
                                 col=COL2("RdYlBu"),tl.pos="lt",number.digits=3,
                                 title="Correlation Between Cortisol and Time Point",
@@ -269,8 +269,6 @@ par(mfrow = c(1,1))
 
 ```
 
-Spearman correlation was used due to significant outliers. 
-
 \newpage
 
 #### Question 6
@@ -278,6 +276,15 @@ The covariance matrix is symmetric. Explain why in 1-2 sentences with a mathemat
 
 The covariance matrix is symmetric because the transposition of this matrix is the same as the original matrix. In mathematical terms, using "A" to refer to the covariance matrix:
 $$A = A^T$$
+
+Another way of proving this is showing that $Cov(X,Y) = Cov(Y,X)$, which would hold for all time block covariance relationships. 
+
+\begin{align*}
+  Cov(X,Y) &= E((X - E(X))(Y - E(Y))) \\
+  &= E(XY - XE(Y) - YE(X) + E(X)E(Y)) \\
+  &= E(XY) - E(X)E(Y) - E(X)E(Y) + E(X)E(Y) \\
+  &= E(XY) - E(X)E(Y) = Cov(Y,X)
+\end{align*}
 
 #### Question 7
 Verify that the diagonal elements of the covariance matrix are the variances of each time point by comparing your variance-covariance matrix to the table created in problem 1. 
@@ -294,9 +301,9 @@ Interpret cell(3,4) and cell(3,2) in the covariance matrix.
 #### Question 9 
 Interpret cell(3,4) and cell(3,2) in the correlation matrix. 
 
-* Cell(3,4) of the correlation matrix is the covariance between time block 3 (Time3) and time block 4 (Time4). This correlation is 0.143, meaning that there is a positive correlation between time block 3 and 4. In other words higher mean cortisol measurements at time 3 tend to have higher mean cortisol measurements at time 4. 
+* Cell(3,4) of the correlation matrix is the covariance between time block 3 (Time3) and time block 4 (Time4). This correlation is 0.633, meaning that there is a positive correlation between time block 3 and 4. In other words higher mean cortisol measurements at time 3 tend to have higher mean cortisol measurements at time 4. The correlation of 0.633 is considered moderate-strong. 
 
-* Cell(3,2) of the correlation matrix is the correlation between time block 3 (Time3) and time block 2 (Time2). This correlation is 0.771, meaning that there is a positive correlation between time block 3 and 2. In other words higher mean cortisol measurements at time 3 tend to have higher mean cortisol measurements at time 2. 
+* Cell(3,2) of the correlation matrix is the correlation between time block 3 (Time3) and time block 2 (Time2). This correlation is 0.587, meaning that there is a positive correlation between time block 3 and 2. In other words higher mean cortisol measurements at time 3 tend to have higher mean cortisol measurements at time 2. The correlation of 0.587 is considered moderate-strong.  
 
 
 ### Question 10
@@ -453,7 +460,7 @@ Multiplying matrices with the dimensions orientation of $(3 \times 2)^T = (2 \ti
 #### Question 3
 Let X be an nxp matrix of covariate data. Can I invert X? Explain. 
 
-The covariance matrix is always square, but also need to be either positive definite or positive semi-definite in order to invert.  
+The covariance matrix is always square, but also need to be either positive definite or positive semi-definite in order to invert. So you may be able to invert
 
 #### Question 4
 Let Y be an nx1 vector. Let X be an nxp matrix of covariates, let Z be an nxq matrix of additional covariates, let $\beta$ be an px1 vector of fixed (not random) parameters, and let b be an qx1 vector. Using an analysis of the dimensions determine whether the following operations are possible or equations make sense. When no, explain the issue. When yes, provide a dimension evaluation showing the resulting dimensions of the dimensions match on both sides of an equation. 
@@ -553,7 +560,9 @@ x_i2 <- matrix(c(33,41,7,49,5,31),nrow = 1, byrow = TRUE)
 y_i <- matrix(c(42,33,75,28,91,55),nrow = 1, byrow = TRUE)
 
 # Creating X matrix and Y matrix so they can be used in operations correctly.
-x <- t(rbind(x_i1,x_i2))
+# Adding a column to the X matrix to account for the intercept. 
+intercept_x <- matrix(c(1,1,1,1,1,1), nrow = 6)
+x <- cbind(intercept_x,t(rbind(x_i1,x_i2)))
 y <- t(y_i)
 
 # Combining vectors and naming rows and columns.
@@ -590,13 +599,13 @@ least_square_estimates <- solve(t(x) %*% x) %*% t(x) %*% y
 
 Solved in one step by R (code found in appendix), but one way steps can be broken down as follows:
 
-* $(X^TX)^{-1}$; Solved by inverting X then multiplying this by X. Because the number of columns of $X^T$ is the same as the number of rows of X this operation can occur. This results in a square matrix with dimensions (2x2) that can be inverted (not all square matrices can be inverted). After inverting the subsequent matrix is (2x2). 
+* $(X^TX)^{-1}$; Solved by transposing X, (3,6), then multiplying this by X, (6,3). Because the number of columns of $X^T$ is the same as the number of rows of X this operation can occur. This results in a square matrix with dimensions (3x3) that can be inverted (not all square matrices can be inverted). After inverting the subsequent matrix is (3x3) as well. 
 
-* $(X^TX)^{-1}X^T$: The expression solved above had dimensions of (2x2), while $X^T$ has dimensions of (2x6). Because the number of columns of $(X^TX)^{-1}$ is equal to the number of rows of $X^T$ this operation can occur, and returns a matrix with dimensions of (2x6). 
+* $(X^TX)^{-1}X^T$: The expression solved above had dimensions of (3x3), while $X^T$ has dimensions of (3x6). Because the number of columns of $(X^TX)^{-1}$ is equal to the number of rows of $X^T$ this operation can occur, and returns a matrix with dimensions of (3x6). 
 
-* $(X^TX)^{-1} X^T Y$: The expression solved above has dimensions of (2x6) and Y has dimensions of (6x1). Because the number of columns of $(X^TX)^{-1} X^T$ is the same as the number of rows in $Y$ this operation can occur, and returns a matrix with dimensions of (2x1). 
+* $(X^TX)^{-1} X^T Y$: The expression solved above has dimensions of (3x6) and Y has dimensions of (6x1). Because the number of columns of $(X^TX)^{-1} X^T$ is the same as the number of rows in $Y$ this operation can occur, and returns a matrix with dimensions of (3x1). 
 
-Because matrix multiplication is associative the order these steps were performed does not matter. The total operation returns the following (2x1) matrix:
+Because matrix multiplication is associative the order these steps were performed does not matter. The total operation returns the following (3x1) matrix:
 
 $$ LSE = `r write_matrix(round(least_square_estimates,4)) ` $$
 
@@ -608,7 +617,7 @@ estimate the hat matrix $H = X(X^TX)^{-1}X^T$
 
 # START PART 2 QUESTION 7 PART B CODE
 
-hat_mat <- (x %*% solve((t(x) %*% x)) %*% t(x))
+hat_mat <- x %*% solve((t(x) %*% x)) %*% t(x)
 
 # END PART 2 QUESTION 7 PART B CODE
 
@@ -616,11 +625,11 @@ hat_mat <- (x %*% solve((t(x) %*% x)) %*% t(x))
 
 Solved in one step by R (code found in appendix), but one way steps can be broken down as follows:
 
-* $(X^TX)^{-1}$: Same as in the above part, solved by inverting X then multiplying this by X. Because the number of columns of $X^T$ is the same as the number of rows of X this can be down. This results in a square matrix with dimensions (2x2) that can be inverted (not all square matrices can be inverted). After inverting the subsequent matrix is (2x2).
+* $(X^TX)^{-1}$: Same as in the above part, solved by inverting X then multiplying this by X. Because the number of columns of $X^T$ is the same as the number of rows of X this can be down. This results in a square matrix with dimensions (3x3) that can be inverted (not all square matrices can be inverted). After inverting the subsequent matrix is (3x3).
 
-* $X(X^TX)^{-1}$: X has dimensions of (6x2) and the expression above has dimensions of (2x2). Because the number of columns of X is the same as the number of rows of $(X^TX)^{-1}$ this operation can occur. The resulting matrix has dimensions of (6x2).
+* $X(X^TX)^{-1}$: X has dimensions of (6x3) and the expression above has dimensions of (3x3). Because the number of columns of X is the same as the number of rows of $(X^TX)^{-1}$ this operation can occur. The resulting matrix has dimensions of (6x3).
 
-* $X(X^TX)^{-1}X^T$: The expression solved above has dimensions of (6x2) and $X^T$ has dimensions of (2x6). Because the number of columns of $X(X^TX)^{-1}$ is the same as the number of rows of $X^T$ this operation can occur. The resulting matrix has dimensions of (6x6). 
+* $X(X^TX)^{-1}X^T$: The expression solved above has dimensions of (6x3) and $X^T$ has dimensions of (3x6). Because the number of columns of $X(X^TX)^{-1}$ is the same as the number of rows of $X^T$ this operation can occur. The resulting matrix has dimensions of (6x6). 
 
 Because matrix multiplication is associative the order these steps were performed does not matter. The total operation returns the following (6x6) matrix:
 
@@ -640,11 +649,11 @@ y_hat <- x %*% least_square_estimates
 
 ```
 
-Solved in one step by R, code found in appendix. $\hat{Y}$ is found by multiplying X, the subjects covariate matrix, by $\hat{\beta}$, the vector of coefficients. This returns the estimated outcomes for each subject, $\hat{Y}$. 
+Solved in one step by R, code found in appendix. $\hat{Y}$ is found by multiplying X, the subjects covariate matrix, by $\hat{\beta}$, the vector of estimated coefficients. This returns the estimated outcomes for each subject, $\hat{Y}$. 
 
 $$\hat{Y} = X \hat{\beta}$$
 
-Where X has dimensions of (6x2) and $\hat{\beta}$ has dimensions of (2x1). Because the number of columns in X is the same as the number of rows in $\hat{\beta}$ this operation can occur, resulting in the (6x1) matrix shown below. 
+Where X has dimensions of (6x3) and $\hat{\beta}$ has dimensions of (3x1). Because the number of columns in X is the same as the number of rows in $\hat{\beta}$ this operation can occur, resulting in the (6x1) matrix shown below. 
 
 $$ `r write_matrix(round(y_hat,4)) ` $$
 

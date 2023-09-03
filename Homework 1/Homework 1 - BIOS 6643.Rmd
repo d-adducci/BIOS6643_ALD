@@ -600,7 +600,7 @@ least_square_estimates <- solve(t(x) %*% x) %*% t(x) %*% y
 
 ```
 
-Solved in one step by R (code found in appendix, pg.21), but one way steps can be broken down as follows:
+Solved in one step by R (code found in appendix, pg.22), but one way steps can be broken down as follows:
 
 * $(X^TX)^{-1}$; Solved by transposing X, (3,6), then multiplying this by X, (6,3). Because the number of columns of $X^T$ is the same as the number of rows of X this operation can occur. This results in a square matrix with dimensions (3x3) that can be inverted (not all square matrices can be inverted). After inverting the subsequent matrix is (3x3) as well. 
 
@@ -626,7 +626,7 @@ hat_mat <- x %*% solve((t(x) %*% x)) %*% t(x)
 
 ```
 
-Solved in one step by R (code found in appendix, pg.21), but one way steps can be broken down as follows:
+Solved in one step by R (code found in appendix, pg.22), but one way steps can be broken down as follows:
 
 * $(X^TX)^{-1}$: Same as in the above part, solved by inverting X then multiplying this by X. Because the number of columns of $X^T$ is the same as the number of rows of X this can be down. This results in a square matrix with dimensions (3x3) that can be inverted (not all square matrices can be inverted). After inverting the subsequent matrix is (3x3).
 
@@ -652,7 +652,7 @@ y_hat <- x %*% least_square_estimates
 
 ```
 
-Solved in one step by R (code found in appendix, pg.21). $\hat{Y}$ is found by multiplying X, the subjects covariate matrix, by $\hat{\beta}$, the vector of estimated coefficients. This returns the estimated outcomes for each subject, $\hat{Y}$. 
+Solved in one step by R (code found in appendix, pg.22). $\hat{Y}$ is found by multiplying X, the subjects covariate matrix, by $\hat{\beta}$, the vector of estimated coefficients. This returns the estimated outcomes for each subject, $\hat{Y}$. 
 
 $$\hat{Y} = X \hat{\beta}$$
 
@@ -677,7 +677,7 @@ e_hat <- y_hat - y
 
 ```
 
-Solved in one step in R (code found in appendix, pg.21). The residual vector $\hat{E_i}$ is found by subtracting the actual outcomes by the predicted outcomes:
+Solved in one step in R (code found in appendix, pg.22). The residual vector $\hat{E_i}$ is found by subtracting the actual outcomes by the predicted outcomes:
 
 $$E_i = \hat{Y_i} - Y_i$$
 
@@ -834,6 +834,8 @@ Putting these together gives the following relationship:
   &= \beta_j'\frac{S_Y}{S_{X,j}}
 \end{align*}
 
+
+\newpage
 
 # Code Appendix
 

@@ -689,7 +689,7 @@ Assume we have a regression model $Y_i = \beta_0 + \beta_1 X_{1,i} + \beta_2 X_{
 In order to standardize $Y_i$ we can use the following equation:
 $$Y_i' = \frac{Y_i - \bar{Y}}{S_Y}$$
 Where the equation for $S_Y$ is:
-$$\sqrt{\frac{(y_i - \bar{y})^2}{n-1}}$$
+$$S_Y = \sqrt{\frac{\sum(y_i - \bar{y})^2}{n-1}}$$
 Because $\bar{Y}$ is the mean of every subject it is a scalar. In order to do this operation using matrix methods we need to convert this scalar into a vector of $\bar{Y}$ values. 
 ```{r, echo = F}
 
@@ -700,14 +700,17 @@ y_n_mat <- matrix(c(1,".",".",".",1),ncol = 1, byrow = TRUE)
 
 ```
 $$ \bar{Y}_n = \bar{Y}1_n,\,\,where\,\, 1_n = `r write_matrix(y_n_mat) `_n $$
-Matrix subtraction can then be used to standardize the outcome.
-$$Y' = Y - \bar{Y}1_n$$
-Where this operation is possible because Y has (nx1) dimensions, and $\bar{Y}1_n$ has (nx1) dimensions. 
+Matrix subtraction can then be used to center the outcome around 0.
+$$Y_{centered} = Y - \bar{Y}1_n$$
+Where this operation is possible because Y has (nx1) dimensions, and $\bar{Y}1_n$ has (nx1) dimensions. The resulting $Y'$ matrix has (nx1) dimensions.
 
+After this we can divide by the standard deviation of Y to standardize the outcome:
+$$Y' = \frac{Y - \bar{Y}1_n}{S_Y}$$
+Where this operation is possible because $S_Y$ is a scalar. 
 
-Standardizing the covariate matrix is similar, but needs an additional matrix for the denominator. For the mean estimates of the coefficients we have a vector with (1x2) dimensions.
+Standardizing the covariate matrix is similar, but needs an additional matrix for the denominator. For the mean estimates of the coefficients we have a vector with (2x1) dimensions, which can be transposed to get a vector with (1x2) dimensions.
 $$
-\bar{X} =
+\bar{X}^T =
 \begin{bmatrix}
   \bar{X}_1, & \bar{X}_2 \\
 \end{bmatrix}
@@ -716,6 +719,8 @@ $$
 
 First we need to turn this into an (nx2) matrix for the, which can be done by multiplying a matrix of ones with (nx1) dimensions with the $\bar{X}$ vector with (1x2) dimensions. 
 $$
+1_n \bar{X}_{2 \times 1}^T
+=
 \begin{bmatrix}
   1 \\
   1 \\
@@ -732,9 +737,77 @@ $$
   \vdots & \vdots \\
   \bar{X}_1 & \bar{X}_2 \\
 \end{bmatrix}
-= \bar{X}_n
 $$
-We can then use the $\bar{X}_n$ matrix to start the standardization of the covariate matrix, X. 
+We can then use the above operation to start the standardization of the covariate matrix, X. 
+$$
+X - 1_n \bar{X}_{2 \times 1}^T =
+\begin{bmatrix}
+  X_{1,1} & X_{2,1} \\
+  X_{1,2} & X_{2,2} \\
+  \vdots & \vdots \\
+  X_{1,n} & X_{2,n}
+\end{bmatrix} 
+-
+\begin{bmatrix}
+  \bar{X}_1 & \bar{X}_2 \\
+  \bar{X}_1 & \bar{X}_2 \\
+  \vdots & \vdots \\
+  \bar{X}_1 & \bar{X}_2 \\
+\end{bmatrix}
+$$
+Where the resulting matrix has (nx2) dimensions. 
+
+The standard deviation of each element can be found with the following equation:
+$$S_{X,j} = \sqrt{\frac{\sum(x_{i,j} - \bar{X}_{j})^2}{n-1}}$$
+
+From here we can get a vector of the standard deviation for the covariates, which will have dimensions of (nx2) after transposing. 
+$$
+S_X^T 
+=
+\begin{bmatrix}
+  S_{X,1}, & S_{X,2}
+\end{bmatrix}
+$$
+
+Because we need to use these value to divide the centered covariates the easiest way to do this would be to make another vector with the inverted standard deviations. Note, cannot invert this matrix because it is not square. 
+$$
+S_{X,inv}^T =
+\begin{bmatrix}
+  \frac{1}{S_{X,1}},& \frac{1}{S_{X,2}}
+\end{bmatrix}
+$$
+We then need to convert this into a matrix with (nx2) dimensions in order to multiply this by the centered covariates. In order to do this we can use a matrix of ones which has dimensions (nx1). 
+$$
+1_p S_{X,inv}^T 
+=
+\begin{bmatrix}
+  1 \\
+  1 \\
+\end{bmatrix}
+\begin{bmatrix}
+  \frac{1}{S_{X,1}},& \frac{1}{S_{X,2}}
+\end{bmatrix}
+=
+\begin{bmatrix}
+  \frac{1}{S_{X,1}},& \frac{1}{S_{X,2}} \\
+  \frac{1}{S_{X,1}},& \frac{1}{S_{X,2}} \\
+\end{bmatrix}
+$$
+Where the resulting matrix has (2x2) dimensions. 
+
+Putting these together will standardize the covariate matrix:
+$$
+X' =  (X - 1_n \bar{X}_{2 \times 1}^T) 1_n S_{X,inv}^T 
+$$
+Where this operation works because the first matrix on the right hand side of the equivalence has (nx2) dimensions, and the second has (2x2) dimensions, resulting in a matrix with (nx2) dimensions. 
+
+Putting all of this together results in the following:
+$$\frac{Y_i - \bar{Y}}{S_Y} = \beta_0' + \beta_1' \frac{X_{1,i}-\bar{X}_1}{S_{X,1}} + \beta_2 \frac{X_{2,i}-\bar{X}_2}{S_{X,2}} + E_i$$
+Which can be simplified as:
+$$Y_i'=\beta'_0 + \beta'_1X'_{1,i} + \beta_2' X_{2,i}' + E'_i$$
+
+Note that $\beta'_0$ is 0 because the covariate matrix was centered. 
+
 
 
 # Code Appendix

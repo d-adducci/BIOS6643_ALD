@@ -808,6 +808,27 @@ $$Y_i'=\beta'_0 + \beta'_1X'_{1,i} + \beta_2' X_{2,i}' + E'_i$$
 
 Note that $\beta'_0$ is 0 because the covariate matrix was centered. 
 
+$\beta_j$ coefficients can be found with the following equation:
+$$\beta_j = \frac{Cov(X_j,Y)}{Var(X_j)}$$
+Expanding out the numerator:
+\begin{align*}
+  Cov(X_j,Y) \frac{S_{X,j}S_y}{S_{X,j}S_y}&= E[(Y - \bar{Y})(X_j - \bar{X}_j)] \frac{S_{X,j}S_y}{S_{X,j}S_y} \\
+  &= E \left[ \frac{(Y - \bar{Y})(X_j - \bar{X}_j)}{S_{X,j}S_y} \right] S_{X,j}S_y \\
+  &= Cov(X_j',Y') S_{X,j}S_y
+\end{align*}
+
+Expanding out the denominator:
+\begin{align*}
+  Var(X_j)\frac{S_{x,j}^2}{S_{x,j}^2} &= E[(X_j - \bar{X}_j)^2] \frac{S_{x,j}^2}{S_{x,j}^2} \\
+  &= E\left[\frac{(X_j - \bar{X}_j)^2}{S_{x,j}^2}\right] S_{x,j}^2\\
+  &= Var(X_j')S_{x,j}^2
+\end{align*}
+
+Putting these together gives the following relationship:
+\begin{align*}
+  \beta_j &= \frac{Cov(X_j',Y') S_{X,j}S_Y}{Var(X_j')S_{X,j}^2} \\
+  &= \beta_j'\frac{S_Y}{S_{X,j}}
+\end{align*}
 
 
 # Code Appendix

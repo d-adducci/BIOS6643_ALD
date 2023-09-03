@@ -686,6 +686,56 @@ $$E_i =  `r write_matrix(round(e_hat,4)) ` $$
 #### Question 8
 Assume we have a regression model $Y_i = \beta_0 + \beta_1 X_{1,i} + \beta_2 X_{2,i} + E_i, i = 1...n$. Use matrix notation to show how to standardize the outcome ($Y'_i$) and show how to standardize the covariate matrix (X'). We will now have the following regression $Y_i'=\beta'_0 + \beta'_1X'_{1,i} + \beta_2' X_{2,i}' + E'_i$. Derive the relationship between $\hat{\beta}$ and $\hat{\beta'}$.
 
+In order to standardize $Y_i$ we can use the following equation:
+$$Y_i' = \frac{Y_i - \bar{Y}}{S_Y}$$
+Where the equation for $S_Y$ is:
+$$\sqrt{\frac{(y_i - \bar{y})^2}{n-1}}$$
+Because $\bar{Y}$ is the mean of every subject it is a scalar. In order to do this operation using matrix methods we need to convert this scalar into a vector of $\bar{Y}$ values. 
+```{r, echo = F}
+
+# START PART 2 QUESTION 8 CODE
+
+# making y_bar matrix. 
+y_n_mat <- matrix(c(1,".",".",".",1),ncol = 1, byrow = TRUE)
+
+```
+$$ \bar{Y}_n = \bar{Y}1_n,\,\,where\,\, 1_n = `r write_matrix(y_n_mat) `_n $$
+Matrix subtraction can then be used to standardize the outcome.
+$$Y' = Y - \bar{Y}1_n$$
+Where this operation is possible because Y has (nx1) dimensions, and $\bar{Y}1_n$ has (nx1) dimensions. 
+
+
+Standardizing the covariate matrix is similar, but needs an additional matrix for the denominator. For the mean estimates of the coefficients we have a vector with (1x2) dimensions.
+$$
+\bar{X} =
+\begin{bmatrix}
+  \bar{X}_1, & \bar{X}_2 \\
+\end{bmatrix}
+$$
+
+
+First we need to turn this into an (nx2) matrix for the, which can be done by multiplying a matrix of ones with (nx1) dimensions with the $\bar{X}$ vector with (1x2) dimensions. 
+$$
+\begin{bmatrix}
+  1 \\
+  1 \\
+  \vdots \\
+  1
+\end{bmatrix}_n
+\begin{bmatrix}
+  \bar{X}_1, & \bar{X}_2 \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+  \bar{X}_1 & \bar{X}_2 \\
+  \bar{X}_1 & \bar{X}_2 \\
+  \vdots & \vdots \\
+  \bar{X}_1 & \bar{X}_2 \\
+\end{bmatrix}
+= \bar{X}_n
+$$
+We can then use the $\bar{X}_n$ matrix to start the standardization of the covariate matrix, X. 
+
 
 # Code Appendix
 

@@ -101,7 +101,7 @@ time_metric_table <- kbl(metrics,
 
 time_metric_table
 
-# END PART 1 QUESTION 1 CODE
+# FINISH PART 1 QUESTION 1 CODE
 
 ```
 
@@ -114,7 +114,7 @@ For group c the mean cortisol measurement increases until time block 3, after wh
 
 For group p the mean cortisol measurement increases until time block 3, after which it starts to steadily decrease. This group also has the lowest standard deviation and variance at time block 1. For this group there is a steady increase in standard deviation and variance from time block 1 to time block 3. There is then a steep decrease at time 4, and then an alternating pattern of increase and decrease in standard deviation and variance between time blocks 4 and 6. 
 
-Group c always has a lower mean at each time point compared to group p. Group c has higher standard deviation and variance compared to group p at time block 1 and 6, and lower standard deviation and variance at for all other time blocks. 
+Group c always has a lower mean at each time point compared to group p. Group c has higher standard deviation and variance compared to group p at time block 1 and 6, and lower standard deviation and variance for all other time blocks. 
 
 \newpage
 
@@ -171,22 +171,24 @@ group_metric_plot <- ggplot(groups_metric, aes(x = time_point,
                 position = position_dodge(width = 0.5),) +
   labs(title = "Mean and Standard Deviation of Cortisol by Group at Each Time Point",
        x = "Time Point", y = "Cortisol Mean",
-       caption = "Bars indicate 1 standard deviation. Point offset from time point to avoid overlap") + 
+       caption = "Bars indicate 1 standard deviation. Points offset from time point to avoid overlap") + 
   scale_color_brewer(palette = "Dark2") +
   scale_x_continuous(breaks = seq(1,6,1)) +
   theme_bw()
 
 group_metric_plot
 
-# END Part 1 QUESTION 3 CODE.
+# FINISH Part 1 QUESTION 3 CODE.
 
 ```
 
-Both groups follow the same general trend, where mean cortisol is lowest at time point 1 (22:00-01:50), and steadily increases until time point 3 (06:00-09:50). Both groups steadily decrease in mean cortisol until the final time point (time point 6, 18:00-21:50). This trend follows the circadian rhythm, where cortisol peaks in the middle of the day, and decreases during night. 
+Both groups follow the same general trend, where mean cortisol is lowest at time point 1 (22:00-01:50), and steadily increases until time point 3 (06:00-09:50). Both groups then steadily decrease in mean cortisol until the final time point (time point 6, 18:00-21:50). This trend follows the circadian rhythm, where cortisol peaks in the middle of the day, and decreases during night. 
 
 Between groups the mean cortisol levels are nearly the same for time points 1 and 6. For all other time points in the measurement period group "c" has lower mean cortisol levels compared to group p. The standard deviation for each group varies between time points. For time points 1 and 6 group "c" has a much larger standard deviation compared to group "p". For time points 2, 3, and 5 group "p" has a larger standard deviation. Time point 4 has similar standard deviations between groups. 
 
-Mean cortisol levels in general, with the exception of the time point 1 and 6, are lower for group "c" compared to group "p". While this initially seems to suggest that there is a difference in cortisol between women who suffer from depression and those who do not, the standard deviation vary between groups at each time point enough to possible be obscuring what is happening when only looking at means cortisol levels for each time block. Possible explanations for this behavior could be additional variables which may be affecting cortisol levels beyond a diagnosis of depression.  
+Mean cortisol levels in general, with the exception of the time point 1 and 6, are lower for group "c" compared to group "p". While this initially seems to suggest that there is a difference in cortisol between women who suffer from depression (p) and those who do not (c), the standard deviations vary between groups at each time point enough to possible be obscuring what is happening when only looking at means cortisol levels for each time block. Possible explanations for this behavior could be additional variables which may be affecting cortisol levels beyond a diagnosis of depression, and outliers which strongly influence mean cortisol measurements.  
+
+\newpage
 
 #### Question 4
 Construct a spaghetti plot of each group (one panel for each group). Describe the variation in cortisol levels within a person. Describe the variation in the cortisol levels between people. Which source of variation has more variation? Justify with 1-2 sentences. 
@@ -212,7 +214,7 @@ cort_spaghetti <- ggplot(cort_data_long, aes(x = factor(time),
 
 cort_spaghetti
   
-# END Part 1 QUESTION 4 CODE
+# FINISH Part 1 QUESTION 4 CODE
 
 ```
 
@@ -265,7 +267,7 @@ time_cort_corr_plot <- corrplot(time_cor_corr,method = "circle",tl.col = "black"
 
 par(mfrow = c(1,1))
 
-# END PART 1 QUESTION 5
+# FINISH PART 1 QUESTION 5
 
 ```
 
@@ -283,7 +285,8 @@ Another way of proving this is showing that $Cov(X,Y) = Cov(Y,X)$, which would h
   Cov(X,Y) &= E((X - E(X))(Y - E(Y))) \\
   &= E(XY - XE(Y) - YE(X) + E(X)E(Y)) \\
   &= E(XY) - E(X)E(Y) - E(X)E(Y) + E(X)E(Y) \\
-  &= E(XY) - E(X)E(Y) = Cov(Y,X)
+  &= E(XY) - E(X)E(Y) \\
+  &= E(YX) - E(Y)E(X) = Cov(Y,X)
 \end{align*}
 
 #### Question 7
@@ -313,7 +316,7 @@ The equation for correlation is as follows:
 
 $$Corr(x,y) = \frac{Cov(x,y)}{\sigma_x \sigma_y}$$
 
-Where $Cov(x,y)$ comes from the covariance table at the intersection of the time points, and $\sigma_x$ and $sigma_y$ are the standard deviation of the two time points. These are found by finding the desired intersection along the diagonal of the covariance matrix, and then taking the square root of the resulting variance. Finding the correlations between Time1 and Time2 using this method:
+Where $Cov(x,y)$ comes from the covariance table at the intersection of the time points, and $\sigma_x$ and $\sigma_y$ are the standard deviation of the two time points. These are found by finding the desired intersection along the diagonal of the covariance matrix, and then taking the square root of the resulting variance. Finding the correlations between Time1 and Time2 using this method:
 
 $$Corr(Time1,Time2)=\frac{Cov(Time1,Time2)}{\sigma_{Time1}\sigma_{Time2}} = \frac{7.267}{\sqrt{13.848}\sqrt{14.304}}=\frac{7.267}{3.721 \times 3.782}=0.516$$
 
@@ -370,7 +373,7 @@ p1_pe_mat_1 <- matrix(c(2,1,
 p1_pe_mat_2 <- matrix(c(2,4,-2,
                         1,-6,7),nrow = 2, byrow = TRUE)
 
-# END PART 2 QUESTION 1 CODE
+# FINISH PART 2 QUESTION 1 CODE
 
 ```
 
@@ -421,7 +424,7 @@ q2_pa_mat_1 <- matrix(c(2,
 
 q2_pa_mat_2 <- matrix(c(1,4,10),nrow = 1, byrow = TRUE)
 
-# END PART 2 QUESTION 2 CODE
+# FINISH PART 2 QUESTION 2 CODE
 
 ```
 
@@ -460,7 +463,7 @@ Multiplying matrices with the dimensions orientation of $(3 \times 2)^T = (2 \ti
 #### Question 3
 Let X be an nxp matrix of covariate data. Can I invert X? Explain. 
 
-The covariance matrix is always square, but also need to be either positive definite or positive semi-definite in order to invert. So you may be able to invert
+The covariance matrix is always square, but also needs to be either positive definite or positive semi-definite in order to invert. So you may be able to invert the covariate matrix depending on whether these conditions are met. 
 
 #### Question 4
 Let Y be an nx1 vector. Let X be an nxp matrix of covariates, let Z be an nxq matrix of additional covariates, let $\beta$ be an px1 vector of fixed (not random) parameters, and let b be an qx1 vector. Using an analysis of the dimensions determine whether the following operations are possible or equations make sense. When no, explain the issue. When yes, provide a dimension evaluation showing the resulting dimensions of the dimensions match on both sides of an equation. 
@@ -493,7 +496,7 @@ $$Z^{-1}Y = b$$
 * Dimensions of Y: (nx1)
 * Dimensions of b: (qx1)
 
-Inverting Z is only possible if Z is a square matrix (and even then it may not be possible). Additionally, multiplying $Z^{-1}$ by Y is not possible because the number rows of $Z^{-1}$ is not the same as the number of columns in Y. The equation is attempting to return the vector of random effects from the subject outcome (Y) and the matrix for subject-specific/random effects (Z).
+Inverting Z is only possible if Z is a square matrix (and even then it may not be possible). Additionally, multiplying $Z^{-1}$ by Y is not possible because the number rows of $Z^{-1}$ is not the same as the number of columns in Y. The equation is attempting to return the vector of random effects from the subject outcomes (Y) and the matrix for subject-specific/random effects (Z).
 
 #### Part D
 
@@ -519,7 +522,7 @@ $$Y = X \beta + E \,\,\, vs \,\,\, Y = \beta X + E$$
 * Dimensions of $\beta$: (px1)
 * Dimensions of E: (nx1)
 
-These two equations are not equivalent because order matters when multiplying two matrices together. The equation on the left is possible because the number of columns in X are the same as the number of rows in $\beta$. In contrast, the equation on the left is not possible because the number of columns in $\beta$ is not the name as the number of rows in X. In other words the equation on the right is the correct way of writing a linear regresssion in matrix notation. 
+These two equations are not equivalent because order matters when multiplying two matrices together. The equation on the left is possible because the number of columns in X are the same as the number of rows in $\beta$. In contrast, the equation on the right is not possible because the number of columns in $\beta$ is not the name as the number of rows in X. In other words the equation on the left is the correct way of writing a linear regression in matrix notation. 
 
 $$Y = X \beta + E$$
 
@@ -534,7 +537,7 @@ q6_mat <- matrix(c(1,2,3,
                    2,5,-6,
                    3,-6,-1),nrow = 3, byrow = TRUE)
 
-# END PART 2 QUESTION 6 CODE
+# FINISH PART 2 QUESTION 6 CODE
 
 ```
 $$ `r write_matrix(q6_mat)` $$
@@ -543,7 +546,7 @@ There are several requirements which a matrix must have in order to possible be 
 
 * Square matrix: This matrix is square.
 * Symmetric matrix: This matrix is symmetric. 
-* Variances a positive: This is violated, the lower right diagonal has a negative value. 
+* Variances are positive: This is violated, the lower right diagonal has a negative value. 
 
 Because there is a negative variance this could not be a variance-covariance matrix. 
 
@@ -593,11 +596,11 @@ $\hat{\beta} = (X^TX)^{-1} X^T Y$, the least squares estimate.
 
 least_square_estimates <- solve(t(x) %*% x) %*% t(x) %*% y
 
-# END PART 2 QUESTION 7 PART A CODE
+# FINISH PART 2 QUESTION 7 PART A CODE
 
 ```
 
-Solved in one step by R (code found in appendix), but one way steps can be broken down as follows:
+Solved in one step by R (code found in appendix, pg.21), but one way steps can be broken down as follows:
 
 * $(X^TX)^{-1}$; Solved by transposing X, (3,6), then multiplying this by X, (6,3). Because the number of columns of $X^T$ is the same as the number of rows of X this operation can occur. This results in a square matrix with dimensions (3x3) that can be inverted (not all square matrices can be inverted). After inverting the subsequent matrix is (3x3) as well. 
 
@@ -623,7 +626,7 @@ hat_mat <- x %*% solve((t(x) %*% x)) %*% t(x)
 
 ```
 
-Solved in one step by R (code found in appendix), but one way steps can be broken down as follows:
+Solved in one step by R (code found in appendix, pg.21), but one way steps can be broken down as follows:
 
 * $(X^TX)^{-1}$: Same as in the above part, solved by inverting X then multiplying this by X. Because the number of columns of $X^T$ is the same as the number of rows of X this can be down. This results in a square matrix with dimensions (3x3) that can be inverted (not all square matrices can be inverted). After inverting the subsequent matrix is (3x3).
 
@@ -645,11 +648,11 @@ estimate $\hat{Y}$
 
 y_hat <- x %*% least_square_estimates
 
-# END PART 2 QUESTION 7 PART C CODE
+# FINISH PART 2 QUESTION 7 PART C CODE
 
 ```
 
-Solved in one step by R, code found in appendix. $\hat{Y}$ is found by multiplying X, the subjects covariate matrix, by $\hat{\beta}$, the vector of estimated coefficients. This returns the estimated outcomes for each subject, $\hat{Y}$. 
+Solved in one step by R (code found in appendix, pg.21). $\hat{Y}$ is found by multiplying X, the subjects covariate matrix, by $\hat{\beta}$, the vector of estimated coefficients. This returns the estimated outcomes for each subject, $\hat{Y}$. 
 
 $$\hat{Y} = X \hat{\beta}$$
 
@@ -668,13 +671,13 @@ residual vector $\hat{E_i}$
 
 e_hat <- y_hat - y
 
-# END PART 2 QUESTION 7 PART D CODE
+# FINISH PART 2 QUESTION 7 PART D CODE
 
-# END PART 2 QUESTION 7 CODE
+# FINISH PART 2 QUESTION 7 CODE
 
 ```
 
-The residual vector $\hat{E_i}$ is found by subtracting the actual outcomes by the predicted outcomes:
+Solved in one step in R (code found in appendix, pg.21). The residual vector $\hat{E_i}$ is found by subtracting the actual outcomes by the predicted outcomes:
 
 $$E_i = \hat{Y_i} - Y_i$$
 
@@ -698,6 +701,7 @@ Because $\bar{Y}$ is the mean of every subject it is a scalar. In order to do th
 # making y_bar matrix. 
 y_n_mat <- matrix(c(1,".",".",".",1),ncol = 1, byrow = TRUE)
 
+# FINISH PART 2 QUESTION 8 CODE
 ```
 $$ \bar{Y}_n = \bar{Y}1_n,\,\,where\,\, 1_n = `r write_matrix(y_n_mat) `_n $$
 Matrix subtraction can then be used to center the outcome around 0.
@@ -717,7 +721,7 @@ $$
 $$
 
 
-First we need to turn this into an (nx2) matrix for the, which can be done by multiplying a matrix of ones with (nx1) dimensions with the $\bar{X}$ vector with (1x2) dimensions. 
+First we need to turn this into an (nx2) matrix for the, which can be done by multiplying a matrix of ones with (nx1) dimensions with the $\bar{X}^T$ vector with (1x2) dimensions. 
 $$
 1_n \bar{X}_{2 \times 1}^T
 =

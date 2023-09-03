@@ -16,7 +16,9 @@ library(kableExtra)
 library(RColorBrewer)
 library(corrplot)
 library(Hmisc)
+library(knitr)
 
+opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
 ```
 
 ```{r, echo = F}
@@ -223,7 +225,7 @@ In general there seems to be more variation between subjects compared to within 
 #### Question 5
 Calculate the 6x6 covariance and correlation matrices for the six time points of cortisol levels. 
 
-```{r, echo = F, fig.width = 8, fig.height = 8}
+```{r,echo = F, fig.width = 8, fig.height = 8}
 
 # START PART 1 QUESTION 5
 
@@ -246,7 +248,6 @@ time_cort_cov_plot <- corrplot(time_cort_cov,method="circle",tl.col="black",
                                number.digits=3,
                                title="Covariance Between Cortisol and Time Point",
                                cl.align.text="l",
-                               # Margin add
                                mar=c(0,0,2,0))
 
 
@@ -260,8 +261,7 @@ time_cort_corr_plot <- corrplot(time_cor_corr$r,method = "circle",tl.col = "blac
                                 col=COL2("RdYlBu"),tl.pos="lt",number.digits=3,
                                 title="Correlation Between Cortisol and Time Point",
                                 cl.align.text="l",
-                                # Margin add
-                                mar=c(0,0,2,0))
+                                mar = c(0,0,2,0))
 
 par(mfrow = c(1,1))
 
@@ -284,9 +284,33 @@ Verify that the diagonal elements of the covariance matrix are the variances of 
 
 The diagonal elements of the covariance matrix (Covariance Between Cortisol and Time Point) are the variances of each time point in the table (Table 1: Cortisol Measurements Between Groups). 
 
+#### Question 8 
+Interpret cell(3,4) and cell(3,2) in the covariance matrix. 
+
+* Cell(3,4) of the covariance matrix is the covariance between time block 3 (Time3) and time block 4 (Time4). This covariance is 6.72, meaning that time block 3 and time block 4 tend to move together. In other words this means higher mean cortisol measurements at time 3 tend have higher mean cortisol measurements at time 4. 
+
+* Cell(3,2) of the covariance matrix is the covariance between time block 3 (Time3) and time block 2 (Time2). This covariance is 9.531, meaning that time block 3 and 2 tend to move together. In other words this means higher mean cortisol measurements at time 3 tend to have higher mean cortisol measurement at time 2. 
+
+#### Question 9 
+Interpret cell(3,4) and cell(3,2) in the correlation matrix. 
+
+* Cell(3,4) of the correlation matrix is the covariance between time block 3 (Time3) and time block 4 (Time4). This correlation is 0.143, meaning that there is a positive correlation between time block 3 and 4. In other words higher mean cortisol measurements at time 3 tend to have higher mean cortisol measurements at time 4. 
+
+* Cell(3,2) of the correlation matrix is the correlation between time block 3 (Time3) and time block 2 (Time2). This correlation is 0.771, meaning that there is a positive correlation between time block 3 and 2. In other words higher mean cortisol measurements at time 3 tend to have higher mean cortisol measurements at time 2. 
 
 
+### Question 10
+Derive mathematically the correlations between Time1 and Time 2 using the covariance matrix. In other words, show how the covariance matrix can be used to derive the correlation matrix. 
 
+The equation for correlation is as follows:
+
+$$Corr(x,y) = \frac{Cov(x,y)}{\sigma_x \sigma_y}$$
+
+Where $Cov(x,y)$ comes from the covariance table at the intersection of the time points, and $\sigma_x$ and $sigma_y$ are the standard deviation of the two time points. These are found by finding the desired intersection along the diagonal of the covariance matrix, and then taking the square root of the resulting variance. Finding the correlations between Time1 and Time2 using this method:
+
+$$Corr(Time1,Time2)=\frac{Cov(Time1,Time2)}{\sigma_{Time1}\sigma_{Time2}} = \frac{7.267}{\sqrt{13.848}\sqrt{14.304}}=\frac{7.267}{3.721 \times 3.782}=0.516$$
+
+The resulting correlation between Time1 and Time2 is 0.516. The same method can be used to find the rest of the correlations. 
 
 
 \newpage
@@ -302,7 +326,8 @@ For the following matrices and vectors write down the dimensions in rxc notation
 # START PART 2 CODE
 
 # Function for writing a matrix in LaTeX from a r matrix. 
-# Code found at https://stackoverflow.com/questions/45591286/for-r-markdown-how-do-i-display-a-matrix-from-r-variable
+# Code found at https://stackoverflow.com/questions/45591286/
+# for-r-markdown-how-do-i-display-a-matrix-from-r-variable
 
 write_matrix <- function(x) {
   begin <- "\\begin{bmatrix}"
@@ -344,7 +369,7 @@ p1_pe_mat_2 <- matrix(c(2,4,-2,
 
 #### Part A
 
-$$ `r # write_matrix(q1_pa_mat)` $$
+$$ `r write_matrix(q1_pa_mat)` $$
 
 (3x1) matrix. 
 
@@ -653,4 +678,8 @@ $$E_i =  `r write_matrix(round(e_hat,4)) ` $$
 Assume we have a regression model $Y_i = \beta_0 + \beta_1 X_{1,i} + \beta_2 X_{2,i} + E_i, i = 1...n$. Use matrix notation to show how to standardize the outcome ($Y'_i$) and show how to standardize the covariate matrix (X'). We will now have the following regression $Y_i'=\beta'_0 + \beta'_1X'_{1,i} + \beta_2' X_{2,i}' + E'_i$. Derive the relationship between $\hat{\beta}$ and $\hat{\beta'}$.
 
 
+# Code Appendix
+
+```{r, ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+```
 

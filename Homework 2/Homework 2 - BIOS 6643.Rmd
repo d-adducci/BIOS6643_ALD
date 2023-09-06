@@ -1,0 +1,59 @@
+---
+title: "Homework 2 - BIOS 6643 - Analysis of Longitudinal Data"
+author: "Dominic Adducci"
+date: "2023-09-06"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+#### Question 1
+Let **B** be defined as follows:
+$$
+\begin{bmatrix}
+  1 & 5 & 0 \\
+  1 & 0 & 5 \\
+  1 & 0 & 5 
+\end{bmatrix}
+$$
+
+#### Part A
+Are the column vectors of **B** linearly dependent? Explain or show. 
+
+The column vectors can be separated from the matrix, and the following system of equations can be constructed. If each scalar, represented by a, b, and c are equal to 0, then the column vectors are considered independent.
+$$
+a
+\begin{bmatrix}
+  1 \\
+  1 \\
+  1 
+\end{bmatrix}
++
+b
+\begin{bmatrix}
+  5 \\
+  0 \\
+  0
+\end{bmatrix}
++
+c
+\begin{bmatrix}
+  0 \\
+  5 \\
+  5
+\end{bmatrix}
+=
+\begin{bmatrix}
+  0 \\
+  0 \\
+  0
+\end{bmatrix}
+$$
+Expanding this out into a system of equations:
+$$
+\begin{align*}
+  a + 5b &= 0 \\
+  a + 5c &= 0 \\
+  a + 5c &= 0
+\end{align*}
+$$

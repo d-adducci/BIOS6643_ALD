@@ -50,10 +50,8 @@ c
 \end{bmatrix}
 $$
 Expanding this out into a system of equations:
-$$
 \begin{align*}
   a + 5b &= 0 \\
   a + 5c &= 0 \\
   a + 5c &= 0
 \end{align*}
-$$

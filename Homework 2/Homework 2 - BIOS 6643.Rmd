@@ -55,3 +55,345 @@ Expanding this out into a system of equations:
   a + 5c &= 0 \\
   a + 5c &= 0
 \end{align*}
+Where the second and third row are identical. After solving the system of equations we end up with the following equalities:
+\begin{align*}
+  c &= -\frac{1}{5}a \\
+  b &= -\frac{1}{5}a
+\end{align*}
+This can be summed up as follow:
+$$-\frac{1}{5}a=b=c$$
+If we take $a=-5$ we get the following operation of the column vectors:
+$$
+-5
+\begin{bmatrix}
+  1 \\
+  1 \\
+  1 \\
+\end{bmatrix}
++ 1
+\begin{bmatrix}
+  5 \\
+  0 \\
+  0 \\
+\end{bmatrix}
++ 1
+\begin{bmatrix}
+  0 \\
+  5 \\
+  5
+\end{bmatrix}
+=
+\begin{bmatrix}
+  0 \\
+  0 \\
+  0
+\end{bmatrix}
+$$
+Because $a=b=c=0$ is not necessary for this operation to be true, the column vectors a linearly dependent. 
+
+#### Part B
+Are the row vectors of **B** linearly dependent? Explain or show? 
+
+Taking the transpose of the matrix returns the following matrix:
+$$
+\begin{bmatrix}
+  1 & 5 & 0 \\
+  1 & 0 & 5 \\
+  1 & 0 & 5 
+\end{bmatrix}^T
+=
+\begin{bmatrix}
+  1 & 1 & 1 \\
+  5 & 0 & 0 \\
+  0 & 5 & 5
+\end{bmatrix}
+$$
+Separating the transposed matrix **B** into column vectors multiplied by scalars a, b, and c:
+$$
+a
+\begin{bmatrix}
+  1 \\
+  5 \\
+  0
+\end{bmatrix} 
++ b
+\begin{bmatrix}
+  1 \\
+  0 \\
+  5
+\end{bmatrix}
++ c
+\begin{bmatrix}
+  1 \\
+  0 \\
+  5
+\end{bmatrix}
+=
+\begin{bmatrix}
+  0 \\
+  0 \\
+  0
+\end{bmatrix}
+$$
+Where the second and third column vectors are the same. Expanding this into a system of equations:
+\begin{align*}
+  a + b + c &= 0 \\
+  5a &= 0 \\
+  5b + 5c &= 0
+\end{align*}
+From this we automatically know that $a=0$, and $b=-c$. If we take $b=1$ and $c=-1$ we get the following operation:
+$$
+0
+\begin{bmatrix}
+  1 \\
+  5 \\
+  0
+\end{bmatrix} 
++ 1
+\begin{bmatrix}
+  1 \\
+  0 \\
+  5
+\end{bmatrix}
+- 1
+\begin{bmatrix}
+  1 \\
+  0 \\
+  5
+\end{bmatrix}
+=
+\begin{bmatrix}
+  0 \\
+  0 \\
+  0
+\end{bmatrix}
+$$
+Because this operation does not depend on $a=b=c=0$ this means the row vectors of **B** are linearly dependent. 
+
+#### Part C
+What is the rank of **B**?
+
+Because the three columns of **B** are linearly dependent the rank cannot be 3. To find the rank we need to transform matrix **B** into row echelon form, where 1R indicates the first row, 2R the second row, and 3R the third row.  
+$$
+\begin{bmatrix}
+  1 & 5 & 0 \\
+  1 & 0 & 5 \\
+  1 & 0 & 5 
+\end{bmatrix}
+\xrightarrow{3R = 3R -2R}
+\begin{bmatrix}
+  1 & 5 & 0 \\
+  1 & 0 & 5 \\
+  0 & 0 & 0
+\end{bmatrix}
+\xrightarrow{2R = 2R-1R}
+\begin{bmatrix}
+  1 & 5 & 0 \\
+  0 & -5 & 5 \\
+  0 & 0 & 0
+\end{bmatrix}
+$$
+After transforming **B** into row echelon form the number of non-zero rows is 2, and thus the rank of **B** is 2. 
+
+#### Part D
+Will this matrix be invertible? Explain. 
+
+Matrix **B** is not invertible because the rank is 2, while the number of columns is 3. In other words, because not all columns are linearly independent it is not invertible. 
+
+\newpage
+
+#### Question 2
+Let **A** be defined as follows:
+$$
+\textbf{A} = 
+\begin{bmatrix}
+  0 & 1 & 8 \\
+  0 & 3 & 1 \\
+  0 & 5 & 5
+\end{bmatrix}
+$$
+
+#### Part A
+Are the column vectors of **A** linearly dependent? Explain or show.
+
+Separating out the column vectors and multiplying each by either scalar a, b, or c:
+$$
+a
+\begin{bmatrix}
+  0 \\
+  0 \\
+  0
+\end{bmatrix}
++ b
+\begin{bmatrix}
+  1 \\
+  3 \\
+  5
+\end{bmatrix}
++ c
+\begin{bmatrix}
+  8 \\
+  1 \\
+  5
+\end{bmatrix}
+=
+\begin{bmatrix}
+  0 \\
+  0 \\
+  0
+\end{bmatrix}
+$$
+Because the first column is all 0 a can be any scalar. Thus the column vectors of **A** are linearly dependent. 
+
+#### Part B
+Are the row vectors of **A** linearly dependent? Explain or show. 
+
+Taking the transpose of **A** results in the following matrix:
+$$
+\textbf{A} = 
+\begin{bmatrix}
+  0 & 1 & 8 \\
+  0 & 3 & 1 \\
+  0 & 5 & 5
+\end{bmatrix}^T
+=
+\begin{bmatrix}
+  0 & 0 & 0 \\
+  1 & 3 & 5 \\
+  8 & 1 & 5
+\end{bmatrix}
+$$
+Separating out these column vectors and multiplying by scalars a, b, and c:
+$$
+a
+\begin{bmatrix}
+  0 \\
+  1 \\
+  8
+\end{bmatrix}
++ b
+\begin{bmatrix}
+  0 \\
+  3 \\
+  1
+\end{bmatrix}
++ c
+\begin{bmatrix}
+  0 \\
+  5 \\
+  5
+\end{bmatrix}
+=
+\begin{bmatrix}
+  0 \\
+  0 \\
+  0
+\end{bmatrix}
+$$
+Expanding this out into a system of equations:
+\begin{align*}
+  a + 3b + 5c &= 0 \\
+  8a + b +5c &= 0
+\end{align*}
+
+Because we have three unknown (a, b, and c) and only two equations (due to the top row of 0s) we cannot solve this system of equations. Therefore we cannot find a unique solution where all scalars are equal to 0, meaning the row vectors are linearly dependent. 
+
+#### Part C
+What is the rank of **A**?
+
+Because matrix **A** is linearly dependent the rank cannot be 3. To find the rank we need to transform the matrix into row echelon form:
+$$
+\textbf{A} = 
+\begin{bmatrix}
+  0 & 1 & 8 \\
+  0 & 3 & 1 \\
+  0 & 5 & 5
+\end{bmatrix}
+\xrightarrow{3R = 3R-2R}
+\begin{bmatrix}
+  0 & 1 & 8 \\
+  0 & 3 & 1 \\
+  0 & 2 & 4
+\end{bmatrix}
+\xrightarrow{2R=2(2R)-3(3R)}
+\begin{bmatrix}
+  0 & 1 & 8 \\
+  0 & 0 & 10 \\
+  0 & 2 & 4
+\end{bmatrix}
+\xrightarrow{3R = 3R - 2(1R)}
+$$
+$$
+\xrightarrow{3R = 3R - 2(1R)}
+\begin{bmatrix}
+  0 & 1 & 8 \\
+  0 & 0 & 10 \\
+  0 & 0 & -12
+\end{bmatrix}
+\xrightarrow{3R = 3R + 2R}
+\begin{bmatrix}
+  0 & 1 & 8 \\
+  0 & 0 & 10 \\
+  0 & 0 & -2
+\end{bmatrix}
+\xrightarrow{2R = 0.20(2R)}
+\begin{bmatrix}
+  0 & 1 & 8 \\
+  0 & 0 & 2 \\
+  0 & 0 & -2
+\end{bmatrix}
+\xrightarrow{3R = 3R + 2R}
+$$
+$$
+\xrightarrow{3R = 3R + 2R}
+\begin{bmatrix}
+  0 & 1 & 8 \\
+  0 & 0 & 2 \\
+  0 & 0 & 0
+\end{bmatrix}
+$$
+After transforming **A** into row echelon form the number of non-zero rows is 2. Therefore the rank of **A** is 2. 
+
+#### Part D
+Will this matrix be invertable? Explain.
+
+Matrix **A** is not invertible because the rank is 2, while the number of columns is 3. In other words, because not all columns are linearly independent it is not invertible.
+
+\newpage
+
+#### Question 3
+Consider the following functions of the random variables $Y_1$, $Y_2$, and $Y_3$:
+\begin{align*}
+  W_1 &= Y_1 + Y_2 + Y_3 \\
+  W_2 &= Y_1 - Y_2 \\
+  W_3 &= Y_1 - Y_2 - Y_3
+\end{align*}
+
+#### Part A
+State the above in matrix notation.
+
+We can write this in matrix notation as follows:
+$$\textbf{W} = \textbf{X}\textbf{Y}$$
+Where the matrices are equal to the following:
+$$
+\begin{bmatrix}
+  W_1 \\
+  W_2 \\
+  W_3
+\end{bmatrix}
+=
+\begin{bmatrix}
+  1 & 1 & 1 \\
+  1 & -1 & 0 \\
+  1 & -1 & -1
+\end{bmatrix}
+\begin{bmatrix}
+  Y_1 \\
+  Y_2 \\
+  Y_3
+\end{bmatrix}
+$$
+
+#### Part B
+Find the expectation of the random vector **W**. 
+

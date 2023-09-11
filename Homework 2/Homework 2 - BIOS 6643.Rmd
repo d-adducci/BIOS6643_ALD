@@ -417,6 +417,21 @@ $$
   E[Y_3]
 \end{bmatrix}
 $$
+Multiplying the right hand side together:
+$$
+\begin{bmatrix}
+  E[W_1] \\
+  E[W_2] \\
+  E[W_3]
+\end{bmatrix}
+=
+\begin{bmatrix}
+  E[Y_1] + E[Y_2] + E[Y_3] \\
+  E[Y_1] - E[Y_2] \\
+  E[Y_1] - E[Y_2] - E[Y_3]
+\end{bmatrix}
+$$
+
 
 #### Part C
 Find the variance-covariance matrix of **W**. 
@@ -485,7 +500,23 @@ $$
   E[Y_4]
 \end{bmatrix}
 $$
-Expanding this out
+Multiplying the matrices on the right hand side:
+$$
+\begin{bmatrix}
+  E[W_1] \\
+  E[W_2]
+\end{bmatrix}
+=
+\begin{bmatrix}
+  \frac{1}{4}E[Y_1] + \frac{1}{4}E[Y_2] + \frac{1}{4}E[Y_3] + \frac{1}{4}E[Y_4] \\
+  \frac{1}{2}E[Y_1] + \frac{1}{2}E[Y_2] - \frac{1}{2}E[Y_3] - \frac{1}{2}E[Y_4]
+\end{bmatrix}
+=
+\begin{bmatrix}
+  \frac{1}{4}(E[Y_1] + E[Y_2] + E[Y_3] + E[Y_4]) \\
+  \frac{1}{2}(E[Y_1] + E[Y_2]) - \frac{1}{2}(E[Y_3]+E[Y_4])
+\end{bmatrix}
+$$
 
 
 #### Part C

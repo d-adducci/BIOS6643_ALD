@@ -422,7 +422,7 @@ $$
 Find the variance-covariance matrix of **W**. 
 
 $$
-Var(\textbf{Y})
+Var(\textbf{W})
 =
 \begin{bmatrix}
   Var(Y_1) & Cov(Y_1,Y_2) & Cov(Y_1,Y_3) \\
@@ -459,9 +459,39 @@ $$
   Y_4
 \end{bmatrix}
 $$
+This can be simplified with the following notation:
+$$\textbf{W} = \textbf{X}\textbf{Y}$$
+
 
 #### Part B
 Find the expectation of the random vector **W**.
+
+$$E[\textbf{W}] = E[\textbf{X}\textbf{Y}]=E[\textbf{X}]E[\textbf{Y}]$$
+Matrix **X** is a constant, so taking the expectation does not change the matrix. For matrices **W** and **Y** the expectation can be brought in. 
+$$
+\begin{bmatrix}
+  E[W_1] \\
+  E[W_2]
+\end{bmatrix}
+=
+\begin{bmatrix}
+  \frac{1}{4} & \frac{1}{4} & \frac{1}{4} & \frac{1}{4} \\
+  \frac{1}{2} & \frac{1}{2} & -\frac{1}{2} & -\frac{1}{2}
+\end{bmatrix}
+\begin{bmatrix}
+  E[Y_1] \\
+  E[Y_2] \\
+  E[Y_3] \\
+  E[Y_4]
+\end{bmatrix}
+$$
+Expanding this out
+
+
+#### Part C
+Find the variance-covariance matrix of **W**. 
+
+
 
 
 

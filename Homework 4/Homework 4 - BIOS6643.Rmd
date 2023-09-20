@@ -1,0 +1,37 @@
+---
+title: "Homework 4 - BIOS 6643 Analysis of Longitudinal Data"
+author: "Dominic Adducci"
+date: "2023-09-20"
+output: html_document
+---
+
+# Question 1
+Complex MLE estimation in LMM requires computational optimization approaches, the goal here is to implement a basic Newton-Raphson algorithm in R. The following data are an i.i.d sample from a Cauchy($\theta$,1) distribution: 1.77, -0.23, 2.76, 3.80, 3.47, 56.75, -1.34, 4.24, -2.44, 3.29, 3.71, -2.40, 4.53, -0.07, -1.05, -13.87, -2.53, -1.75, 0.27, 43.21. 
+
+#### Part A: 
+Graph the log likelihood function. 
+
+The likelihood function of the Cauchy($\theta$,1) distribution is: 
+$$\frac{1}{\pi^n}\frac{1}{\prod[1+(x_i-\theta)^2]}$$
+and the loglikelihood is:
+$$-nlog(\pi)-\sum_i^nlog(1+(x_i - \theta)^2)$$
+
+```{r}
+
+# START QUESTION 1 CODE
+
+# START QUESTION 1 PART A CODE
+
+# Initializing experimental data. 
+exp_data <- c(1.77,-0.23,2.76,3.80,3.47,56.75,-1.34,4.24,-2.44,3.29,3.71,-2.40,
+              4.53,-0.07,-1.05,-13.87,-2.53,-1.75,0.27,43.21)
+
+cauchy_fuction <- function(data){
+  # Initializing an emtpy df to hold values.
+  na_df <- data.frame(NA,ncol=2,nrow=length(data))
+  n <- length(data)
+  for(i in nlength(data))
+    
+}
+
+```

@@ -22,7 +22,7 @@ library(nlme)
 
 
 ###Read in the lead data from the website.
-leaddatalong <- read.csv("C:/Biostatistics Masters Program/Fall 2023/BIOS 6643 - Analysis of Longitudinal Data/BIOS6643_ALD/In Class Exercises/Lead Dataset/leaddatalong.csv")
+leaddatalong <- read.csv("C:/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ALD/BIOS6643_ALD/In Class Exercises/Lead Dataset/leaddatalong.csv")
 
 
 ####Fit several different var-cov structures for a marginal analysis and evaluate

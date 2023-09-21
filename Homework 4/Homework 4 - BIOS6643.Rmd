@@ -91,16 +91,25 @@ What finding an MLE the score $S(\theta)$, the derivative of the log-likelihood,
 
 ## START QUESTION 1 PART B CODE
 
+# For the log likelihood of the Cauchy distribution the first term drops out
+# after taking the first derivative, so only the second needs to be included.
+ll_cauchy_form <- expression(log(1+(exp_data-theta)^2))
+
+# Finding first and second derivatives of loglikelihood
+# (will copy the output and put it into the function)
+first_d <- D(ll_cauchy_form,"theta")
+second_d <- D(first_d,"theta")
+
 # Making a function to calculate the Newton-Raphson method.
 nr_mle <- function(exp_data,theta_est,loglike,iterations){
   # Initializing a data frame to track progress
   theta_mat <- data.frame(matrix(NA,nrow = iterations,ncol=2))
   theta = theta_est # Initializing theta
-  first_d <- D(loglike,"theta") # Taking first derivative of log likelihood
-  second_d <- D(first_d,"theta") # Taking second derivative of log likelihood
   for(i in 1:iterations){
-    ll_first_d <- sum(eval(first_d)) # summing log likelihood of first derivative
-    ll_second_d <- sum(eval(second_d)) # Summing log likelihood of second derivative
+    # Calculating first and second derivative log likelihood
+    ll_first_d <- sum(-(2 * (exp_data - theta)/(1 + (exp_data - theta)^2))) 
+    ll_second_d <- sum(2/(1 + (exp_data - theta)^2) - 2 * (exp_data - theta) * 
+                         (2 * (exp_data - theta))/(1 + (exp_data - theta)^2)^2) 
     theta <- theta - ll_first_d/ll_second_d # Using Newton-Raphson equation
     # Calculating difference from original theta. 
     difference <- theta - theta_est 
@@ -112,11 +121,8 @@ nr_mle <- function(exp_data,theta_est,loglike,iterations){
   return(theta_mat)
 }
 
-# For the log likelihood of the Cauchy distribution the first term drops out
-# after taking the first derivative, so only the second needs to be included.
-ll_cauchy_form <- expression(log(1+(exp_data-theta)^2))
 
-theta_mle <- nr_mle(exp_data,0,ll_cauchy_form,10)
+theta_mle <- nr_mle(exp_data,mean(exp_data),ll_cauchy_form,20)
 theta_mle
 ```
 

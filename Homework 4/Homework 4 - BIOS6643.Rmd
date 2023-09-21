@@ -48,7 +48,7 @@ cauchy_median <- median(exp_data)
 # Initializing range of location parameters to check. Because Cauchy is 
 # continuous thetas increase at increments of 1/30. Median of experimental 
 # data is 1 so I'll include a range from -10 to 10. 
-theta_range <- seq(-10,10,1/30)
+theta_range <- seq(-20,20,1/30)
 
 # Using an apply statement to enter location parameter range into function.
 ll_cauchy <- data.frame(t(sapply(theta_range, 
@@ -87,7 +87,9 @@ Translating this to finding the MLE of $\theta$:
 $$\hat{\theta}_{i}=\hat{\theta}_{i-1}-\frac{logL'(\hat{\theta}_{i-1})}{logL''(\hat{\theta}_{i-1})}=\hat{\theta}_{i-1}-\frac{S(\hat{\theta}_{i-1})}{I(\hat{\theta}_{i-1})}$$
 What finding an MLE the score $S(\theta)$, the derivative of the log-likelihood, should equal 0, $S(\theta)=0$. $I(\theta)$ is the Fisher observed information from the data.
 
-```{r}
+Check the code appendix for the function. 
+
+```{r, echo = F}
 
 ## START QUESTION 1 PART B CODE
 
@@ -124,12 +126,48 @@ nr_mle <- function(exp_data,theta_est,loglike,iterations){
 }
 
 
-theta_mle <- nr_mle(exp_data,-0.2,ll_cauchy_form,20)
+theta_mle <- nr_mle(exp_data,4,ll_cauchy_form,20)
 theta_mle
 ```
 
+#### Part C
+Try all of the following starting points: -11,-1,0,1.5,4,4.7,7,8,and 38. 
 
 
 
+
+# Question 2
+In a paragraph explain the difference between a general linear model or multiple regression (GLM; not a generalized linear model like a logistic regression or (GLM; not a generalized linear model like a logistic regression or Poisson, which will be discussed later) and a linear mixed model (LMM). 
+
+A general linear model only has fixed effects, while a linear mixed model includes both fixed and random effects. The random effects of the linear mixed model allows the model to account for differences between subjects. A simple example would be measuring something like cholesterol levels through time. A general linear model (fixed effects only) may include covariates such as time, BMI, smoking status, sex, race, etc. Every individual will follow the same regression line based on those covariates. In a linear mixed model random effect which account for subject differences, such as someone tending to have higher or lower cholesterol at start (random intercept) can be included to better model change over time. A better fit may be found by including random slopes as well for each subject if cholesterol trajectory is found to be different between subjects. 
+
+# Question 3
+In a short paragraph, explain the difference between a profiled likelihood and a restricted likelihood for a linear mixed model, and how and why they are used. 
+
+In a profile likelihood you maximize the likelihood by fixing every other parameter and only allowing one to vary. Doing this maximizes the single parameter you allowed to vary. You can then repeat this process for every other parameter incrementally, plugging in the estimates for parameters which have already been maximized. The downside to this method is that variance estimates are biased downward. The restricted likelihood (REML) allows for estimating parameters which are not biased regardless of sample size. The downside for the REML method compared to profile likelihood is that you can only compare REML model using a likelihood ratio of both models have the same set of fixed effects. 
+
+Profile likelihood - maximize likelihood by fixing every other parameter and only allow one to vary and maximize that using a grid search. After getting that maximum repeat each process for each parameter in the set of likelihood parameter.
+
+Restricted maximum likelihood - REML has property that your standard error are unbiased regardless of sample size, so generally is in situations where were trying to get unbiased estimates of errors when sample sizes are small. Loglikelihood are not valid for reduced in full REML models. Can only compare REML models that have the same set of fixed effects. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# Extracting covariance matrix from gls
+lmm <- gls()
+lmm_summ <- summary(lmm)
+varcov <- lmm_summ$modelStruct$corStruct
+
+```
 
 

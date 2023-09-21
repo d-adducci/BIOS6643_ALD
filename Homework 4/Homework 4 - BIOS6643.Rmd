@@ -93,14 +93,18 @@ What finding an MLE the score $S(\theta)$, the derivative of the log-likelihood,
 
 # Making a function to calculate the Newton-Raphson method.
 nr_mle <- function(exp_data,theta_est,loglike,iterations){
+  # Initializing a data frame to track progress
   theta_mat <- data.frame(matrix(NA,nrow = iterations,ncol=2))
-  theta = theta_est
-  first_d <- deriv(loglike,"theta")
-  second_d <- deriv(first_d,"theta")
-  for(i in iterations){
-    ll_first_d <- sum()
-    theta <- theta - first_d/second_d
-    difference <- theta - theta_est
+  theta = theta_est # Initializing theta
+  first_d <- D(loglike,"theta") # Taking first derivative of log likelihood
+  second_d <- D(first_d,"theta") # Taking second derivative of log likelihood
+  for(i in 1:iterations){
+    ll_first_d <- sum(eval(first_d)) # summing log likelihood of first derivative
+    ll_second_d <- sum(eval(second_d)) # Summing log likelihood of second derivative
+    theta <- theta - ll_first_d/ll_second_d # Using Newton-Raphson equation
+    # Calculating difference from original theta. 
+    difference <- theta - theta_est 
+    # Adding these to the data frame. 
     theta_mat[i,1] <- theta
     theta_mat[i,2] <- difference
   }
@@ -108,8 +112,12 @@ nr_mle <- function(exp_data,theta_est,loglike,iterations){
   return(theta_mat)
 }
 
-theta_mle <- nr_mle()
+# For the log likelihood of the Cauchy distribution the first term drops out
+# after taking the first derivative, so only the second needs to be included.
+ll_cauchy_form <- expression(log(1+(exp_data-theta)^2))
 
+theta_mle <- nr_mle(exp_data,0,ll_cauchy_form,10)
+theta_mle
 ```
 
 

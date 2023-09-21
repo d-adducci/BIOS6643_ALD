@@ -93,7 +93,7 @@ What finding an MLE the score $S(\theta)$, the derivative of the log-likelihood,
 
 # For the log likelihood of the Cauchy distribution the first term drops out
 # after taking the first derivative, so only the second needs to be included.
-ll_cauchy_form <- expression(log(1+(exp_data-theta)^2))
+ll_cauchy_form <- expression(-log(1+(exp_data-theta)^2))
 
 # Finding first and second derivatives of loglikelihood
 # (will copy the output and put it into the function)
@@ -107,9 +107,11 @@ nr_mle <- function(exp_data,theta_est,loglike,iterations){
   theta = theta_est # Initializing theta
   for(i in 1:iterations){
     # Calculating first and second derivative log likelihood
-    ll_first_d <- sum(-(2 * (exp_data - theta)/(1 + (exp_data - theta)^2))) 
-    ll_second_d <- sum(2/(1 + (exp_data - theta)^2) - 2 * (exp_data - theta) * 
-                         (2 * (exp_data - theta))/(1 + (exp_data - theta)^2)^2) 
+    ll_first_d <- sum(2 * (exp_data - theta)/(1 + (exp_data - theta)^2)) 
+    ll_second_d <- sum(-(2/(1 + (exp_data - theta)^2) - 2 * 
+                           (exp_data - theta) * 
+                           (2 * (exp_data - theta))/
+                           (1 + (exp_data - theta)^2)^2)) 
     theta <- theta - ll_first_d/ll_second_d # Using Newton-Raphson equation
     # Calculating difference from original theta. 
     difference <- theta - theta_est 

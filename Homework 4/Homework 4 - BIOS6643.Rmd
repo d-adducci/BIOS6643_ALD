@@ -124,7 +124,7 @@ nr_mle <- function(exp_data,theta_est,loglike,iterations){
 }
 
 
-theta_mle <- nr_mle(exp_data,mean(exp_data),ll_cauchy_form,20)
+theta_mle <- nr_mle(exp_data,-0.2,ll_cauchy_form,20)
 theta_mle
 ```
 

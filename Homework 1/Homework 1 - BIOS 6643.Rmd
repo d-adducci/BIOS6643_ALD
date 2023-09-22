@@ -28,7 +28,7 @@ opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
 # Desktop Data: "C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - Analysis of Longitudinal Data/BIOS6643_ALD/Homework 1/DataRaw/cortdata.csv"
 
 # Loading data set (cortdata.csv) into R. 
-cort_data <- read.csv("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - Analysis of Longitudinal Data/BIOS6643_ALD/Homework 1/DataRaw/cortdata.csv")
+cort_data <- read.csv("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 1/DataRaw/cortdata.csv")
 
 ```
 

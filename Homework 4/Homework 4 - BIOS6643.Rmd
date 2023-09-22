@@ -2,13 +2,18 @@
 title: "Homework 4 - BIOS 6643 Analysis of Longitudinal Data"
 author: "Dominic Adducci"
 date: "2023-09-20"
-output: html_document
+output:
+  pdf_document: default
 ---
 
-```{r}
+```{r, echo = F, include = F}
 
 library(tidyverse)
 library(latex2exp)
+library(broom.mixed)
+library(kableExtra)
+library(knitr)
+library(nlme)
 
 ```
 
@@ -23,7 +28,7 @@ $$\frac{1}{\pi^n}\frac{1}{\prod[1+(x_i-\theta)^2]}$$
 and the loglikelihood is:
 $$-nlog(\pi)-\sum_i^nlog(1+(x_i - \theta)^2)$$
 
-```{r}
+```{r, echo = F}
 
 ### START QUESTION 1 CODE ###
 
@@ -128,6 +133,11 @@ nr_mle <- function(exp_data,theta_est,loglike,iterations){
 
 theta_mle <- nr_mle(exp_data,4,ll_cauchy_form,20)
 theta_mle
+
+## END QUESTION 1 PART B CODE
+
+### END QUESTION 1 CODE ###
+
 ```
 
 #### Part C
@@ -151,22 +161,117 @@ Profile likelihood - maximize likelihood by fixing every other parameter and onl
 Restricted maximum likelihood - REML has property that your standard error are unbiased regardless of sample size, so generally is in situations where were trying to get unbiased estimates of errors when sample sizes are small. Loglikelihood are not valid for reduced in full REML models. Can only compare REML models that have the same set of fixed effects. 
 
 
+# Part 2ish 
+
+Investigator wants to understand whether Cortisol (a stress hormone) secretion differs in women suffering from depression. Cortisol was measured every 10 minutes for a period of 24 hours starting at 9 am. 26 patients and 26 controls were collected in the study. Although the data were collected every 10 minutes for a period of 24 hours on each subject (144 observations), the investigators were interested in differences in the circadian pattern between the groups. Data was divided into 6 blocks of 4 hours and averaged to obtain a set of "block means". 
+
+```{r, echo = F}
+
+### START PART 2 DATA FORMATTING ###
+
+cort_data <- read.csv("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 1/DataRaw/cortdata.csv")
+
+cort_data_long <- cort_data %>% pivot_longer(cols = "Time1":"Time6", 
+                                             names_to = "time",
+                                             values_to = "mean_cortisol")
+
+cort_data_long <- cort_data_long %>% mutate(casecontrol = factor(casecontrol),
+                                            time = factor(time))
+
+### END PART 2 DATA FORMATTING ### 
+
+```
 
 
 
 
+# Question 4
 
+#### Part A
+Fir a multiple linear regression to investigate how mean cortisol values change over the day (categorical time) and how the average cortisol levels differ by group (no interaction for this model). This will be used to anchor the comparisons later in the assignment. 
+```{r, echo = F}
 
+### START QUESTION 4 CODE ###
 
+## START QUESTION 4 PART A CODE ##
 
+# Making a multiple linear regression model for mean cortisol. 
+mlr_cort <- lm(mean_cortisol ~ time + casecontrol, data = cort_data_long)
 
+# Formatting output into a table. 
+broom::tidy(mlr_cort, conf.int = TRUE) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "MLR Cortisol",
+      col.names = c("Term","Estimate","Std.Error",
+                    "95% Conf.Low","95% Conf.High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
 
+## END QUESTION 4 PART A CODE ##
+  
+
+```
+Table 1 shows the output of the multiple linear regression where mean cortisol is the outcome and time and casecontrol are covariates. Time is factored into 6 different levels, where time 1 is the reference. 
+
+#### Part B
+Provide a table of mean differences from the 6th time period along with SE's of the differences. Interpret two of the coefficients. You do not need to conduct inference.
+```{r, echo = F}
+
+## START QUESTION 4 PART B CODE ##
+
+# Releveling the time factor variable so time 6 is the reference group.
+cort_long_relevel <- cort_data_long %>% mutate(time = relevel(time,ref = 6))
+
+# Making a multiple linear regression for cortisol 
+# where time 6 is the reference.
+mlr_cort_relev <- lm(mean_cortisol ~ time + casecontrol, data = cort_long_relevel)
+
+# Formatting output into a table. 
+broom::tidy(mlr_cort_relev, conf.int = TRUE) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "MLR Cortisol - Time 6 Reference",
+      ) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+## END QUESTION 4 PART B CODE ##
+
+```
+Table 2 shows the output of the multiple linear regression where time 6 is the reference group. For term timeTime1 this is the mean difference between cortisol at time 1 and cortisol at time 6. Interpreting this it means cortisol is 1.7518 units higher at time 6 compared to time 1. For the term casecontrolp this is the mean difference between the control (reference) group and women with depression. Interpreting this it means cortisol is 0.9211 units higher for women with depression compared to women without depression (control). 
+
+#### Part C
+Will these standard error be too big or small and why? 
+
+Standard error is found with the equation:
+$$Std.Error = \frac{\sigma}{\sqrt{n}}$$
+For a study at a single instance n is generally the number of subjects. For this study because subjects each have 6 time points (assuming balanced data) n refers to all instances where cortisol was measured for each subject, $52 \times 6$, which mean $n = 312$. 
+```{r, echo = F}
+
+## START QUESTION 4 PART C CODE ##
+
+# Selecting standard errors and converting to variance. 
+q4_var <- ((summary(mlr_cort_relev)$coefficients[,2]) * 
+  sqrt(length(cort_long_relevel)))^2
+
+q4_var_tbl <- kbl(data.frame(t(q4_var)),
+                  caption = "MLR Cortisol - Time 6 Ref. Variances",
+                  col.names = c("Intercept","Time 1","Time 2","Time 3",
+                                "Time 4","Time 5","Group P"),
+                  booktabs = T, align = "cc") %>%
+  kable_styling(latex_options = "HOLD_position")
+
+q4_var_tbl
+
+```
+Table 3 shows the variances for each estimate. Given that each estimate is relatively low compared to the variances the standard errors (which were used to calculate variance) may be too large to make a meaningful interpretation, as subjects may have significantly different mean cortisol measurements between each other. 
 
 ```{r}
 # Extracting covariance matrix from gls
-lmm <- gls()
-lmm_summ <- summary(lmm)
-varcov <- lmm_summ$modelStruct$corStruct
+#lmm <- gls()
+#lmm_summ <- summary(lmm)
+#varcov <- lmm_summ$modelStruct$corStruct
 
 ```
 

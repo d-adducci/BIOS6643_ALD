@@ -479,6 +479,9 @@ What is the estimated difference in mean cortisol levels (and SE) between the de
 
 From table 4 (or 5, they are equivalent for the casecontrol variable) the estimate difference between the control group and the depressed group is 0.7446. This means that cortisol is 0.7446 units higher in the depressed group. This estimate is smaller compared to the MLR model, but has a higher standard error of 0.6096 compared to the MLR model's standard error of 0.3846.
 
+# Question 8 
+Write a paragraph comparing and contrasting the parameter estimates for $\beta$ (the mean differences) and the standard errors across the difference variance-covariance structures. 
+
 
 ```{r}
 # Extracting covariance matrix from gls

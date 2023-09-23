@@ -233,7 +233,8 @@ broom::tidy(mlr_cort_relev, conf.int = TRUE) %>%
   select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
   kbl(digits = 4, booktabs = T, align = "cc",
       caption = "MLR Cortisol - Time 6 Reference",
-      ) %>%
+      col.names = c("Term","Estimate","Std.Error","95% Conf.Low",
+                    "95% Conf.High","P-Value")) %>%
   kable_styling(latex_options = "HOLD_position")
 
 ## END QUESTION 4 PART B CODE ##
@@ -264,8 +265,220 @@ q4_var_tbl <- kbl(data.frame(t(q4_var)),
 
 q4_var_tbl
 
+## END QUESTION 4 PART C CODE ##
+
+### END QUESTION 4 CODE ###
+
 ```
 Table 3 shows the variances for each estimate. Given that each estimate is relatively low compared to the variances the standard errors (which were used to calculate variance) may be too large to make a meaningful interpretation, as subjects may have significantly different mean cortisol measurements between each other. 
+
+# Question 5
+
+#### Part A
+Fit a linear mixed model assuming categorical time and group with an unstructured variance-covariance structure using method=REML (the default). Print out the correlation matrix and interpret the general patterns of the correlation in the errors for an individual. 
+
+```{r, echo = F}
+
+### START QUESTION 5 CODE ###
+
+## START QUESTION 5 PART A CODE ##
+
+lmm_unstr_corr <- gls(mean_cortisol ~ time + casecontrol, 
+                      data = cort_data_long, 
+                      correlation = corSymm(form = ~ 1 | SubjectId))
+
+lmm_unstr_corr_sum <- summary(lmm_unstr_corr)
+
+broom.mixed::tidy(lmm_unstr_corr, conf.int = TRUE) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "LMM Unstructured Var-Cov",
+      col.names = c("Term","Estimate","Std.Error","95% Conf.Low",
+                    "95% Conf. High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+Table 4 shows the fixed effects for the linear mixed effects model with unstructured variance-covariance. 
+```{r, echo = F}
+
+lmm_unstr_corr_sum$modelStruct$corStruct
+
+## END QUESTION 5 PART A CODE ##
+
+```
+The above output shows the correlation structure for the linear mixed model with unstructured variance-covariance. 
+
+#### Part B
+Provide a table of mean differences from the 6th time period along with SE's of the differences. Interpret two of the coefficients. You do not need to conduce inference. 
+```{r, echo = F}
+
+## START QUESTION 5 PART B CODE ##
+lmm_unstr_corr_relev <- gls(mean_cortisol ~ time + casecontrol, 
+                      data = cort_long_relevel, 
+                      correlation = corSymm(form = ~ 1 | SubjectId))
+
+broom.mixed::tidy(lmm_unstr_corr_relev, conf.int = TRUE) %>%
+  select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "LMM Unstructured Var-Cov - Time 6 Ref.",
+      col.names = c("Term","Estimate","Std.Error","95% Conf.Low",
+                    "95% Conf. High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+## END QUESTION 5 PART B CODE ##
+
+### END QUESTION 5 CODE ###
+
+```
+Table 5 shows the output of the linear mixed model with unstructured variance-covariance where time 6 is the reference group. 
+
+* For term timeTime1 this is the mean difference between cortisol at time 1 and cortisol at time 6. Interpreting this it means cortisol is 1.7518 units higher at time 6 compared to time 1. This estimate is identical to that of the MLR model from question 4, but the standard error is smaller at 0.3213 compared to the MLR model's standard error of 0.6662. In other words the estimate of the LMM with unstructured variance-covariance is more precise. 
+
+* For term timeTime2 this is the mean difference between cortisol at time 2 and cortisol at time 6. Interpreting this is means cortisol is 2.2179 units higher at time 2 compared to time 6. This estimate is identical to that of the MLR model from question 4, but the standard error is smaller at 0.5658 compared to the MLR model's standard error of 0.6662. In other words the estimate of the LMM with unstructured variance-covariance is more precise. 
+
+#### Part C
+What is the estimate difference in mean cortisol levels (and SE) between the depressed and non-depressed groups. Interpret the finding in a sentence. You do not need to conduct inference. 
+
+From table 4 (or 5, they are equivalent for the casecontrol variable) the estimate difference between the control group and the depressed group is 0.7591. This means that cortisol is 0.7591 units higher in the depressed group. The estimate is smaller than the estimate from the MLR model, but has a higher standard error of 0.7254 compared to the MLR model's standard error of 0.3846. 
+
+# Question 6
+
+#### Part A
+Fit a linear mixed model assuming categorical time and group with a compound symmetry structure using method=REML (the default). Print out the correlation matrix and interpret the general patterns of the correlation in the errors for an individual. 
+```{r, echo = F}
+
+### START QUESTION 6 CODE ###
+
+## START QUESTION 6 PART A CODE ##
+
+lmm_compsymm <- gls(mean_cortisol ~ time + casecontrol, data = cort_data_long,
+                    correlation = corCompSymm(form = ~ 1 | SubjectId))
+
+lmm_compsymm_sum <- summary(lmm_compsymm)
+
+broom.mixed::tidy(lmm_compsymm, conf.int = TRUE) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "LMM Compound Symmetry Var-Cov",
+      col.names = c("Term","Estimate","Std.Error","95% Conf.Low",
+                    "95% Conf. High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+Table 6 shows the fixed effects for the linear mixed effects model with compound symmetry variance-covariance structure. 
+```{r,echo = F}
+
+lmm_compsymm$modelStruct$corStruct
+
+## END QUESTION 6 PART A CODE ##
+
+```
+The above output shows the correlation structure for the linear mixed model with compound symmetry variance-covariance structure. 
+
+#### Part B
+Provide a table of mean differences from the 6th time period along with SE's of the differences. Interpret two of the coefficients. You do not need to conduct inference. 
+```{r, echo = F}
+
+## START QUESTION 6 PART B CODE ##
+lmm_compsymm_relev <- gls(mean_cortisol ~ time + casecontrol, 
+                      data = cort_long_relevel, 
+                      correlation = corCompSymm(form = ~ 1 | SubjectId))
+
+broom.mixed::tidy(lmm_compsymm_relev, conf.int = TRUE) %>%
+  select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "LMM Compound Symmetry Var-Cov - Time 6 Ref.",
+      col.names = c("Term","Estimate","Std.Error","95% Conf.Low",
+                    "95% Conf. High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+## END QUESTION 6 PART B CODE ##
+
+### END QUESTION 6 CODE ###
+
+```
+Table 7 shows the output of the linear mixed model with compound symmetry variance-covariance where time 6 is the reference group. Because the variance-covariance structure is compound symmetric each SE for time points are the same. 
+
+* For term timeTime1 this is the mean difference between cortisol at time 1 and cortisol at time 6. Interpreting this it means cortisol is 1.7518 units higher at time 6 compared to time 1. This estimate is identical to that of the MLR model from question 4, but the standard error is smaller at 0.4770 compared to the MLR model's standard error of 0.6662. In other words the estimate of the LMM with compound symmetry variance-covariance is more precise. 
+* For term timeTime2 this is the mean difference between cortisol at time 2 and cortisol at time 6. Interpreting this it means cortisol is 2.2179 units higher at time 2 compared to time 6. This estimate is identical to that of the MLR model from question 4, but the standard error is smaller at 0.4770 compared to the MLR model's standard error of 0.6662. In other words the estimate of the LMM with compound symmetry variance-covariance is more precise. 
+
+#### Part C
+What is the estimated difference in mean cortisol levels (and SE) between the depressed and non-depressed groups. Interpret the finding in a sentence. You do not need to conduct inference. 
+
+From table 4 (or 5, they are equivalent for the casecontrol variable) the estimate difference between the control group and the depressed group is 0.9211. This means that cortisol is 0.9211 units higher in the depressed group. This estimate is identical to the MLR model, but has a higher standard error of 0.7180 compared to the MLR model's standard error of 0.3846.
+
+# Question 7
+
+#### Part A
+Fit a linear mixed model assuming categorical time and group with an AR(1) structure using method=REML (the default). Print out the correlation matrix and interpret the general patterns of the correlation in the errors for an individual. 
+```{r, echo = F}
+
+### START QUESTION 7 CODE ###
+
+## START QUESTION 7 PART A CODE ##
+
+lmm_ar1 <- gls(mean_cortisol ~ time + casecontrol, data = cort_data_long,
+                    correlation = corCAR1(form = ~ 1 | SubjectId))
+
+lmm_ar1_sum <- summary(lmm_ar1)
+
+broom.mixed::tidy(lmm_ar1, conf.int = TRUE) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "LMM AR(1) Var-Cov",
+      col.names = c("Term","Estimate","Std.Error","95% Conf.Low",
+                    "95% Conf. High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+Table 8 shows the fixed effects for the linear mixed effects model with AR(1) variance-covariance. 
+```{r,echo = F}
+
+lmm_compsymm$modelStruct$corStruct
+
+## END QUESTION 7 PART A CODE ##
+
+```
+The above output shows the correlation structure for the linear mixed model with AR(1) variance-covariance. 
+
+#### Part B
+Provide a table of mean differences from the 6th time period along with SE's of the differences. Interpret two of the coefficients. You do not need to conduct inference. 
+```{r, echo = F}
+
+## START QUESTION 7 PART B CODE ##
+lmm_ar1_relev <- gls(mean_cortisol ~ time + casecontrol, 
+                      data = cort_long_relevel, 
+                      correlation = corCAR1(form = ~ 1 | SubjectId))
+
+broom.mixed::tidy(lmm_ar1_relev, conf.int = TRUE) %>%
+  select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "LMM AR(1) Var-Cov - Time 6 Ref.",
+      col.names = c("Term","Estimate","Std.Error","95% Conf.Low",
+                    "95% Conf. High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+## END QUESTION 7 PART B CODE ##
+
+### END QUESTION 7 CODE ###
+
+```
+Table 9 shows the output of the linear mixed model with AR(1) variance-covariance where time 6 is the reference group.
+
+* For term timeTime1 this is the mean difference between cortisol at time 1 and cortisol at time 6. Interpreting this is means cortisol is 1.7518 units higher at time 6 compared to time 1. This estimate is identical to that of the MLR model from question 4, but the standard error is slightly smaller at 0.6542 compared to the MLR model's standard error of 0.6662. In other words the estimate of the LMM with AR(1) variance-covariance is more precise. 
+* For term timeTime2 this is the mean difference between cortisol at time 2 and cortisol at time 6. Interpreting this it means cortisol is 2.2179 units higher at time 2 compared to time 6. This estimate is identical to that of the MLR model from question 4, but the standard error is slightly smaller at 0.6395 compared to the MLR model's standard error of 0.6662. In other words the estimate of LMM with AR(1) variance-covariance is slightly more precise. 
+
+#### Part C
+What is the estimated difference in mean cortisol levels (and SE) between the depressed and non-depressed groups. Interpret the finding in a sentence. You do not need to conduct inference. 
+
+From table 4 (or 5, they are equivalent for the casecontrol variable) the estimate difference between the control group and the depressed group is 0.7446. This means that cortisol is 0.7446 units higher in the depressed group. This estimate is smaller compared to the MLR model, but has a higher standard error of 0.6096 compared to the MLR model's standard error of 0.3846.
+
 
 ```{r}
 # Extracting covariance matrix from gls

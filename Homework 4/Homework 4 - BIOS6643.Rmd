@@ -131,7 +131,7 @@ nr_mle <- function(exp_data,theta_est,loglike,iterations){
 }
 
 
-theta_mle <- nr_mle(exp_data,4,ll_cauchy_form,20)
+theta_mle <- nr_mle(exp_data,0,ll_cauchy_form,20)
 theta_mle
 
 ## END QUESTION 1 PART B CODE
@@ -147,7 +147,7 @@ Try all of the following starting points: -11,-1,0,1.5,4,4.7,7,8,and 38.
 
 
 # Question 2
-In a paragraph explain the difference between a general linear model or multiple regression (GLM; not a generalized linear model like a logistic regression or (GLM; not a generalized linear model like a logistic regression or Poisson, which will be discussed later) and a linear mixed model (LMM). 
+In a paragraph explain the difference between a general linear model or multiple regression (GLM; not a generalized linear model like a logistic regression or GLM; not a generalized linear model like a logistic regression or Poisson, which will be discussed later) and a linear mixed model (LMM). 
 
 A general linear model only has fixed effects, while a linear mixed model includes both fixed and random effects. The random effects of the linear mixed model allows the model to account for differences between subjects. A simple example would be measuring something like cholesterol levels through time. A general linear model (fixed effects only) may include covariates such as time, BMI, smoking status, sex, race, etc. Every individual will follow the same regression line based on those covariates. In a linear mixed model random effect which account for subject differences, such as someone tending to have higher or lower cholesterol at start (random intercept) can be included to better model change over time. A better fit may be found by including random slopes as well for each subject if cholesterol trajectory is found to be different between subjects. 
 
@@ -188,7 +188,7 @@ cort_data_long <- cort_data_long %>% mutate(casecontrol = factor(casecontrol),
 # Question 4
 
 #### Part A
-Fir a multiple linear regression to investigate how mean cortisol values change over the day (categorical time) and how the average cortisol levels differ by group (no interaction for this model). This will be used to anchor the comparisons later in the assignment. 
+Fit a multiple linear regression to investigate how mean cortisol values change over the day (categorical time) and how the average cortisol levels differ by group (no interaction for this model). This will be used to anchor the comparisons later in the assignment. 
 ```{r, echo = F}
 
 ### START QUESTION 4 CODE ###
@@ -422,7 +422,7 @@ Fit a linear mixed model assuming categorical time and group with an AR(1) struc
 ## START QUESTION 7 PART A CODE ##
 
 lmm_ar1 <- gls(mean_cortisol ~ time + casecontrol, data = cort_data_long,
-                    correlation = corCAR1(form = ~ 1 | SubjectId))
+                    correlation = corAR1(form = ~ 1 | SubjectId))
 
 lmm_ar1_sum <- summary(lmm_ar1)
 
@@ -439,7 +439,9 @@ broom.mixed::tidy(lmm_ar1, conf.int = TRUE) %>%
 Table 8 shows the fixed effects for the linear mixed effects model with AR(1) variance-covariance. 
 ```{r,echo = F}
 
-lmm_compsymm$modelStruct$corStruct
+lmm_ar1$modelStruct$corStruct
+
+getVarCov(lmm_ar1_sum)
 
 ## END QUESTION 7 PART A CODE ##
 

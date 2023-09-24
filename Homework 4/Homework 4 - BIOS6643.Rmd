@@ -54,7 +54,7 @@ cauchy_median <- median(exp_data)
 # Initializing range of location parameters to check. Because Cauchy is 
 # continuous thetas increase at increments of 1/30. Median of experimental 
 # data is 1 so I'll include a range from -10 to 10. 
-theta_range <- seq(-20,20,1/30)
+theta_range <- seq(-100,100,1/30)
 
 # Using an apply statement to enter location parameter range into function.
 ll_cauchy <- data.frame(t(sapply(theta_range, 
@@ -109,7 +109,7 @@ first_d <- D(ll_cauchy_form,"theta")
 second_d <- D(first_d,"theta")
 
 # Making a function to calculate the Newton-Raphson method.
-nr_mle <- function(exp_data,theta_est,loglike,iterations){
+nr_mle <- function(exp_data,theta_est,iterations){
   # Initializing a data frame to track progress
   theta_mat <- data.frame(matrix(NA,nrow = iterations,ncol=2))
   theta = theta_est # Initializing theta
@@ -132,20 +132,56 @@ nr_mle <- function(exp_data,theta_est,loglike,iterations){
 }
 
 
-theta_mle <- nr_mle(exp_data,0,ll_cauchy_form,20)
+theta_mle <- nr_mle(exp_data,0,20)
 theta_mle
 
 ## END QUESTION 1 PART B CODE
-
-### END QUESTION 1 CODE ###
 
 ```
 
 #### Part C
 Try all of the following starting points: -11,-1,0,1.5,4,4.7,7,8,and 38. 
+```{r, echo = F}
+
+## START QUESTION 1 PART C CODE ##
+
+# Calculating the estimates. Number of iterations 
+# can be varied to get convergence.
+start_neg11 <- nr_mle(exp_data,-11,300)
+start_neg1 <- nr_mle(exp_data,-1,20)
+start_0 <- nr_mle(exp_data,0,20)
+start_1.5 <- nr_mle(exp_data,1.5,20)
+start_4 <- nr_mle(exp_data,4,20)
+start_4.7 <- nr_mle(exp_data,4.7,20)
+start_7 <- nr_mle(exp_data,7,20)
+start_8 <- nr_mle(exp_data,8,400)
+start_38 <- nr_mle(exp_data,38,20)
 
 
+# Making a table to hold the results.
+starting_theta <- data.frame(matrix(c(-11,-1,0,1.5,4,4.7,7,8,38),ncol=1))
+estimate <- data.frame(matrix(c(-0.193,-0.193,-0.193,
+                                1.714,2.817,-0.192,41.041,
+                                -0.193,42.795),ncol=1))
 
+nr_mle_estimates <- cbind(starting_theta,estimate)
+colnames(nr_mle_estimates) <- c("Starting Theta","Estimate")
+
+nr_mle_estimates_table <- kbl(nr_mle_estimates,
+                              caption = "Cauchy Location Parameter Estimate",
+                              booktabs=T,align="cc") %>%
+  kable_styling(latex_options="HOLD_position")
+
+nr_mle_estimates_table
+
+## END QUESTION 1 PART C CODE ##
+
+```
+
+#### PART D
+Discuss your results. Is the mean of the data a good starting point?
+
+When using the mean as the starting point the estimate is 54.877. The mean is not a good starting point in this case, as the convergence is relatively far off from the true maximum of around -0.2 given from the maximum likelihood plot. The Newton-Raphson method is extremely sensitive to the starting point. 
 
 # Question 2
 In a paragraph explain the difference between a general linear model or multiple regression (GLM; not a generalized linear model like a logistic regression or GLM; not a generalized linear model like a logistic regression or Poisson, which will be discussed later) and a linear mixed model (LMM). 
@@ -509,12 +545,5 @@ From table 4 (or 5, they are equivalent for the casecontrol variable) the estima
 Write a paragraph comparing and contrasting the parameter estimates for $\beta$ (the mean differences) and the standard errors across the difference variance-covariance structures. 
 
 
-```{r}
-# Extracting covariance matrix from gls
-#lmm <- gls()
-#lmm_summ <- summary(lmm)
-#varcov <- lmm_summ$modelStruct$corStruct
-
-```
 
 

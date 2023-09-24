@@ -14,6 +14,7 @@ library(broom.mixed)
 library(kableExtra)
 library(knitr)
 library(nlme)
+library(corrplot)
 
 ```
 
@@ -302,7 +303,15 @@ broom.mixed::tidy(lmm_unstr_corr, conf.int = TRUE) %>%
 Table 4 shows the fixed effects for the linear mixed effects model with unstructured variance-covariance. 
 ```{r, echo = F}
 
-lmm_unstr_corr_sum$modelStruct$corStruct
+# Extracting the variance-covariance matrix, converting to a 
+# correlation matrix, and plotting. 
+lmm_unstr_corr <- cov2cor(getVarCov(lmm_unstr_corr))
+
+corrplot(lmm_unstr_corr,method="circle",tl.col="black",
+         addCoef.col="black",col=COL2('RdYlBu'),tl.pos="lt",
+         number.digits=4,
+         title="Correlation ofUnstructured Model",
+         mar=c(0,0,2,0))
 
 ## END QUESTION 5 PART A CODE ##
 
@@ -371,7 +380,15 @@ broom.mixed::tidy(lmm_compsymm, conf.int = TRUE) %>%
 Table 6 shows the fixed effects for the linear mixed effects model with compound symmetry variance-covariance structure. 
 ```{r,echo = F}
 
-lmm_compsymm$modelStruct$corStruct
+# Extracting the variance-covariance matrix, converting to a 
+# correlation matrix, and plotting. 
+lmm_compsymm_corr <- cov2cor(getVarCov(lmm_compsymm))
+
+corrplot(lmm_compsymm_corr,method="circle",tl.col="black",
+         addCoef.col="black",col=COL2('RdYlBu'),tl.pos="lt",
+         number.digits=4,
+         title="Correlation of Compound Symmetry Model",
+         mar=c(0,0,2,0))
 
 ## END QUESTION 6 PART A CODE ##
 
@@ -439,9 +456,16 @@ broom.mixed::tidy(lmm_ar1, conf.int = TRUE) %>%
 Table 8 shows the fixed effects for the linear mixed effects model with AR(1) variance-covariance. 
 ```{r,echo = F}
 
-lmm_ar1$modelStruct$corStruct
+# Extracting the variance-covariance matrix, converting to a 
+# correlation matrix, and plotting. 
+lmm_ar1_corr <- cov2cor(getVarCov(lmm_ar1))
 
-getVarCov(lmm_ar1_sum)
+corrplot(lmm_ar1_corr,method="circle",tl.col="black",
+         addCoef.col="black",col=COL2('RdYlBu'),tl.pos="lt",
+         number.digits=4,
+         title="Correlation of AR(1) Model",
+         mar=c(0,0,2,0))
+
 
 ## END QUESTION 7 PART A CODE ##
 

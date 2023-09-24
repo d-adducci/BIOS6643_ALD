@@ -320,13 +320,13 @@ Fit a linear mixed model assuming categorical time and group with an unstructure
 
 ## START QUESTION 5 PART A CODE ##
 
-lmm_unstr_corr <- gls(mean_cortisol ~ time + casecontrol, 
+lmm_unstr <- gls(mean_cortisol ~ time + casecontrol, 
                       data = cort_data_long, 
                       correlation = corSymm(form = ~ 1 | SubjectId))
 
-lmm_unstr_corr_sum <- summary(lmm_unstr_corr)
+lmm_unstr_sum <- summary(lmm_unstr)
 
-broom.mixed::tidy(lmm_unstr_corr, conf.int = TRUE) %>%
+broom.mixed::tidy(lmm_unstr, conf.int = TRUE) %>%
   mutate(p.value = format.pval(p.value)) %>%
   select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
   kbl(digits = 4, booktabs = T, align = "cc",
@@ -341,18 +341,18 @@ Table 4 shows the fixed effects for the linear mixed effects model with unstruct
 
 # Extracting the variance-covariance matrix, converting to a 
 # correlation matrix, and plotting. 
-lmm_unstr_corr <- cov2cor(getVarCov(lmm_unstr_corr))
+lmm_unstr_corr <- cov2cor(getVarCov(lmm_unstr))
 
 corrplot(lmm_unstr_corr,method="circle",tl.col="black",
          addCoef.col="black",col=COL2('RdYlBu'),tl.pos="lt",
          number.digits=4,
-         title="Correlation ofUnstructured Model",
+         title="Correlation of Unstructured Model",
          mar=c(0,0,2,0))
 
 ## END QUESTION 5 PART A CODE ##
 
 ```
-The above output shows the correlation structure for the linear mixed model with unstructured variance-covariance. 
+The above plot shows the correlation structure for the linear mixed model with unstructured variance-covariance. Because the correlation structure is unstructured each time point correlation is different and has no general pattern. This is reflected in the standard errors, where each time point has a unique standard error. 
 
 #### Part B
 Provide a table of mean differences from the 6th time period along with SE's of the differences. Interpret two of the coefficients. You do not need to conduce inference. 
@@ -413,7 +413,8 @@ broom.mixed::tidy(lmm_compsymm, conf.int = TRUE) %>%
   kable_styling(latex_options = "HOLD_position")
 
 ```
-Table 6 shows the fixed effects for the linear mixed effects model with compound symmetry variance-covariance structure. 
+Table 6 shows the fixed effects for the linear mixed effects model with compound symmetry variance-covariance structure.
+\
 ```{r,echo = F}
 
 # Extracting the variance-covariance matrix, converting to a 
@@ -429,7 +430,7 @@ corrplot(lmm_compsymm_corr,method="circle",tl.col="black",
 ## END QUESTION 6 PART A CODE ##
 
 ```
-The above output shows the correlation structure for the linear mixed model with compound symmetry variance-covariance structure. 
+The above plot shows the correlation structure for the linear mixed model with compound symmetry variance-covariance structure. Because the correlation structure is compound symmetric each correlation (besides the variances) is the same value. This is reflected in the standard error, where each time point standard error has the same value of 0.4770.  
 
 #### Part B
 Provide a table of mean differences from the 6th time period along with SE's of the differences. Interpret two of the coefficients. You do not need to conduct inference. 
@@ -506,7 +507,7 @@ corrplot(lmm_ar1_corr,method="circle",tl.col="black",
 ## END QUESTION 7 PART A CODE ##
 
 ```
-The above output shows the correlation structure for the linear mixed model with AR(1) variance-covariance. 
+The above output shows the correlation structure for the linear mixed model with AR(1) variance-covariance. As time points get further from each other the correlation decreases. Each standard error is different, which is reflected by each covariance being different. This is likely not a good structure for this data set, as time 6 and time 1 have very little correlation even though they are actually the same distance from each other as the other consective time points. 
 
 #### Part B
 Provide a table of mean differences from the 6th time period along with SE's of the differences. Interpret two of the coefficients. You do not need to conduct inference. 
@@ -545,5 +546,129 @@ From table 4 (or 5, they are equivalent for the casecontrol variable) the estima
 Write a paragraph comparing and contrasting the parameter estimates for $\beta$ (the mean differences) and the standard errors across the difference variance-covariance structures. 
 
 
+# Question 9
+Refit the models using method = ML and compare and contrast the findings with the different estimation approaches. How were the $\beta$ coefficients impacted (if at all)? How were the SE estimates (and variance-covariance structures) impacted by the different methods (if at all)? Explain.
+
+#### Question 5 Refit
+\
+```{r, echo = F}
+
+### START QUESTION 9 CODE ###
+
+## START QUESTION 9 Q5 REFIT CODE ##
+
+lmm_unstr_ml <- gls(mean_cortisol ~ time + casecontrol, 
+                      data = cort_data_long, method = "ML",
+                      correlation = corSymm(form = ~ 1 | SubjectId))
+
+lmm_unstr_ml_sum <- summary(lmm_unstr_ml)
+
+broom.mixed::tidy(lmm_unstr_ml, conf.int = TRUE) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "LMM Unstructured Var-Cov ML",
+      col.names = c("Term","Estimate","Std.Error","95% Conf.Low",
+                    "95% Conf. High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+Table 11 shows the fixed effects for the linear mixed effects model with unstructured variance-covariance when the maximum likelihood method is used. Compared to the REML method all time point coefficients are the same and the intercept and casecontrol coefficients are slightly different. Standard errors for the time points increased slightly, and standard errors for intercept and casecontrol decreased slightly. 
+```{r, echo = F}
+
+# Extracting the variance-covariance matrix, converting to a 
+# correlation matrix, and plotting. 
+lmm_unstr_ml_corr <- cov2cor(getVarCov(lmm_unstr_ml))
+
+corrplot(lmm_unstr_ml_corr,method="circle",tl.col="black",
+         addCoef.col="black",col=COL2('RdYlBu'),tl.pos="lt",
+         number.digits=4,
+         title="Correlation of Unstructured ML Model",
+         mar=c(0,0,2,0))
+
+## END QUESTION 9 Q5 REFIT CODE ##
+
+```
+The correlations at each time point decreased slightly for the ML method compared to the REML method. 
+
+
+#### QUESTION 6 REFIT
+\
+```{r, echo = F}
+
+## START QUESTION 9 Q6 REFIT CODE ##
+
+lmm_compsymm_ml <- gls(mean_cortisol ~ time + casecontrol, 
+                    data = cort_data_long, method = "ML",
+                    correlation = corCompSymm(form = ~ 1 | SubjectId))
+
+lmm_compsymm_ml_sum <- summary(lmm_compsymm_ml)
+
+broom.mixed::tidy(lmm_compsymm_ml, conf.int = TRUE) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "LMM Compound Symmetry Var-Cov ML",
+      col.names = c("Term","Estimate","Std.Error","95% Conf.Low",
+                    "95% Conf. High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+Table 12 shows the fixed effects for the linear mixed effects model with compound symmetry variance-covariance structure. The estimates are the same between the REML and ML methods. The standard errors slightly increased for the time point coefficients and decreased slightly or the intercept and casecontrol estimates. 
+```{r,echo = F}
+
+# Extracting the variance-covariance matrix, converting to a 
+# correlation matrix, and plotting. 
+lmm_compsymm_ml_corr <- cov2cor(getVarCov(lmm_compsymm_ml))
+
+corrplot(lmm_compsymm_ml_corr,method="circle",tl.col="black",
+         addCoef.col="black",col=COL2('RdYlBu'),tl.pos="lt",
+         number.digits=4,
+         title="Correlation of Compound Symmetry ML Model",
+         mar=c(0,0,2,0))
+
+## END QUESTION 9 Q6 REFIT CODE ##
+
+```
+The plot above shows the correlation
+
+#### QUESTION 7 Refit
+\
+```{r, echo = F}
+
+## START QUESTION 9 Q7 REFIT CODE ##
+
+lmm_ar1 <- gls(mean_cortisol ~ time + casecontrol, data = cort_data_long,
+                    correlation = corAR1(form = ~ 1 | SubjectId))
+
+lmm_ar1_sum <- summary(lmm_ar1)
+
+broom.mixed::tidy(lmm_ar1, conf.int = TRUE) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "LMM AR(1) Var-Cov",
+      col.names = c("Term","Estimate","Std.Error","95% Conf.Low",
+                    "95% Conf. High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+Table 13 shows the fixed effects for the linear mixed effects model with AR(1) variance-covariance. 
+```{r,echo = F}
+
+# Extracting the variance-covariance matrix, converting to a 
+# correlation matrix, and plotting. 
+lmm_ar1_corr <- cov2cor(getVarCov(lmm_ar1))
+
+corrplot(lmm_ar1_corr,method="circle",tl.col="black",
+         addCoef.col="black",col=COL2('RdYlBu'),tl.pos="lt",
+         number.digits=4,
+         title="Correlation of AR(1) Model",
+         mar=c(0,0,2,0))
+
+
+## END QUESTION 9 Q7 REFIT CODE ##
+
+```
 
 

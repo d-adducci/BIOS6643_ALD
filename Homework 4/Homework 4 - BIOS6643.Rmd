@@ -29,7 +29,7 @@ $$\frac{1}{\pi^n}\frac{1}{\prod[1+(x_i-\theta)^2]}$$
 and the loglikelihood is:
 $$-nlog(\pi)-\sum_i^nlog(1+(x_i - \theta)^2)$$
 
-```{r, echo = F}
+```{r, echo = F, fig.width = 4, fig.height = 4, fig.align='center'}
 
 ### START QUESTION 1 CODE ###
 
@@ -54,7 +54,7 @@ cauchy_median <- median(exp_data)
 # Initializing range of location parameters to check. Because Cauchy is 
 # continuous thetas increase at increments of 1/30. Median of experimental 
 # data is 1 so I'll include a range from -10 to 10. 
-theta_range <- seq(-100,100,1/30)
+theta_range <- seq(-50,50,1/30)
 
 # Using an apply statement to enter location parameter range into function.
 ll_cauchy <- data.frame(t(sapply(theta_range, 
@@ -131,10 +131,6 @@ nr_mle <- function(exp_data,theta_est,iterations){
   return(theta_mat)
 }
 
-
-theta_mle <- nr_mle(exp_data,0,20)
-theta_mle
-
 ## END QUESTION 1 PART B CODE
 
 ```
@@ -161,7 +157,7 @@ start_38 <- nr_mle(exp_data,38,20)
 # Making a table to hold the results.
 starting_theta <- data.frame(matrix(c(-11,-1,0,1.5,4,4.7,7,8,38),ncol=1))
 estimate <- data.frame(matrix(c(-0.193,-0.193,-0.193,
-                                1.714,2.817,-0.192,41.041,
+                                1.714,2.817,-0.193,41.041,
                                 -0.193,42.795),ncol=1))
 
 nr_mle_estimates <- cbind(starting_theta,estimate)
@@ -183,6 +179,8 @@ Discuss your results. Is the mean of the data a good starting point?
 
 When using the mean as the starting point the estimate is 54.877. The mean is not a good starting point in this case, as the convergence is relatively far off from the true maximum of around -0.2 given from the maximum likelihood plot. The Newton-Raphson method is extremely sensitive to the starting point. 
 
+\newpage
+
 # Question 2
 In a paragraph explain the difference between a general linear model or multiple regression (GLM; not a generalized linear model like a logistic regression or GLM; not a generalized linear model like a logistic regression or Poisson, which will be discussed later) and a linear mixed model (LMM). 
 
@@ -197,6 +195,7 @@ Profile likelihood - maximize likelihood by fixing every other parameter and onl
 
 Restricted maximum likelihood - REML has property that your standard error are unbiased regardless of sample size, so generally is in situations where were trying to get unbiased estimates of errors when sample sizes are small. Loglikelihood are not valid for reduced in full REML models. Can only compare REML models that have the same set of fixed effects. 
 
+\newpage
 
 # Part 2ish 
 
@@ -337,7 +336,7 @@ broom.mixed::tidy(lmm_unstr, conf.int = TRUE) %>%
 
 ```
 Table 4 shows the fixed effects for the linear mixed effects model with unstructured variance-covariance. 
-```{r, echo = F}
+```{r, echo = F, fig.width = 4, fig.height = 4, fig.align = "center"}
 
 # Extracting the variance-covariance matrix, converting to a 
 # correlation matrix, and plotting. 
@@ -415,7 +414,7 @@ broom.mixed::tidy(lmm_compsymm, conf.int = TRUE) %>%
 ```
 Table 6 shows the fixed effects for the linear mixed effects model with compound symmetry variance-covariance structure.
 \
-```{r,echo = F}
+```{r,echo = F, fig.width = 4, fig.height = 4, fig.align = "center"}
 
 # Extracting the variance-covariance matrix, converting to a 
 # correlation matrix, and plotting. 
@@ -491,7 +490,7 @@ broom.mixed::tidy(lmm_ar1, conf.int = TRUE) %>%
 
 ```
 Table 8 shows the fixed effects for the linear mixed effects model with AR(1) variance-covariance. 
-```{r,echo = F}
+```{r,echo = F, fig.width = 4, fig.height = 4, fig.align = "center"}
 
 # Extracting the variance-covariance matrix, converting to a 
 # correlation matrix, and plotting. 
@@ -545,6 +544,10 @@ From table 4 (or 5, they are equivalent for the casecontrol variable) the estima
 # Question 8 
 Write a paragraph comparing and contrasting the parameter estimates for $\beta$ (the mean differences) and the standard errors across the difference variance-covariance structures. 
 
+Between the different variance-covariance structures the time points all have the same estimates. Between the MLR model and the unstructured LMM the standard errors for the time coefficients decrease. Between the MLR model and the compound symmetry LMM the standard errors for the time coefficients decrease (and are all the same). Between the unstructured and compound symmetry LMMs the standard errors are smaller in the compound symmetry model. Between the MLR model and the AR(1) model the standard errors are all smaller in the AR(1) model. Between the unstructured LMM and the AR(1) LMM some time points have higher standard errors and some have lower between the models. Between the compound symmetry model and the AR(1) model the compound symmetry model has smaller standard errors for all time points. 
+
+The intercept and casecontrol coefficients change between variance-covariance structure. Between the MLR and the unstructured LMM the intercept is higher in the MLR model and the casecontrol coefficient is higher in the unstructured model. Standard error for both of these is smaller in the MLR model. Between the MLR and the compound symmetry LMM the estimates are identical, and the compound symmetry has higher standard error. Between the MLR and AR(1) models the intercept is higher in the AR(1) model and the casecontrol coefficient is higher in the MLR model. Standard error is higher in the AR(1) model. Between the compound symmetry LMM and the unstructured LMM the intercept is higher in the unstructured model and the casecontrol coefficient is higher in the compound symmetry model. Between the unstructured model and the AR(1) model the intercept is higher in the AR(1) model and the casecontrol coefficient is higher in the unstructured model. The standard error is higher for both coefficients in the unstructured model. Between the compound symmetry LMM and the AR(1) LMM the intercept is higher in the AR(1) model and for the case control coefficient it is higher in the compound symmetry model. The standard errors are higher in the compound symmetry models. 
+
 
 # Question 9
 Refit the models using method = ML and compare and contrast the findings with the different estimation approaches. How were the $\beta$ coefficients impacted (if at all)? How were the SE estimates (and variance-covariance structures) impacted by the different methods (if at all)? Explain.
@@ -574,7 +577,7 @@ broom.mixed::tidy(lmm_unstr_ml, conf.int = TRUE) %>%
 
 ```
 Table 11 shows the fixed effects for the linear mixed effects model with unstructured variance-covariance when the maximum likelihood method is used. Compared to the REML method all time point coefficients are the same and the intercept and casecontrol coefficients are slightly different. Standard errors for the time points increased slightly, and standard errors for intercept and casecontrol decreased slightly. 
-```{r, echo = F}
+```{r, echo = F, fig.width = 4, fig.height = 4, fig.align = "center"}
 
 # Extracting the variance-covariance matrix, converting to a 
 # correlation matrix, and plotting. 
@@ -615,7 +618,7 @@ broom.mixed::tidy(lmm_compsymm_ml, conf.int = TRUE) %>%
 
 ```
 Table 12 shows the fixed effects for the linear mixed effects model with compound symmetry variance-covariance structure. The estimates are the same between the REML and ML methods. The standard errors slightly increased for the time point coefficients and decreased slightly or the intercept and casecontrol estimates. 
-```{r,echo = F}
+```{r,echo = F, fig.width = 4, fig.height = 4, fig.align = "center"}
 
 # Extracting the variance-covariance matrix, converting to a 
 # correlation matrix, and plotting. 
@@ -630,7 +633,7 @@ corrplot(lmm_compsymm_ml_corr,method="circle",tl.col="black",
 ## END QUESTION 9 Q6 REFIT CODE ##
 
 ```
-The plot above shows the correlation
+The correlation is smaller in the ML method compared to the REML method. 
 
 #### QUESTION 7 Refit
 \
@@ -638,7 +641,8 @@ The plot above shows the correlation
 
 ## START QUESTION 9 Q7 REFIT CODE ##
 
-lmm_ar1 <- gls(mean_cortisol ~ time + casecontrol, data = cort_data_long,
+lmm_ar1 <- gls(mean_cortisol ~ time + casecontrol, 
+               data = cort_data_long, method = "ML",
                     correlation = corAR1(form = ~ 1 | SubjectId))
 
 lmm_ar1_sum <- summary(lmm_ar1)
@@ -653,8 +657,8 @@ broom.mixed::tidy(lmm_ar1, conf.int = TRUE) %>%
   kable_styling(latex_options = "HOLD_position")
 
 ```
-Table 13 shows the fixed effects for the linear mixed effects model with AR(1) variance-covariance. 
-```{r,echo = F}
+Table 13 shows the fixed effects for the linear mixed effects model with AR(1) variance-covariance. The time estimates are the same between both methods. The intercept is higher in the REML method and the casecontrol coefficient is higher in the ML method. The direction of change for the standard errors vary between methods.  
+```{r,echo = F, fig.width = 4, fig.height = 4, fig.align = "center"}
 
 # Extracting the variance-covariance matrix, converting to a 
 # correlation matrix, and plotting. 
@@ -670,5 +674,5 @@ corrplot(lmm_ar1_corr,method="circle",tl.col="black",
 ## END QUESTION 9 Q7 REFIT CODE ##
 
 ```
-
+Between the REML and ML methods the direction of change for the correlations vary between time points. 
 

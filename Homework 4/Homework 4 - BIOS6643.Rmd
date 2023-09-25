@@ -15,11 +15,14 @@ library(kableExtra)
 library(knitr)
 library(nlme)
 library(corrplot)
+library(knitr)
+
+opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
 
 ```
 
 # Question 1
-Complex MLE estimation in LMM requires computational optimization approaches, the goal here is to implement a basic Newton-Raphson algorithm in R. The following data are an i.i.d sample from a Cauchy($\theta$,1) distribution: 1.77, -0.23, 2.76, 3.80, 3.47, 56.75, -1.34, 4.24, -2.44, 3.29, 3.71, -2.40, 4.53, -0.07, -1.05, -13.87, -2.53, -1.75, 0.27, 43.21. 
+Complex MLE estimation in LMMs requires computational optimization approaches, the goal here is to implement a basic Newton-Raphson algorithm in R. The following data are an i.i.d sample from a Cauchy($\theta$,1) distribution: 1.77, -0.23, 2.76, 3.80, 3.47, 56.75, -1.34, 4.24, -2.44, 3.29, 3.71, -2.40, 4.53, -0.07, -1.05, -13.87, -2.53, -1.75, 0.27, 43.21. 
 
 #### Part A: 
 Graph the log likelihood function. 
@@ -79,10 +82,10 @@ ll_cauchy_plot <- ggplot(ll_cauchy, aes(x = Theta,
 
 ll_cauchy_plot
 
-## END QUESTION 1 PART A CODE ##
+## Finish QUESTION 1 PART A CODE ##
 
 ```
-From the plot of log-likelihood the maximum log-likelihood values is -72.92, and the optimal theta is -0.2. 
+From the plot of log-likelihood the maximum log-likelihood value is -72.92, and the optimal theta is -0.2. 
 
 # Part B
 Find (and write an R program) to find the MLE for $\theta$ using the Newton-Raphson method. 
@@ -91,7 +94,7 @@ The equation for the Newton-Raphson method in general form is as follows:
 $$x_i = x_{i-1} - \frac{f(x_{i-1})}{f'(x_{i-1})}$$
 Translating this to finding the MLE of $\theta$:
 $$\hat{\theta}_{i}=\hat{\theta}_{i-1}-\frac{logL'(\hat{\theta}_{i-1})}{logL''(\hat{\theta}_{i-1})}=\hat{\theta}_{i-1}-\frac{S(\hat{\theta}_{i-1})}{I(\hat{\theta}_{i-1})}$$
-What finding an MLE the score $S(\theta)$, the derivative of the log-likelihood, should equal 0, $S(\theta)=0$. $I(\theta)$ is the Fisher observed information from the data.
+When finding an MLE the score $S(\theta)$, the derivative of the log-likelihood, should equal 0, $S(\theta)=0$. $I(\theta)$ is the Fisher observed information from the data.
 
 Check the code appendix for the function. 
 
@@ -131,7 +134,7 @@ nr_mle <- function(exp_data,theta_est,iterations){
   return(theta_mat)
 }
 
-## END QUESTION 1 PART B CODE
+## Finish QUESTION 1 PART B CODE
 
 ```
 
@@ -170,30 +173,26 @@ nr_mle_estimates_table <- kbl(nr_mle_estimates,
 
 nr_mle_estimates_table
 
-## END QUESTION 1 PART C CODE ##
+## Finish QUESTION 1 PART C CODE ##
 
 ```
 
 #### PART D
 Discuss your results. Is the mean of the data a good starting point?
 
-When using the mean as the starting point the estimate is 54.877. The mean is not a good starting point in this case, as the convergence is relatively far off from the true maximum of around -0.2 given from the maximum likelihood plot. The Newton-Raphson method is extremely sensitive to the starting point. 
+When using the mean as the starting point the estimate is 54.877. The mean is not a good starting point in this case, as the convergence is relatively far off from the true maximum of around -0.2 given from the maximum likelihood plot. The Newton-Raphson method is extremely sensitive to the starting point, and the mean is too far from the actual to give an accurate estimate. 
 
 \newpage
 
 # Question 2
-In a paragraph explain the difference between a general linear model or multiple regression (GLM; not a generalized linear model like a logistic regression or GLM; not a generalized linear model like a logistic regression or Poisson, which will be discussed later) and a linear mixed model (LMM). 
+In a paragraph explain the difference between a general linear model or multiple regression (GLM; not a generalized linear model like a logistic regression or Poisson; which will be discussed later) and a linear mixed model (LMM). 
 
-A general linear model only has fixed effects, while a linear mixed model includes both fixed and random effects. The random effects of the linear mixed model allows the model to account for differences between subjects. A simple example would be measuring something like cholesterol levels through time. A general linear model (fixed effects only) may include covariates such as time, BMI, smoking status, sex, race, etc. Every individual will follow the same regression line based on those covariates. In a linear mixed model random effect which account for subject differences, such as someone tending to have higher or lower cholesterol at start (random intercept) can be included to better model change over time. A better fit may be found by including random slopes as well for each subject if cholesterol trajectory is found to be different between subjects. 
+A general linear model only has fixed effects, while a linear mixed model includes both fixed and random effects. The random effects of the linear mixed model allows the model to account for differences between subjects. A simple example would be measuring something like cholesterol levels through time. A general linear model (fixed effects only) may include covariates such as time, BMI, smoking status, sex, race, etc. Every individual will follow the same regression line as any other with the same variables. In a linear mixed model random effect which account for subject differences, such as someone tending to have higher or lower cholesterol at start (random intercept), can be included to better model change over time. A better fit may be found by including random slopes as well for each subject if cholesterol trajectory is found to be different between subjects. 
 
 # Question 3
 In a short paragraph, explain the difference between a profiled likelihood and a restricted likelihood for a linear mixed model, and how and why they are used. 
 
-In a profile likelihood you maximize the likelihood by fixing every other parameter and only allowing one to vary. Doing this maximizes the single parameter you allowed to vary. You can then repeat this process for every other parameter incrementally, plugging in the estimates for parameters which have already been maximized. The downside to this method is that variance estimates are biased downward. The restricted likelihood (REML) allows for estimating parameters which are not biased regardless of sample size. The downside for the REML method compared to profile likelihood is that you can only compare REML model using a likelihood ratio of both models have the same set of fixed effects. 
-
-Profile likelihood - maximize likelihood by fixing every other parameter and only allow one to vary and maximize that using a grid search. After getting that maximum repeat each process for each parameter in the set of likelihood parameter.
-
-Restricted maximum likelihood - REML has property that your standard error are unbiased regardless of sample size, so generally is in situations where were trying to get unbiased estimates of errors when sample sizes are small. Loglikelihood are not valid for reduced in full REML models. Can only compare REML models that have the same set of fixed effects. 
+In a profile likelihood you maximize the likelihood by fixing every other parameter and only allowing one to vary. Doing this maximizes the single parameter you allowed to vary. You can then repeat this process for every other parameter incrementally, plugging in the estimates for parameters which have already been maximized. The downside to this method is that variance estimates are biased downward. The restricted likelihood (REML) allows for estimating parameters which are not biased regardless of sample size. The downside for the REML method compared to profile likelihood is that you can only compare REML model using a likelihood ratio if both models have the same set of fixed effects. 
 
 \newpage
 
@@ -214,7 +213,7 @@ cort_data_long <- cort_data %>% pivot_longer(cols = "Time1":"Time6",
 cort_data_long <- cort_data_long %>% mutate(casecontrol = factor(casecontrol),
                                             time = factor(time))
 
-### END PART 2 DATA FORMATTING ### 
+### Finish PART 2 DATA FORMATTING ### 
 
 ```
 
@@ -244,11 +243,11 @@ broom::tidy(mlr_cort, conf.int = TRUE) %>%
                     "95% Conf.Low","95% Conf.High","P-Value")) %>%
   kable_styling(latex_options = "HOLD_position")
 
-## END QUESTION 4 PART A CODE ##
+## Finish QUESTION 4 PART A CODE ##
   
 
 ```
-Table 1 shows the output of the multiple linear regression where mean cortisol is the outcome and time and casecontrol are covariates. Time is factored into 6 different levels, where time 1 is the reference. 
+Table 2 shows the output of the multiple linear regression where mean cortisol is the outcome and time and casecontrol are covariates. Time is factored into 6 different levels, where time 1 is the reference. 
 
 #### Part B
 Provide a table of mean differences from the 6th time period along with SE's of the differences. Interpret two of the coefficients. You do not need to conduct inference.
@@ -273,10 +272,10 @@ broom::tidy(mlr_cort_relev, conf.int = TRUE) %>%
                     "95% Conf.High","P-Value")) %>%
   kable_styling(latex_options = "HOLD_position")
 
-## END QUESTION 4 PART B CODE ##
+## Finish QUESTION 4 PART B CODE ##
 
 ```
-Table 2 shows the output of the multiple linear regression where time 6 is the reference group. For term timeTime1 this is the mean difference between cortisol at time 1 and cortisol at time 6. Interpreting this it means cortisol is 1.7518 units higher at time 6 compared to time 1. For the term casecontrolp this is the mean difference between the control (reference) group and women with depression. Interpreting this it means cortisol is 0.9211 units higher for women with depression compared to women without depression (control). 
+Table 3 shows the output of the multiple linear regression where time 6 is the reference group. For term timeTime1 this is the mean difference between cortisol at time 1 and cortisol at time 6 when controlling for casecontrol group. Interpreting this it means cortisol is 1.7518 units higher at time 6 compared to time 1. For the term casecontrolp this is the mean difference between the control (reference) group and women with depression when controlling for time point. Interpreting this it means cortisol is 0.9211 units higher for women with depression compared to women without depression (control). 
 
 #### Part C
 Will these standard error be too big or small and why? 
@@ -301,12 +300,12 @@ q4_var_tbl <- kbl(data.frame(t(q4_var)),
 
 q4_var_tbl
 
-## END QUESTION 4 PART C CODE ##
+## Finish QUESTION 4 PART C CODE ##
 
-### END QUESTION 4 CODE ###
+### Finish QUESTION 4 CODE ###
 
 ```
-Table 3 shows the variances for each estimate. Given that each estimate is relatively low compared to the variances the standard errors (which were used to calculate variance) may be too large to make a meaningful interpretation, as subjects may have significantly different mean cortisol measurements between each other. 
+Table 4 shows the variances for each estimate. Given that each estimate is relatively low compared to the variances the standard errors (which were used to calculate variance) may be too large to make a meaningful interpretation, as subjects may have significantly different mean cortisol measurements between each other. 
 
 # Question 5
 
@@ -335,7 +334,7 @@ broom.mixed::tidy(lmm_unstr, conf.int = TRUE) %>%
   kable_styling(latex_options = "HOLD_position")
 
 ```
-Table 4 shows the fixed effects for the linear mixed effects model with unstructured variance-covariance. 
+Table 5 shows the fixed effects for the linear mixed effects model with unstructured variance-covariance. 
 ```{r, echo = F, fig.width = 4, fig.height = 4, fig.align = "center"}
 
 # Extracting the variance-covariance matrix, converting to a 
@@ -348,7 +347,7 @@ corrplot(lmm_unstr_corr,method="circle",tl.col="black",
          title="Correlation of Unstructured Model",
          mar=c(0,0,2,0))
 
-## END QUESTION 5 PART A CODE ##
+## Finish QUESTION 5 PART A CODE ##
 
 ```
 The above plot shows the correlation structure for the linear mixed model with unstructured variance-covariance. Because the correlation structure is unstructured each time point correlation is different and has no general pattern. This is reflected in the standard errors, where each time point has a unique standard error. 
@@ -371,14 +370,14 @@ broom.mixed::tidy(lmm_unstr_corr_relev, conf.int = TRUE) %>%
                     "95% Conf. High","P-Value")) %>%
   kable_styling(latex_options = "HOLD_position")
 
-## END QUESTION 5 PART B CODE ##
+## Finish QUESTION 5 PART B CODE ##
 
-### END QUESTION 5 CODE ###
+### Finish QUESTION 5 CODE ###
 
 ```
-Table 5 shows the output of the linear mixed model with unstructured variance-covariance where time 6 is the reference group. 
+Table 6 shows the output of the linear mixed model with unstructured variance-covariance where time 6 is the reference group. 
 
-* For term timeTime1 this is the mean difference between cortisol at time 1 and cortisol at time 6. Interpreting this it means cortisol is 1.7518 units higher at time 6 compared to time 1. This estimate is identical to that of the MLR model from question 4, but the standard error is smaller at 0.3213 compared to the MLR model's standard error of 0.6662. In other words the estimate of the LMM with unstructured variance-covariance is more precise. 
+* For term timeTime1 this is the mean difference between cortisol at time 1 and cortisol at time 6 when controlling for casecontrol group. Interpreting this it means cortisol is 1.7518 units higher at time 6 compared to time 1. This estimate is identical to that of the MLR model from question 4, but the standard error is smaller at 0.3213 compared to the MLR model's standard error of 0.6662. In other words the estimate of the LMM with unstructured variance-covariance is more precise. 
 
 * For term timeTime2 this is the mean difference between cortisol at time 2 and cortisol at time 6. Interpreting this is means cortisol is 2.2179 units higher at time 2 compared to time 6. This estimate is identical to that of the MLR model from question 4, but the standard error is smaller at 0.5658 compared to the MLR model's standard error of 0.6662. In other words the estimate of the LMM with unstructured variance-covariance is more precise. 
 
@@ -412,7 +411,7 @@ broom.mixed::tidy(lmm_compsymm, conf.int = TRUE) %>%
   kable_styling(latex_options = "HOLD_position")
 
 ```
-Table 6 shows the fixed effects for the linear mixed effects model with compound symmetry variance-covariance structure.
+Table 7 shows the fixed effects for the linear mixed effects model with compound symmetry variance-covariance structure.
 \
 ```{r,echo = F, fig.width = 4, fig.height = 4, fig.align = "center"}
 
@@ -426,7 +425,7 @@ corrplot(lmm_compsymm_corr,method="circle",tl.col="black",
          title="Correlation of Compound Symmetry Model",
          mar=c(0,0,2,0))
 
-## END QUESTION 6 PART A CODE ##
+## Finish QUESTION 6 PART A CODE ##
 
 ```
 The above plot shows the correlation structure for the linear mixed model with compound symmetry variance-covariance structure. Because the correlation structure is compound symmetric each correlation (besides the variances) is the same value. This is reflected in the standard error, where each time point standard error has the same value of 0.4770.  
@@ -449,15 +448,15 @@ broom.mixed::tidy(lmm_compsymm_relev, conf.int = TRUE) %>%
                     "95% Conf. High","P-Value")) %>%
   kable_styling(latex_options = "HOLD_position")
 
-## END QUESTION 6 PART B CODE ##
+## Finish QUESTION 6 PART B CODE ##
 
-### END QUESTION 6 CODE ###
+### Finish QUESTION 6 CODE ###
 
 ```
-Table 7 shows the output of the linear mixed model with compound symmetry variance-covariance where time 6 is the reference group. Because the variance-covariance structure is compound symmetric each SE for time points are the same. 
+Table 8 shows the output of the linear mixed model with compound symmetry variance-covariance where time 6 is the reference group. Because the variance-covariance structure is compound symmetric each SE for time points are the same. 
 
-* For term timeTime1 this is the mean difference between cortisol at time 1 and cortisol at time 6. Interpreting this it means cortisol is 1.7518 units higher at time 6 compared to time 1. This estimate is identical to that of the MLR model from question 4, but the standard error is smaller at 0.4770 compared to the MLR model's standard error of 0.6662. In other words the estimate of the LMM with compound symmetry variance-covariance is more precise. 
-* For term timeTime2 this is the mean difference between cortisol at time 2 and cortisol at time 6. Interpreting this it means cortisol is 2.2179 units higher at time 2 compared to time 6. This estimate is identical to that of the MLR model from question 4, but the standard error is smaller at 0.4770 compared to the MLR model's standard error of 0.6662. In other words the estimate of the LMM with compound symmetry variance-covariance is more precise. 
+* For term timeTime1 this is the mean difference between cortisol at time 1 and cortisol at time 6 when controlling for casecontrol group. Interpreting this it means cortisol is 1.7518 units higher at time 6 compared to time 1. This estimate is identical to that of the MLR model from question 4, but the standard error is smaller at 0.4770 compared to the MLR model's standard error of 0.6662. In other words the estimate of the LMM with compound symmetry variance-covariance is more precise. 
+* For term timeTime2 this is the mean difference between cortisol at time 2 and cortisol at time 6 when controlling for casecontrol group. Interpreting this it means cortisol is 2.2179 units higher at time 2 compared to time 6. This estimate is identical to that of the MLR model from question 4, but the standard error is smaller at 0.4770 compared to the MLR model's standard error of 0.6662. In other words the estimate of the LMM with compound symmetry variance-covariance is more precise. 
 
 #### Part C
 What is the estimated difference in mean cortisol levels (and SE) between the depressed and non-depressed groups. Interpret the finding in a sentence. You do not need to conduct inference. 
@@ -489,7 +488,7 @@ broom.mixed::tidy(lmm_ar1, conf.int = TRUE) %>%
   kable_styling(latex_options = "HOLD_position")
 
 ```
-Table 8 shows the fixed effects for the linear mixed effects model with AR(1) variance-covariance. 
+Table 9 shows the fixed effects for the linear mixed effects model with AR(1) variance-covariance. 
 ```{r,echo = F, fig.width = 4, fig.height = 4, fig.align = "center"}
 
 # Extracting the variance-covariance matrix, converting to a 
@@ -503,7 +502,7 @@ corrplot(lmm_ar1_corr,method="circle",tl.col="black",
          mar=c(0,0,2,0))
 
 
-## END QUESTION 7 PART A CODE ##
+## Finish QUESTION 7 PART A CODE ##
 
 ```
 The above output shows the correlation structure for the linear mixed model with AR(1) variance-covariance. As time points get further from each other the correlation decreases. Each standard error is different, which is reflected by each covariance being different. This is likely not a good structure for this data set, as time 6 and time 1 have very little correlation even though they are actually the same distance from each other as the other consective time points. 
@@ -526,28 +525,31 @@ broom.mixed::tidy(lmm_ar1_relev, conf.int = TRUE) %>%
                     "95% Conf. High","P-Value")) %>%
   kable_styling(latex_options = "HOLD_position")
 
-## END QUESTION 7 PART B CODE ##
+## Finish QUESTION 7 PART B CODE ##
 
-### END QUESTION 7 CODE ###
+### Finish QUESTION 7 CODE ###
 
 ```
-Table 9 shows the output of the linear mixed model with AR(1) variance-covariance where time 6 is the reference group.
+Table 10 shows the output of the linear mixed model with AR(1) variance-covariance where time 6 is the reference group.
 
-* For term timeTime1 this is the mean difference between cortisol at time 1 and cortisol at time 6. Interpreting this is means cortisol is 1.7518 units higher at time 6 compared to time 1. This estimate is identical to that of the MLR model from question 4, but the standard error is slightly smaller at 0.6542 compared to the MLR model's standard error of 0.6662. In other words the estimate of the LMM with AR(1) variance-covariance is more precise. 
-* For term timeTime2 this is the mean difference between cortisol at time 2 and cortisol at time 6. Interpreting this it means cortisol is 2.2179 units higher at time 2 compared to time 6. This estimate is identical to that of the MLR model from question 4, but the standard error is slightly smaller at 0.6395 compared to the MLR model's standard error of 0.6662. In other words the estimate of LMM with AR(1) variance-covariance is slightly more precise. 
+* For term timeTime1 this is the mean difference between cortisol at time 1 and cortisol at time 6 when controlling for casecontrol group. Interpreting this is means cortisol is 1.7518 units higher at time 6 compared to time 1. This estimate is identical to that of the MLR model from question 4, but the standard error is slightly smaller at 0.6542 compared to the MLR model's standard error of 0.6662. In other words the estimate of the LMM with AR(1) variance-covariance is more precise. 
+* For term timeTime2 this is the mean difference between cortisol at time 2 and cortisol at time 6 when controlling for casecontrol group. Interpreting this it means cortisol is 2.2179 units higher at time 2 compared to time 6. This estimate is identical to that of the MLR model from question 4, but the standard error is slightly smaller at 0.6395 compared to the MLR model's standard error of 0.6662. In other words the estimate of LMM with AR(1) variance-covariance is slightly more precise. 
 
 #### Part C
 What is the estimated difference in mean cortisol levels (and SE) between the depressed and non-depressed groups. Interpret the finding in a sentence. You do not need to conduct inference. 
 
-From table 4 (or 5, they are equivalent for the casecontrol variable) the estimate difference between the control group and the depressed group is 0.7446. This means that cortisol is 0.7446 units higher in the depressed group. This estimate is smaller compared to the MLR model, but has a higher standard error of 0.6096 compared to the MLR model's standard error of 0.3846.
+From table 9 (or 10, they are equivalent for the casecontrol variable) the estimate difference between the control group and the depressed group is 0.7446. This means that cortisol is 0.7446 units higher in the depressed group. This estimate is smaller compared to the MLR model, but has a higher standard error of 0.6096 compared to the MLR model's standard error of 0.3846.
 
 # Question 8 
 Write a paragraph comparing and contrasting the parameter estimates for $\beta$ (the mean differences) and the standard errors across the difference variance-covariance structures. 
 
 Between the different variance-covariance structures the time points all have the same estimates. Between the MLR model and the unstructured LMM the standard errors for the time coefficients decrease. Between the MLR model and the compound symmetry LMM the standard errors for the time coefficients decrease (and are all the same). Between the unstructured and compound symmetry LMMs the standard errors are smaller in the compound symmetry model. Between the MLR model and the AR(1) model the standard errors are all smaller in the AR(1) model. Between the unstructured LMM and the AR(1) LMM some time points have higher standard errors and some have lower between the models. Between the compound symmetry model and the AR(1) model the compound symmetry model has smaller standard errors for all time points. 
 
-The intercept and casecontrol coefficients change between variance-covariance structure. Between the MLR and the unstructured LMM the intercept is higher in the MLR model and the casecontrol coefficient is higher in the unstructured model. Standard error for both of these is smaller in the MLR model. Between the MLR and the compound symmetry LMM the estimates are identical, and the compound symmetry has higher standard error. Between the MLR and AR(1) models the intercept is higher in the AR(1) model and the casecontrol coefficient is higher in the MLR model. Standard error is higher in the AR(1) model. Between the compound symmetry LMM and the unstructured LMM the intercept is higher in the unstructured model and the casecontrol coefficient is higher in the compound symmetry model. Between the unstructured model and the AR(1) model the intercept is higher in the AR(1) model and the casecontrol coefficient is higher in the unstructured model. The standard error is higher for both coefficients in the unstructured model. Between the compound symmetry LMM and the AR(1) LMM the intercept is higher in the AR(1) model and for the case control coefficient it is higher in the compound symmetry model. The standard errors are higher in the compound symmetry models. 
+The intercept and casecontrol coefficients change between variance-covariance structures. Between the MLR and the unstructured LMM the intercept is higher in the MLR model and the casecontrol coefficient is higher in the unstructured model. Standard error for both of these is smaller in the MLR model. Between the MLR and the compound symmetry LMM the estimates are identical, and the compound symmetry has higher standard error. Between the MLR and AR(1) models the intercept is higher in the AR(1) model and the casecontrol coefficient is higher in the MLR model. Standard error is higher in the AR(1) model. Between the compound symmetry LMM and the unstructured LMM the intercept is higher in the unstructured model and the casecontrol coefficient is higher in the compound symmetry model. Between the unstructured model and the AR(1) model the intercept is higher in the AR(1) model and the casecontrol coefficient is higher in the unstructured model. The standard error is higher for both coefficients in the unstructured model. Between the compound symmetry LMM and the AR(1) LMM the intercept is higher in the AR(1) model and for the case control coefficient it is higher in the compound symmetry model. The standard errors are higher in the compound symmetry model. 
 
+For the correlation patterns the unstructured has no clear pattern, the compound symmetry is all the same, and the AR(1) structure has less correlation the further time points are away from each other. 
+
+\newpage
 
 # Question 9
 Refit the models using method = ML and compare and contrast the findings with the different estimation approaches. How were the $\beta$ coefficients impacted (if at all)? How were the SE estimates (and variance-covariance structures) impacted by the different methods (if at all)? Explain.
@@ -589,11 +591,12 @@ corrplot(lmm_unstr_ml_corr,method="circle",tl.col="black",
          title="Correlation of Unstructured ML Model",
          mar=c(0,0,2,0))
 
-## END QUESTION 9 Q5 REFIT CODE ##
+## Finish QUESTION 9 Q5 REFIT CODE ##
 
 ```
 The correlations at each time point decreased slightly for the ML method compared to the REML method. 
 
+\newpage
 
 #### QUESTION 6 REFIT
 \
@@ -617,7 +620,7 @@ broom.mixed::tidy(lmm_compsymm_ml, conf.int = TRUE) %>%
   kable_styling(latex_options = "HOLD_position")
 
 ```
-Table 12 shows the fixed effects for the linear mixed effects model with compound symmetry variance-covariance structure. The estimates are the same between the REML and ML methods. The standard errors slightly increased for the time point coefficients and decreased slightly or the intercept and casecontrol estimates. 
+Table 12 shows the fixed effects for the linear mixed effects model with compound symmetry variance-covariance structure. The estimates are the same between the REML and ML methods. The standard errors slightly increased for the time point coefficients and decreased slightly for the intercept and casecontrol estimates. 
 ```{r,echo = F, fig.width = 4, fig.height = 4, fig.align = "center"}
 
 # Extracting the variance-covariance matrix, converting to a 
@@ -630,10 +633,12 @@ corrplot(lmm_compsymm_ml_corr,method="circle",tl.col="black",
          title="Correlation of Compound Symmetry ML Model",
          mar=c(0,0,2,0))
 
-## END QUESTION 9 Q6 REFIT CODE ##
+## Finish QUESTION 9 Q6 REFIT CODE ##
 
 ```
 The correlation is smaller in the ML method compared to the REML method. 
+
+\newpage
 
 #### QUESTION 7 Refit
 \
@@ -671,8 +676,14 @@ corrplot(lmm_ar1_corr,method="circle",tl.col="black",
          mar=c(0,0,2,0))
 
 
-## END QUESTION 9 Q7 REFIT CODE ##
+## Finish QUESTION 9 Q7 REFIT CODE ##
 
 ```
 Between the REML and ML methods the direction of change for the correlations vary between time points. 
 
+\newpage
+
+# Code Appendix
+
+```{r, ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+```

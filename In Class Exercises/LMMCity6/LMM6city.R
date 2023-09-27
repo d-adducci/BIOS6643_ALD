@@ -26,7 +26,7 @@ library(multcomp)
 
 
 ###Read in the fev data from the csv file (available on CANVAS for students).
-fev.data <- read.csv(file="/Users/nichole/Dropbox/Teaching/Bios6643/Fall2023/Datasets/fev1.csv",header=T)
+fev.data <- read.csv("C:/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ALD/BIOS6643_ALD/In Class Exercises/LMMCity6/fev1.csv",header=T)
 
 ####Check graphs ###
 p <- ggplot(data = fev.data, aes(x = age, y = logfev1, group = id))

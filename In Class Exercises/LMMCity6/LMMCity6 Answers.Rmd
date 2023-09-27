@@ -1,0 +1,23 @@
+---
+title: "LMM6city Answers"
+author: "Dominic Adducci"
+date: "2023-09-27"
+output: pdf_document
+---
+
+1.)
+
+Models wre run in the code. 
+
+2.) 
+
+```{r}
+
+linear_ml <- data.frame(term = c("intercept","age"),
+                     estimates = c(-0.2723,0.08576),
+                     lower_ci = c(-0.29622,0.08430),
+                     upper_ci = c(-0.24835,0.08722),
+                     p_value = c("<2e-16","<2e-16"))
+
+
+```

@@ -1,0 +1,100 @@
+---
+title: "Homework 5 - BIOS 6643"
+author: "Dominic Adducci"
+date: "2023-09-28"
+output: pdf_document
+---
+
+```{r, echo = F, message = F, include = F}
+
+library(tidyverse)
+library(lme4)
+library(lmerTest)
+
+```
+
+We received data on the blood levels of measles vaccine titers collected randomly over an average of 12 years on 39 subjects. The science of interest was to estimate whether many decades after measles vaccination there was still a significant decay of the vaccine titers. This information will be used to determine whether boosters are needed. 
+
+# Question 1
+\
+Conduct a preliminary data investigation on the titer data. Analysis will be conducted on the log scale. Please make graphs on this scale. Include in your homework submission 2-3 graphs and a summary table that you believe describes the data. Interpret both the graphs and the summary data in a paragraph. 
+
+```{r, echo = F}
+
+### START QUESTION 1 CODE ###
+
+# Entering data in R. 
+measles_raw <- read_csv("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 5/measlestiter.csv")
+
+# Converting titer measurements to log scale.
+measles_raw$Avg_Titer_Log <- log(measles_raw$Avg..Titer)
+
+# Formatting names of columns. 
+colnames(measles_raw) <- c("Sample","ID","Age_At_Draw","Avg_Titer","Avg_Titer_Log")
+
+```
+
+```{r, echo = F, warning = F}
+
+# Making a spaghetti plot showing change in average titers as subjects age. 
+measles_spaghetti <- ggplot(measles_raw,aes(x = Age_At_Draw,
+                                            y = Avg_Titer_Log,
+                                            group = ID)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Log(Avg. Titer) vs. Age by ID",
+       x = "Age", y = "Log(Avg. Titer") +
+  theme_bw()
+
+# Outputting the plot.
+measles_spaghetti
+
+```
+
+# Question 2: Random Intercept Model
+
+#### Part A
+Write out the random intercept model for these data in subject level notation including indices for matrices. 
+
+$$Y_i = X_i\beta + Z_ib_i + E_i$$
+Where each matrix has the following dimensions:
+
+* $Y_i: (n_i \times 1)$; $n_i$ refers to the number of time points (age). Outcome is the log of average titer. 
+* $X_i: (n_i \times p)$; $n_i$ refers to the number of time points(age) and p is the number of covariates plus the intercept. The only covariates are the number of time points (age).
+* $\beta: (p \times 1)$; $p$ refers to the number of covariates (measurements at a certain age plus the intercept). 
+* $Z_i: (n_i \times q)$; $n_i$ refers to the number of time points (age). $q$ refers to the number of covariates for the random effects. In this case there is only a random intercept, so $q=1$. 
+* $b_i: (q \times 1)$; $q$ refers to the number of covariates for the random effects. In this case there is only one random intercept, so $q=1$. 
+* $E_i: (n_i \times 1)$; $n_i$ refers to the number of time points (age). Each individual outcome has its own error term. 
+
+#### Part B
+What is the format for $G_i$ and $R_i$ that will be assumed in the lmer R function when you fit the random intercept model? Please write the format for these two matrices and interpret. 
+
+The variability of the random effect will be a matrix with $(q_i \times q_i)$ dimensions. Because there is only one random effect, the random intercept, this will be a matrix with a single element for all subjects.  
+$$G_i = [\tau_0^2] = [\sigma_0^2]$$
+It is not possible to estimate both $G$ and an unstructured $R_i$, meaning that $R_i=\sigma_e^2I_n$ (an independence matrix). The dimensions of $R_i$ are $(n_i \times n_i)$, which in this case means a square matrix where $n_i$ is the number of time points (measurements at different ages) for each subject. Because different subjects have different time points the dimensions of the $R_i$ matrix will change between subjects. 
+
+#### Part C
+Will $G_i$ and $R_i$ be the same dimension for each individual? Explain. 
+
+For $G_i$ the dimensions will be the same between all subjects because each subject only has a random intercept. The dimension of $G_i$ are $(q_i \times q_i)$, where $q_i$ refers to the number of random effects. Because this model only includes a random intercept $q_i$ will be equal to 1, and the matrix will simply contain a single element of $\tau_0^2=\sigma_0^2$. 
+
+$R_i$ will not be the same between subjects because there are different numbers of time points for each subject. The dimensions of $R_i$ are $(n_i \times n_i)$, where $n_i$ refers to the number of individual time points (age at sample collection). 
+
+#### Part D
+Fit a random intercept model for these data using the lmer R function with REML and ML estimation approaches. Provide you code and output. 
+
+```{r}
+
+### START QUESTION 2 CODE ###
+
+## START QUESTION 2 Part D CODE ##
+
+# Fitting a lmer model with a random intercept using the REML method
+measles_ri_reml <- lmer(Avg_Titer_Log ~ Age_At_Draw + (1|ID), 
+                        data = measles_raw, REML = TRUE)
+
+summary(measles_ri_reml)
+
+
+```
+

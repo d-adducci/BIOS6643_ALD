@@ -73,7 +73,7 @@ What is the format for $G_i$ and $R_i$ that will be assumed in the lmer R functi
 
 The variability of the random effect will be a matrix with $(q_i \times q_i)$ dimensions. Because there is only one random effect, the random intercept, this will be a matrix with a single element for all subjects.  
 $$G_i = [\tau_0^2] = [\sigma_0^2]$$
-It is not possible to estimate both $G$ and an unstructured $R_i$, meaning that $R_i=\sigma_e^2I_n$ (an independence matrix). The dimensions of $R_i$ are $(n_i \times n_i)$, which in this case means a square matrix where $n_i$ is the number of time points (measurements at different ages) for each subject. Because different subjects have different time points the dimensions of the $R_i$ matrix will change between subjects. 
+It is usually not possible to estimate both $G$ and an unstructured $R_i$, meaning that $R_i=\sigma_e^2I_n$ (an independence matrix). The dimensions of $R_i$ are $(n_i \times n_i)$, which in this case means a square matrix where $n_i$ is the number of time points (measurements at different ages) for each subject. Because different subjects have different time points the dimensions of the $R_i$ matrix will change between subjects. 
 
 #### Part C
 Will $G_i$ and $R_i$ be the same dimension for each individual? Explain. 
@@ -174,6 +174,63 @@ satterthwaite_ri_ml <- anova(measles_ri_ml,ddf = "Satterthwaite")
 # Kenward-Roger method only valid for REML model fits. 
 # kenward_roger_ri_ml <- anova(measles_ri_ml,ddf = "Kenward-Roger")
 
+ri_ddf_comp <- data.frame(model = c("REML - Random Intercept",
+                                    "REML - Random Intercept",
+                                    "ML - Random Intercept",
+                                    "ML - Random Intercept"),
+                          ddf_method = c("Satterthwaite",
+                                         "Kenward-Roger",
+                                         "Satterthwaite",
+                                         "Kenward-Roger"),
+                          value = c(satterthwaite_ri_reml$DenDF,
+                                    kenward_roger_ri_reml$DenDF,
+                                    satterthwaite_ri_ml$DenDF,
+                                    NA))
 
+ri_ddf_table <- kbl(ri_ddf_comp,
+                    caption = "DDF for Different Methods",
+                    col.names = c("Model","DDF","Value"),
+                    booktabs = TRUE, align = "cc") %>%
+  kable_styling(latex_options = "HOLD_position")
+
+ri_ddf_table
 
 ```
+\
+For the REML model the Satterthwaite and Kenward-Roger DDFs are nearly identical. For the ML model the Satterthwaite DDF is very similar to the REML DDFs. The Kenward-Roger method is not available for the ML model. The DDF for the REML model is similar between both methods because the sample size is large enough that the REML and ML models perform similarly. 
+
+
+# Question 3
+
+#### Part A
+Write out the random intercept model for these data in subject level notation including indices for matrices. 
+
+$$Y_i = X_i\beta + Z_ib_i + E_i$$
+Where each matrix has the following dimensions:
+
+* $Y_i: (n_i \times 1)$; $n_i$ refers to the number of time points (age). Outcome is the log of average titer. 
+* $X_i: (n_i \times p)$; $n_i$ refers to the number of time points(age) and p is the number of covariates plus the intercept. The only covariates are the number of time points (age).
+* $\beta: (p \times 1)$; $p$ refers to the number of covariates (measurements at a certain age plus the intercept). 
+* $Z_i: (n_i \times q)$; $n_i$ refers to the number of time points (age). $q$ refers to the number of covariates for the random effects. In this case there is a random intercept and a random slope, so $q=2$. 
+* $b_i: (q \times 1)$; $q$ refers to the number of covariates for the random effects. In this case there is a random intercept and random slope, so $q=2$. 
+* $E_i: (n_i \times 1)$; $n_i$ refers to the number of time points (age). Each individual outcome has its own error term. 
+
+#### Part B
+What is the format for $G_i$ and $R_i$ that will be assumed in the lmer R function when you fit the random intercept model? Please write the format for these two matrices and interpret. Note we want the random effects to have an unstructured $G_i$ matrix.
+
+The variability of the random effect will be a matrix with $(q_i \times q_i)$ dimensions. Because there is a random intercept and a random slope the $G_i$ matrix will have dimensions of $(2 \times 2)$.  
+$$
+G_i = 
+\begin{bmatrix}
+  \tau_0^2 & \tau_{01} \\
+  \tau_{10} & \tau_1^2
+\end{bmatrix}
+=
+\begin{bmatrix}
+  \sigma_0^2 & \sigma_{01}^2 \\
+  \sigma_{10} & \sigma_1^2
+\end{bmatrix}
+$$
+It is usually not possible to estimate both $G$ and an unstructured $R_i$, meaning that $R_i=\sigma_e^2I_n$ (an independence matrix). The dimensions of $R_i$ are $(n_i \times n_i)$, which in this case means a square matrix where $n_i$ is the number of time points (measurements at different ages) for each subject. Because different subjects have different time points the dimensions of the $R_i$ matrix will change between subjects.  
+
+#### Part C

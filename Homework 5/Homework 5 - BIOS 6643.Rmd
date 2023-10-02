@@ -10,6 +10,8 @@ output: pdf_document
 library(tidyverse)
 library(lme4)
 library(lmerTest)
+library(broom.mixed)
+library(kableExtra)
 
 ```
 
@@ -97,4 +99,81 @@ summary(measles_ri_reml)
 
 
 ```
+```{r}
 
+# Fitting a lmer model with a random intercept using the ML method
+measles_ri_ml <- lmer(Avg_Titer_Log ~ Age_At_Draw + (1|ID), 
+                        data = measles_raw, REML = FALSE)
+
+summary(measles_ri_ml)
+
+## FINISH QUESTION 2 PART D CODE ##
+
+```
+
+#### Part E
+What are the fixed effects estimates with 95\%CI and p-values for both fits? How do they compare? Explain.
+
+```{r, echo = F}
+
+## START QUESTION 2 PART E CODE ##
+
+reml_ri_results <- broom.mixed::tidy(measles_ri_reml,
+                                     conf.int = TRUE)[c(1:2),] %>%
+  select(term,estimate,conf.low,conf.high,p.value) %>%
+  mutate(p.value = format.pval(p.value),
+         term = c("Intercept","Age At Draw"))
+
+ml_ri_results <- broom.mixed::tidy(measles_ri_ml,
+                                   conf.int = TRUE)[c(1:2),] %>%
+  select(term,estimate,conf.low,conf.high,p.value) %>%
+  mutate(p.value = format.pval(p.value),
+         term = c("Intercept","Age At Draw"))
+
+ri_comp_df <- rbind(reml_ri_results,ml_ri_results)
+
+ri_comp_table <- kbl(ri_comp_df,
+                     col.names = c("Term","Estimate","95% Conf.Low",
+                                   "95% Conf.High","P-Value"),
+                     digits = 5, booktabs = TRUE, align = "cc") %>%
+  kable_styling(latex_options = "HOLD_position") %>%
+  pack_rows("REML",1,2) %>%
+  pack_rows("ML",3,4)
+
+ri_comp_table
+
+## FINISH QUESTION 2 PART E CODE ##
+
+```
+\
+The REML method has a slightly higher intercept coefficient and a slightly lower "Age At Draw" coefficient compared to the ML method. The REML method also has a slightly wider 95\% CI for the intercept term and a slightly narrower 95\% CI for the "Age At Draw" term compared to the ML method. The p-value for the intercept term is effectively the same and significant between both methods. The p-value for the "Age At Draw" term is slightly lower for the ML method, but neither REML or ML have a significant "Age At Draw" coefficient. 
+
+#### Part F
+Interpret these findings in 1-2 sentences. 
+
+The REML method restricts the variance for the longitudinal term, as it takes correlation within a subject into account, which the ML method does not. This results in the narrower 95\% CI for the "Age at Draw" term. Generally this also holds for the fixed intercept as well, but the number of subjects in the sample size can affect this. 
+
+#### Part G
+What test was used to generate the p-value and what were the denominator DF? 
+
+For both the REML and ML methods the Satterthwaite's method was used to generate the p-value. For the REML method the degrees of freedom for the intercept was 76.57 (closer to the number of subjects), and for the "Age At Draw" term it was 425.3 (Closer to the number of total observations). For the ML method the degrees of freedom for the intercept was 79.49 (closer to the number of subjects), and for the "Age at Draw" term it was 426.6 (closer to the number of observations). 
+
+#### Part H
+Use the anova package to test the significance of the slope on age using a Satterwaithe and a Kenward-Roger DF adjustment. Present and compare the denominator DF. Provide a 1-2 sentence intuitive answer as to why they differ (or are similar). Were there any differences in your study conclusion using different tests? 
+
+```{r, echo = F}
+
+## START QUESTION 2 PART H CODE ##
+
+satterthwaite_ri_reml <- anova(measles_ri_reml,ddf = "Satterthwaite")
+
+kenward_roger_ri_reml <- anova(measles_ri_reml,ddf = "Kenward-Roger")
+
+satterthwaite_ri_ml <- anova(measles_ri_ml,ddf = "Satterthwaite")
+
+# Kenward-Roger method only valid for REML model fits. 
+# kenward_roger_ri_ml <- anova(measles_ri_ml,ddf = "Kenward-Roger")
+
+
+
+```

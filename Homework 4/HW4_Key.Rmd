@@ -1,0 +1,309 @@
+---
+title: "6643 HW4 Key"
+author: "Nichole Carlson"
+date: ""
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Dependencies
+
+library(tidyverse)
+library(flextable)
+library(ggplot2)
+library(ggpubr)
+library(wrapr)
+library(purrr)
+library(arsenal)
+library(table1)
+library(kableExtra)
+library(olsrr)
+library(broom)
+library(reshape)
+library(nlme)
+#library(dplyr)
+#library(tidyr)
+
+###Read in the Cortdata and transform to long.
+# Read Data
+
+#Cort <- read.csv("C:\\Users\\Jared\\Desktop\\6643_TA\\HW1\\cortdata.csv")
+Cort <-read.csv("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 1/DataRaw/cortdata.csv")
+Cort_P1 <- Cort %>%
+  pivot_longer(cols= c(Time1:Time6), names_to="Time", names_prefix = "Time", values_to="Cortisol") %>%
+  mutate(casecontrol = ifelse(casecontrol == "c", "Control", "Patient"))
+
+```
+
+\newpage
+
+
+
+(25 points) Since the complex MLE estimation in LMM requires computational optimization approaches, you will implement one of the classical approaches here to investigate how it works. The goals is to implement a basic Newton-Raphson algorithm in R. The following data are an i.i.d. sample from a Cauchy($\theta$,1) distribution: 1.77, -0.23, 2.76, 3.80, 3.47, 56.75, -1.34, 4.24, -2.44, 3.29, 3.71, -2.40, 4.53, -0.07, -1.05, -13.87, -2.53, -1.75, 0.27, 43.21.
+
+\textcolor{blue}{To complete this problem we need the likelihood, its' derivative, and the information (second derivative of the likelihood). Recall that the N-R method for maximizing a function $f(\alpha)$ is $$\alpha_{t+1} = \alpha_t + \frac{f(\alpha_t)}{f^{\prime}(\alpha_t)}.$$ However, in our case $f(\alpha) = l^{\prime}(\alpha)$ the derivative of the likelihood. This is the form of the N-R that I gave in the class notes. The Cauchy pdf is: $\frac{1}{\pi[1+(x-\theta)^2]}$ and the likelihood is $\prod_{i=1}^n \frac{1}{\pi[1+(x_i-\theta)^2]}.$ The log likelihood is $- \sum_{i=1}^n[\pi + \log(1+(x_i-\theta)^2)].$
+}
+
+$$\frac{dl}{d\theta} = 2 \sum_{i=1}^n \Biggl [\frac{(x_i-\theta)}{1+(x_i-\theta)^2} \Biggr].$$
+$$\frac{dl^{\prime}}{d\theta} = 2 \sum_{i=1}^n\frac{-[ 1+(x_i-\theta)^2 + 2(x_i-\theta)^2]}{[1+(x_i-\theta)^2]^2}$$
+$$\frac{dl^{\prime}}{d\theta} = 2 \sum_{i=1}^n\frac{[(x_i-\theta)^2 - 1] }{[1+(x_i-\theta)^2]^2}$$
+
+
+Graph the log likelihood function. 
+
+```{r,llgraph, echo=FALSE}
+
+xdata<-c(1.77, -0.23, 2.76, 3.80, 3.47, 56.75, -1.34, 4.24, -2.44, 3.29, 3.71, -2.40, 4.53, -0.07, -1.05, -13.87, -2.53, -1.75, 0.27, 43.21)
+
+#The likelihood is a function of the parameter, theta. So create values to plot on x axis
+theta<-seq(-50,50,by=1)
+
+##program the loglike.f with data and parameter as input.
+##Could prob. be prettier code but will work.  Order of the function inputs
+##needs to have theta first to work with apply fn. Could be more robust code.
+loglike.f<-function(theta,x) {
+  
+  loglikexi <- 
+  loglike <- -(length(x)*pi + sum(log(1+ (theta - x)^2)))
+}
+
+lltheta<-sapply(theta,loglike.f,xdata)
+
+##plot loglikelihood
+graph.data<-as.data.frame(cbind(theta,lltheta))
+
+llplot <- ggplot(data=graph.data, aes(x=theta, y=lltheta)) +
+  geom_line() 
+
+llplot
+
+```
+
+
+Find (and write an R program) to fine the MLE for $\theta$ using the Newton- Raphson method. 
+
+```{r,nrchunk, echo=TRUE}
+
+## create function to implement NR algorithm
+my.nrfun<-function(x,theta.start,eps=1.e-4,max.iter=200) {
+  if (missing(theta.start)) theta.start <- median(x) 
+  theta <- theta.start 
+  n<-length(x)
+  score <- sum(2 * (x - theta)/((x-theta)^2 + 1)^2) 
+  iter<-1
+  conv <- T 
+  while (abs(score)>eps && iter<=max.iter) {
+    inform<-2 * sum((1 - (x - theta)^2)/((x-theta)^2 + 1)^2) 
+    theta <-theta + score/inform
+    iter <- iter+1
+    score <- sum(2 * (x - theta)/((x-theta)^2 + 1)^2)
+  }
+  
+  if (abs(score)>eps) {
+    print("No convergence")
+    conv <- F
+  }
+  
+  loglik <- -(length(x)*pi + sum(log(1+ (theta - x)^2)))
+  inform <- 2 * sum((1 - (x - theta)^2)/((x-theta)^2 + 1)^2) 
+  output <- list(iter = iter,theta=theta,loglik=loglik,score = score, inform = inform, convergence = conv)
+  output
+}
+
+test.cauchy <- my.nrfun(xdata,theta.start = median(xdata))
+```
+
+
+Try all of the following starting points: -11, -1, 0, 1.5, 4, 4.7, 7, 8, and
+38. 
+
+```{r,nrstart, echo=FALSE}
+
+theta.values<-c(-11, -1, 0, 1.5, 4, 4.7, 7, 8, 38)
+
+cauchy.mles<-sapply(theta.values,my.nrfun,xdata)
+cauchy.mles
+```
+Discuss your results. Is the mean of the data a good starting point?
+
+\textcolor{blue}{No, the mean is ill defined for the Cauchy and influenced by the outliers that will show up in the Cauchy.}
+
+
+(5 points)  In a paragraph, explain the difference between a general linear model or multiple regression (GLM; not a generalized linear model like a logistic regression or Poisson, which will be discussed more later) and a linear mixed model (LMM).
+
+\textcolor{blue}{The GLM assumes indepencence in errors, which results in independence in the outcomes. The LMM allows correlation between observations and a better choice for repeatedly collected data on an individual. The LMM has a very flexible approach to incorporating correlation between observations including directly modeling the correlation through a marginal model of the outcome and specifying between subject variation in intercepts and slope values (ie random effects) or even a combination of the two.}
+
+(5 points) In a short paragraph, explain the difference between a profiled likelihood and a restricted likelihood for a linear mixed model, and how and why they are used.  
+
+\textcolor{blue}{Profile likelihood is an approach to jointly maximize the full likelihood of the observed data by maximizing each parameter with the other parameter(s) fixed at a particular value. Then a set of values (grid search) is used to derive a set of maximization values for the parameter being maximized over.  The maximum of all the profile maximums is then the joint maximum. Restricted maximum likelihood is derived by rotating the data according to an orthogonal transformation. The result is a restricted distribution (restricted by the "rules" of the transformation). It is a distribution that is also only defined by the variance terms (the mean is zero) so the variance estimates serve as a plug in for the full maximum likelihood estimator of the $\beta$'s in the LMM.}
+
+\vspace{0.25in}
+\hspace{-0.25in}In this next part of the homework you will now fit the models that you wrote up in homework 3. The data can be found in Week 1 out of class materials and as a link in Homework 4. Recall, an investigator was interested in understanding whether Cortisol (a stress hormone) secretion differs in women suffering from depression. The investigator measured Cortisol levels every 10 minutes for a period of 24 hours starting at 9 am.  26 patients and 26 controls were collected in the study. Although the data were collected every 10 minutes for a period of 24 hours on each subject (144 observations), for this analysis the investigator was interested in differences in the circadian pattern between the groups. The data were divided into 6 blocks of 4 hours and averaged to obtain a set of "block means".
+
+(10 points)
+
+Fit a multiple linear regression to investigate how mean cortisol values change over the day (categorical time) and how the average cortisol levels differ by group (no interaction for this model).  This will be used to anchor the comparisons later in the assignment.
+
+```{r,lrfit, echo=TRUE}
+# Fit a multiple linear regression with no correlation assumed
+
+lr.fit<-lm(Cortisol ~ as.factor(Time) + as.factor(casecontrol), data=Cort_P1)
+lr.summary <- summary(lr.fit)
+```
+
+
+
+Provide a table of mean differences from the 6th time period along with SE's of the differences. Interpret two of the coefficients.  You do not need to conduct inference.
+```{r,lrest, echo=TRUE}
+lr.summary$coefficients
+```
+
+\textcolor{blue}{I will interpret Time2 and Time3. The mean cortisol levels are 3.97 (SE=0.67) units higher in time block 2 compared to time block 1. In addition, The mean cortisol levels are 10.08 (SE=0.67) units higher in time block 3 compared to time block 1.}
+
+Will these standard errors be too big or small and why?
+
+\textcolor{blue}{I thought that these SE would be too small compared to models that account for correlation because they are treating all the data (52*6) as the number in the SE calculation. The actual DF should be smaller because of the correlation between observations on the same individual. This was the case for the group variable but not time variable. Note the two sources of variation differ here (between subject for case/control and withint for Time).}
+
+
+
+(15 points)
+
+Fit a linear mixed model assuming categorical time and group with an unstructured variance-covariance structure using method $=$ REML (the default). Print out the correlation matrix and interpret the general patterns of the correlation in the errors for an individual.
+
+```{r,lmmunfit1, echo=TRUE}
+# Fit a mixed effects model with a no random effects and an unstructured var-cov
+
+lmm.un.fit<-gls(Cortisol ~ as.factor(Time) + as.factor(casecontrol), 
+                    data=Cort_P1, correlation = corSymm(form = ~ 1 | SubjectId))
+lmm.un.summary <- summary(lmm.un.fit)
+
+un.varcov<-lmm.un.fit$modelStruct$corStruct
+
+```
+
+\textcolor{blue}{The correlation structure has weaker correlations the farther apart the times are. Note, time 1 and 6 are actually as close in time as 1 and 2 based on the 24 hour day. The correlations range from 0.2-0.86 (wide range). Mostly there are modest correlations between observations.}
+
+
+
+Provide a table of mean differences from the 6th time period along with SE's of the differences. Interpret two of the coefficients.  You do not need to conduct inference.
+
+```{r,lmmunest, echo=TRUE}
+lmm.un.summary$tTable
+```
+
+
+\textcolor{blue}{I will interpret Time2 and Time3. The mean cortisol levels are 3.97 (SE=0.51) units higher in time block 2 compared to time block 1. In addition, The mean cortisol levels are 10.08 (SE=0.52) units higher in time block 3 compared to time block 1.}
+
+ What is the estimated difference in mean cortisol levels (and SE) between the depressed and non-depressed groups. Interpret the finding in a sentence.  You do not need to conduct inference.
+
+\textcolor{blue}{Mean cortisol levels are 0.76 (SE=0.73) units higher in the depressed patients compared to the controls.}
+
+
+
+(15 points)
+Fit a linear mixed model assuming categorical time and group with a compound symmetry structure using method$=$REML (the default). Print out the correlation matrix and interpret the general patterns of the correlation in the errors for an individual
+
+```{r,lmmcsfit, echo=TRUE}
+# Fit a mixed effects model with a no random effects and an unstructured var-cov
+
+lmm.cs.fit<-gls(Cortisol ~ as.factor(Time) + as.factor(casecontrol), 
+                    data=Cort_P1, correlation = corCompSymm(form = ~ 1 |SubjectId))
+lmm.cs.summary <- summary(lmm.cs.fit)
+
+cs.varcov<-lmm.cs.fit$modelStruct$corStruct
+cs.varcov
+```
+\textcolor{blue}{The correlation between observations is moderate at 0.49. Based on the unstructured this seems like a reasonable compromise between all the values we saw above.}
+
+Provide a table of mean differences from the 6th time period along with SE's of the differences. Interpret two of the coefficients.  You do not need to conduct inference.
+```{r,lmmcsest, echo=TRUE}
+lmm.cs.summary$tTable
+```
+\textcolor{blue}{The coefficients are the same as above and the interpretation doesn't change. Note the SE's are different and the same for all time points (unlike for the unstructure) and then different for the group level factor. One is a within subject SE (time) and one is a between subject SE (group). }
+
+What is the estimated difference in mean cortisol levels (and SE) between the depressed and non-depressed groups. Interpret the finding in a sentence.  You do not need to conduct inference.
+
+
+\textcolor{blue}{Mean cortisol levels are 0.92 (SE=0.72) units higher in the depressed patients compared to the controls. This is a slightly different estimate from the unstructured (maybe related to bias in estimation with the changes in correlation structure).}
+
+
+
+(15 points)
+
+Fit a linear mixed model assuming categorical time and group with an AR(1) structure using method$=$REML (the default). Print out the correlation matrix and interpret the general patterns of the correlation in the errors for an individual
+
+```{r,lmmarfit, echo=TRUE}
+# Fit a mixed effects model with a no random effects and an AR1 var-cov
+
+lmm.ar.fit<-gls(Cortisol ~ as.factor(Time) + as.factor(casecontrol), 
+                    data=Cort_P1, correlation = corAR1(form = ~ 1 |SubjectId))
+lmm.ar.summary <- summary(lmm.ar.fit)
+
+ar.varcov<-lmm.ar.fit$modelStruct$corStruct
+ar.varcov
+```
+\textcolor{blue}{The correlation between observations is moderate at 0.55 and higher than the CS estimate. However, values that are farther apart get this value exponentiated. In this model that means that the 1-6 time difference will have a small correlation not reflective of the circadian pattern.}
+
+Provide a table of mean differences from the 6th time period along with SE's of the differences. Interpret two of the coefficients.  You do not need to conduct inference.
+
+```{r,lmmarest, echo=TRUE}
+lmm.ar.summary$tTable
+```
+
+\textcolor{blue}{Coefficients and interpretation are the same as the other models.}
+
+What is the estimated difference in mean cortisol levels (and SE) between the depressed and non-depressed groups. Interpret the finding in a sentence.  You do not need to conduct inference.
+
+\textcolor{blue}{Mean cortisol levels are 0.74 (SE=0.61) units higher in the depressed patients compared to the controls. This is a slightly different estimate from the compound symmetry model and closer to unstructured.}
+
+
+
+(10 points) Write a paragraph comparing and contrasting the parameter estimates for $\beta$ (the mean differences) and the standard errors across the different variance-covariance structures.
+
+\textcolor{blue}{The time estimates are the same across the models. The group estimates were more sensitive to the misspecification of the correlation structure. The SE's were smallest for the CS model (which is also perhaps the most oversimplified). The SE's for independence were slightly high compared to some models. The SE's were all different for the unstructured and AR(1) models reflecting a different correlation for each pairing (Note: we only have coefficients from some of the comparisons so the AR(1) SE's will be similar for all commparisons that are the same distance apart). The SE's were impacted the most by the differences in the models (compared to the coefficient estimates).}
+
+(25 points) Refit the models using method$=$ML and compare and contrast the findings with the different estimation approaches.  How were the $\beta$ coefficients impacted (if at all)? How were the SE estimates (and variance-covariance structures) impacted by the different methods (if at all)? Explain.
+
+```{r,lmmunfit, echo=TRUE}
+# Fit a mixed effects model with a no random effects and an unstructured var-cov
+
+lmm.un.fit.ml<-gls(Cortisol ~ as.factor(Time) + as.factor(casecontrol), 
+                    data=Cort_P1, correlation = corSymm(form = ~ 1 | SubjectId),method="ML")
+lmm.un.summary.ml <- summary(lmm.un.fit.ml)
+
+un.varcov.ml<-lmm.un.fit.ml$modelStruct$corStruct
+
+# Fit a mixed effects model with a no random effects and an unstructured var-cov
+
+lmm.cs.fit.ml<-gls(Cortisol ~ as.factor(Time) + as.factor(casecontrol), 
+                    data=Cort_P1, correlation = corCompSymm(form = ~ 1 |SubjectId),method="ML")
+lmm.cs.summary.ml <- summary(lmm.cs.fit.ml)
+
+cs.varcov.ml<-lmm.cs.fit.ml$modelStruct$corStruct
+
+##4. Fit a mixed effects model with a no random effects and an AR1 var-cov
+
+lmm.ar.fit.ml<-gls(Cortisol ~ as.factor(Time) + as.factor(casecontrol), 
+                    data=Cort_P1, correlation = corAR1(form = ~ 1 |SubjectId),method="ML")
+lmm.ar.summary.ml <- summary(lmm.ar.fit.ml)
+
+ar.varcov.ml<-lmm.ar.fit.ml$modelStruct$corStruct
+
+lmm.un.summary.ml$tTable
+lmm.cs.summary.ml$tTable
+lmm.ar.summary.ml$tTable
+
+un.varcov.ml
+cs.varcov.ml
+ar.varcov.ml
+
+
+```
+\textcolor{blue}{The results are nearly identical in this problem.  The unstructured correlation estimates are slightly different but very close and similar in interpretation.}
+
+
+
+

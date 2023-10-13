@@ -279,3 +279,69 @@ $$
 It is usually not possible to estimate both $G$ and an unstructured $R_i$, meaning that $R_i=\sigma_e^2I_n$ (an independence matrix). The dimensions of $R_i$ are $(n_i \times n_i)$, which in this case means a square matrix where $n_i$ is the number of time points (measurements at different ages) for each subject. Because different subjects have different time points the dimensions of the $R_i$ matrix will change between subjects.  
 
 #### Part C
+Fit a random intercept and slope model for these data using the lmer R function with REML and ML estimation approaches. Provide code and output. 
+
+```{r}
+
+### START QUESTION 3 CODE ###
+
+## START PART C CODE ##
+
+# Fitting a lmer model with a random intercept and slope  using the REML method.
+measles_ri_rs_reml <- lmer(Avg_Titer_Log ~ Age_At_Draw + (1 + Age_At_Draw|ID), 
+                        data = measles_raw, REML = TRUE)
+
+summary(measles_ri_rs_reml)
+
+```
+```{r}
+
+# Fitting a lmer model with a random intercept and slope using the ML method
+measles_ri_rs_ml <- lmer(Avg_Titer_Log ~ Age_At_Draw + (1 + Age_At_Draw|ID), 
+                        data = measles_raw, REML = FALSE)
+
+summary(measles_ri_rs_ml)
+
+## FINISH QUESTION 3 PART C CODE ##
+
+```
+
+#### Part D
+What are the fixed effects estimates with 95\%CI and p-values for both fits? How do they compare? Explain.
+
+```{r, echo = F}
+
+## START QUESTION 3 PART D CODE ##
+
+reml_ri_rs_results <- broom.mixed::tidy(measles_ri_rs_reml,
+                                     conf.int = TRUE)[c(1:2),] %>%
+  select(term,estimate,conf.low,conf.high,p.value) %>%
+  mutate(p.value = format.pval(p.value),
+         term = c("Intercept","Age At Draw"))
+
+ml_ri_rs_results <- broom.mixed::tidy(measles_ri_rs_ml,
+                                   conf.int = TRUE)[c(1:2),] %>%
+  select(term,estimate,conf.low,conf.high,p.value) %>%
+  mutate(p.value = format.pval(p.value),
+         term = c("Intercept","Age At Draw"))
+
+ri_rs_comp_df <- rbind(reml_ri_rs_results,ml_ri_rs_results)
+
+ri_rs_comp_table <- kbl(ri_rs_comp_df,
+                     col.names = c("Term","Estimate","95% Conf.Low",
+                                   "95% Conf.High","P-Value"),
+                     digits = 5, booktabs = TRUE, align = "cc") %>%
+  kable_styling(latex_options = "HOLD_position") %>%
+  pack_rows("REML",1,2) %>%
+  pack_rows("ML",3,4)
+
+ri_rs_comp_table
+
+## FINISH QUESTION 3 PART D CODE ##
+
+```
+
+The REML method had a slightly lower intercept and a slightly higher "At At Draw" coefficient. Intercepts were significant in both models and "Age At Draw" coefficients were insignificant in both models. Additionally the ML model gave a warning concerning convergence. 
+
+
+

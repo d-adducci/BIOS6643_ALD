@@ -45,13 +45,20 @@ measles_spaghetti <- ggplot(measles_raw,aes(x = Age_At_Draw,
   geom_point() +
   geom_line() +
   labs(title = "Log(Avg. Titer) vs. Age by ID",
-       x = "Age", y = "Log(Avg. Titer") +
+       x = "Age", y = "Log(Avg. Titer)") +
   theme_bw()
 
 # Outputting the plot.
 measles_spaghetti
 
 ```
+
+```{r, echo = F}
+
+
+
+```
+
 
 # Question 2: Random Intercept Model
 
@@ -198,6 +205,44 @@ ri_ddf_table
 ```
 \
 For the REML model the Satterthwaite and Kenward-Roger DDFs are nearly identical. For the ML model the Satterthwaite DDF is very similar to the REML DDFs. The Kenward-Roger method is not available for the ML model. The DDF for the REML model is similar between both methods because the sample size is large enough that the REML and ML models perform similarly. 
+
+#### Part I
+What were the estimates of $G_i$, $R_i$, and $V_i$ for this model using both approaches? Interpret the different sources of variation. What estimates will be more biased (ML and REML)? Why? 
+
+**REML**
+
+$G_i$ and $R_i$ are both from the model summary. $V_i$ is the summation of these two components:
+
+* $G_i$ = 2.0834
+* $R_i$ = 0.1154
+* $V_i$ = 2.1988
+
+**ML**
+
+$G_i$ and $R_i$ are both from the model summary. $V_i$ is the summation of these two components:
+
+* $G_i$ = 2.0299
+* $R_i$ = 0.1151
+* $V_i$ = 2.1450
+
+The estimates from the ML method will be more biased (downward). 
+
+#### Part J
+Compute the ICC and interpret. What source of variation is largest, within or between subject variation?
+
+**REML**
+
+$$ICC = \frac{\sigma_{b0}}{\sigma_{b0}+\sigma_e}=\frac{2.0834}{2.0834+0.1154}=0.948$$
+In the REML method there is more between subject variation compared to within subject variation. 
+
+**ML**
+
+$$ICC = \frac{\sigma_{b0}}{\sigma_{b0}+\sigma_e}=\frac{2.0299}{2.0299+0.1151}=0.946$$
+In the ML method there is more between subject variation compared to within subject variation. 
+
+#### Part K
+Using the ML estimates, create the EBLUP and the fitted estimates. The individual fitted values of the outcome are a weighted combination of two quantities. What are these two quantities? What determines the weight of the individual estimate towards each of the quantities? 
+
 
 
 # Question 3

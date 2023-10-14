@@ -153,12 +153,12 @@ ri_comp_table
 
 ```
 \
-The REML method has a slightly higher intercept coefficient and a slightly lower "Age At Draw" coefficient compared to the ML method. The REML method also has a slightly wider 95\% CI for the intercept term and a slightly narrower 95\% CI for the "Age At Draw" term compared to the ML method. The p-value for the intercept term is effectively the same and significant between both methods. The p-value for the "Age At Draw" term is slightly lower for the ML method, but neither REML or ML have a significant "Age At Draw" coefficient. 
+The REML method has a slightly higher intercept coefficient and a slightly lower "Age At Draw" coefficient compared to the ML method. The REML method also has a slightly wider 95\% CI for the intercept term and a slightly narrower 95\% CI for the "Age At Draw" term compared to the ML method. The p-value for the intercept term is effectively the same and significant between both methods. The p-value for the "Age At Draw" term is slightly lower for the ML method, but neither REML or ML have a significant "Age At Draw" coefficient. Because the ML method tends to have a downward bias for variance the intercept for the ML method has narrower 95\% confidence intervals compared to the REML method for the model fitting a random slope. 
 
 #### Part F
 Interpret these findings in 1-2 sentences. 
 
-The REML method restricts the variance for the longitudinal term, as it takes correlation within a subject into account, which the ML method does not. This results in the narrower 95\% CI for the "Age at Draw" term. Generally this also holds for the fixed intercept as well, but the number of subjects in the sample size can affect this. 
+Both models have approximately the same output. The intercept of 9.10 is the expected log of the average titer at age 0, which is significant in both models with p-values <0.001. The "Age At Draw" coefficient is the expected change in titer as age progresses each year, with the coefficient meaning there is an expected increase of 0.005 in log of titer each year. This coefficient is insignificant with a p-value >0.05. 
 
 #### Part G
 What test was used to generate the p-value and what were the denominator DF? 
@@ -172,39 +172,28 @@ Use the anova package to test the significance of the slope on age using a Satte
 
 ## START QUESTION 2 PART H CODE ##
 
-satterthwaite_ri_reml <- anova(measles_ri_reml,ddf = "Satterthwaite")
+satterthwaite_ri_reml <- anova(measles_ri_reml, ddf = "Satterthwaite")
 
-kenward_roger_ri_reml <- anova(measles_ri_reml,ddf = "Kenward-Roger")
+kenward_roger_ri_reml <- anova(measles_ri_reml, ddf = "Kenward-Roger")
 
-satterthwaite_ri_ml <- anova(measles_ri_ml,ddf = "Satterthwaite")
-
-# Kenward-Roger method only valid for REML model fits. 
-# kenward_roger_ri_ml <- anova(measles_ri_ml,ddf = "Kenward-Roger")
-
-ri_ddf_comp <- data.frame(model = c("REML - Random Intercept",
-                                    "REML - Random Intercept",
-                                    "ML - Random Intercept",
-                                    "ML - Random Intercept"),
-                          ddf_method = c("Satterthwaite",
-                                         "Kenward-Roger",
-                                         "Satterthwaite",
+ri_ddf_comp <- data.frame(ddf_method = c("Satterthwaite",
                                          "Kenward-Roger"),
-                          value = c(satterthwaite_ri_reml$DenDF,
-                                    kenward_roger_ri_reml$DenDF,
-                                    satterthwaite_ri_ml$DenDF,
-                                    NA))
+                          ddf = c(satterthwaite_ri_reml$DenDF,
+                                  kenward_roger_ri_reml$DenDF),
+                          p_value = c(satterthwaite_ri_reml$`Pr(>F)`,
+                                      kenward_roger_ri_reml$`Pr(>Chisq)`))
 
 ri_ddf_table <- kbl(ri_ddf_comp,
                     caption = "DDF for Different Methods",
-                    col.names = c("Model","DDF","Value"),
-                    booktabs = TRUE, align = "cc") %>%
+                    col.names = c("Method","DDF","P-Value"),
+                    booktabs = TRUE, align = "cc", digits = 3) %>%
   kable_styling(latex_options = "HOLD_position")
 
 ri_ddf_table
 
 ```
 \
-For the REML model the Satterthwaite and Kenward-Roger DDFs are nearly identical. For the ML model the Satterthwaite DDF is very similar to the REML DDFs. The Kenward-Roger method is not available for the ML model. The DDF for the REML model is similar between both methods because the sample size is large enough that the REML and ML models perform similarly. 
+The DDF are nearly identical for the slope between the Satterthwaite and Kenward-Roger methods. The sample size may be sufficient to overcome the unbalanced data (where the Satterthwaite tends to performs worse). The p-values were the same to the third decimal place, meaning the same conclusion, that the slope is not significant in the random intercept model.  
 
 #### Part I
 What were the estimates of $G_i$, $R_i$, and $V_i$ for this model using both approaches? Interpret the different sources of variation. What estimates will be more biased (ML and REML)? Why? 
@@ -214,21 +203,21 @@ What were the estimates of $G_i$, $R_i$, and $V_i$ for this model using both app
 $G_i$ and $R_i$ are both from the model summary. $V_i$ is the summation of these two components:
 
 * $G_i$ = 2.0834
-* $R_i$ = 0.1154
-* $V_i$ = 2.1988
+* $R_i$ = $\sigma_e$ = 0.1154; This estimate will be in a matrix with the format $\sigma_e I_n$
+* $V_i$ = 2.1988; This estimate will be in a matrix with dimensions (nx1). 
 
 **ML**
 
 $G_i$ and $R_i$ are both from the model summary. $V_i$ is the summation of these two components:
 
 * $G_i$ = 2.0299
-* $R_i$ = 0.1151
-* $V_i$ = 2.1450
+* $R_i$ = $\sigma_e$ = 0.1151; This estimate will be in a matrix with the format $\sigma_e I_n$
+* $V_i$ = 2.1450; This estimate will be in a matrix with dimensions (nx1). 
 
 The estimates from the ML method will be more biased (downward). 
 
 #### Part J
-Compute the ICC and interpret. What source of variation is largest, within or between subject variation?
+Compute the ICC and interpret. What source of variation is largest, within or between subject variation? $G_i$ is the between subject variation, $R_I$ is the within subject variation, and $V_i$ is the total variation for a specific subject. 
 
 **REML**
 
@@ -341,7 +330,78 @@ ri_rs_comp_table
 
 ```
 
-The REML method had a slightly lower intercept and a slightly higher "At At Draw" coefficient. Intercepts were significant in both models and "Age At Draw" coefficients were insignificant in both models. Additionally the ML model gave a warning concerning convergence. 
+The REML method had a slightly lower intercept and a slightly higher "Age At Draw" coefficient. Intercepts were significant in both models and "Age At Draw" coefficients were insignificant in both models. Additionally the ML model gave a warning concerning convergence. Because the variance estimate of the ML method tends to be biased downwards this is why the 95\% confidence intervals of the ML method are slightly narrower here after fitting both a random slope and a random intercept. 
+
+#### Part E
+Interpret these finding in 1-2 sentences.
+
+Both models have approximately the same outcomes. The intercept means that subjects at age 0 are expected to have a log of average titer of 8.36, which is significant with a p-value <0.001. The "Age at Draw" coefficient means that for every year subjects are expected to increase their log of average titer by 0.026. This estimate is insignificant in both models, with p-values > 0.05. 
+
+#### Part F
+What test was used to generate the p-value and what were the denominator DF? 
+
+For both the REML and ML methods the Satterthwaite's method was used to generate the p-value. For the REML method the degrees of freedom for the intercept was 37.92 (closer to the number of subjects), and for the "Age At Draw" coefficient it was 34.59 (closer to the number of subjects). For the ML method the degrees of freedom for the intercept was 38.51 (closer to the number of subjects), and for the "Age At Draw" coefficient it was 35.09 (closer to the number of subjects). 
+
+#### Part G
+How did the denominator DF in the test statistic differ between the random intercept and random slope model? Explain what is happening here (if anything). 
+
+For the test statistics denominator DF in the random intercept only model was closer to the number of subjects. Once a random slope was added to the model the test statistic denominator DF was closer to the number of subjects. This makes sense as fitting a random slope for each subjects uses up DF, and inferences on slope are collapsed closer to the number of subjects compared to the number of observations after random slopes are fitted. 
+
+#### Part H
+Use the anova package to test the significance of the slope on age using a Satterthwaite and a Kenward-Roger DF adjustment for the REML model. Present and compare the denominator DF. Provide a 1-2 sentence intuitive answer as to why they differ (or are similar). Were there any differences in your conclusions between these different testing approaches. 
+
+```{r, echo = F}
+
+satterthwaite_ri_rs_reml <- anova(measles_ri_rs_reml,ddf = "Satterthwaite")
+
+kenward_roger_ri_rs_reml <- anova(measles_ri_rs_reml,ddf = "Kenward-Roger")
+
+ri_rs_reml_df <- data.frame(Method = c("Satterthwaite","Kenward-Roger"),
+                            DDF = c(satterthwaite_ri_rs_reml$DenDF,
+                                   kenward_roger_ri_rs_reml$DenDF),
+                            p_value <- c(satterthwaite_ri_rs_reml$`Pr(>F)`,
+                                         kenward_roger_ri_rs_reml$`Pr(>F)`))
+
+ri_rs_reml_df_tbl <- kbl(ri_rs_reml_df,
+                         caption = "Random Intercept-Slope REML DF",
+                         col.names = c("Method","DDF","P-Value"),
+                         booktabs = TRUE, align = "cc", digits = 3) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+ri_rs_reml_df_tbl
+
+```
+The DDF for the Satterthwaite method is less than the Kenward-Roger method. Because a random slope was fitted this grouped data for the slope from being individual observations as it was in the random intercept only model to being observations within subjects as age progressed. This reduction accounts for both the DDF being closer to the number of subjects instead of the number of observations, as well as the difference in DDF observed between the two methods. Due to unbalanced data between subjects the Kenward-Roger method should be chosen. The p-values are very close however, and neither is statistically significant. 
+
+#### Part I
+Were there any differences between tests and denominator DF between the random intercept and random slope models? Explain.
+
+Between the random intercept and random intercept/slope models neither p-values are significant. However, the p-values from the random intercept/slope models are much closer to the level of significance due to accounting for between subject variation in slopes. Between the random intercept and random intercept/slope models the degrees of freedom in the random intercept model is much higher and much closer to the number of observations. After accounting for between subject differences in slopes with the random slope/intercept model the DF are closer to the number of subjects. 
+
+#### Part J
+What were the estimates of $G_i$, $R_i$, and $V_i$ for this model using both approaches? Interpret the different sources of variation. What estimates will be more biased (ML and REML)? Why? 
+
+All values were extracted from the model outputs. 
+
+**REML**
+
+* $G_i$: 
+
+$$
+G_i =
+\begin{bmatrix}
+  \sigma_{b0}^2 & \sigma_{b,01} \\
+  \sigma_{b,01} & \sigma_{b1}^2
+\end{bmatrix}
+=
+\begin{bmatrix}
+  11.15 & -0.91 \\
+  -0.91 & 0.0061 
+\end{bmatrix}
+$$
+
+* $R_i$: $\sigma_e$ = 0.0606; $R_i$ is a matrix with form $\sigma_e I_n$
+* 
 
 
 

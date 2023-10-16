@@ -34,14 +34,17 @@ measles_raw$Avg_Titer_Log <- log(measles_raw$Avg..Titer)
 # Formatting names of columns. 
 colnames(measles_raw) <- c("Sample","ID","Age_At_Draw","Avg_Titer","Avg_Titer_Log")
 
+# Removing observation with missing titer data. 
+measles_data <- na.omit(measles_raw)
+
 ```
 
 ```{r, echo = F, warning = F}
 
 # Making a spaghetti plot showing change in average titers as subjects age. 
-measles_spaghetti <- ggplot(measles_raw,aes(x = Age_At_Draw,
-                                            y = Avg_Titer_Log,
-                                            group = ID)) +
+measles_spaghetti <- ggplot(measles_data,aes(x = Age_At_Draw,
+                                             y = Avg_Titer_Log,
+                                             group = ID)) +
   geom_point() +
   geom_line() +
   labs(title = "Log(Avg. Titer) vs. Age by ID",
@@ -100,7 +103,7 @@ Fit a random intercept model for these data using the lmer R function with REML 
 
 # Fitting a lmer model with a random intercept using the REML method
 measles_ri_reml <- lmer(Avg_Titer_Log ~ Age_At_Draw + (1|ID), 
-                        data = measles_raw, REML = TRUE)
+                        data = measles_data, REML = TRUE)
 
 summary(measles_ri_reml)
 
@@ -110,7 +113,7 @@ summary(measles_ri_reml)
 
 # Fitting a lmer model with a random intercept using the ML method
 measles_ri_ml <- lmer(Avg_Titer_Log ~ Age_At_Draw + (1|ID), 
-                        data = measles_raw, REML = FALSE)
+                        data = measles_data, REML = FALSE)
 
 summary(measles_ri_ml)
 
@@ -191,6 +194,8 @@ ri_ddf_table <- kbl(ri_ddf_comp,
 
 ri_ddf_table
 
+## FINISH QUESTION 2 PART H CODE ##
+
 ```
 \
 The DDF are nearly identical for the slope between the Satterthwaite and Kenward-Roger methods. The sample size may be sufficient to overcome the unbalanced data (where the Satterthwaite tends to performs worse). The p-values were the same to the third decimal place, meaning the same conclusion, that the slope is not significant in the random intercept model.  
@@ -232,6 +237,52 @@ In the ML method there is more between subject variation compared to within subj
 #### Part K
 Using the ML estimates, create the EBLUP and the fitted estimates. The individual fitted values of the outcome are a weighted combination of two quantities. What are these two quantities? What determines the weight of the individual estimate towards each of the quantities? 
 
+```{r, echo = F}
+
+## START QUESTION 2 PART K CODE ##
+
+# Calculating the EBLUPs.
+ri_eblup <- ranef(measles_ri_ml)
+
+# Calculating the fitted estimates. 
+ri_fitted <- fitted(measles_ri_ml)
+
+## FINISH QUESTION 2 PAT K CODE ## 
+
+```
+The individual fitted values are a combination of subject specific data (random effects) and group averaged data. The weight of individual estimates is the difference between the population average profile and the observed data. 
+
+#### Part L
+Make a plot of the estimated individual specific curves compared to the observed data. How well do you think this model is capturing the the variation in the data and the age trends in the data? Provide an interpretation in a few sentences. 
+
+```{r, echo = F}
+
+## START QUESTION 2 PART L CODE ##
+
+# Combining the fitted data with the original data. 
+measles_ri_fitted <- cbind(measles_data,ri_fitted)
+
+# Making a plot of the estimated fitted curves compared to the observed data. 
+measles_ri_fit_plot <- ggplot(data = measles_ri_fitted, aes(x = Age_At_Draw,
+                                                            y = ri_fitted,
+                                                            group = ID)) +
+  geom_line(aes(color = "Fitted")) +
+  geom_line(aes(x = Age_At_Draw,
+                y = Avg_Titer_Log,
+                group = ID, color = "Observed")) +
+  labs(title = "Comparison Between Subject Specific Curves and Observed Data",
+       y = "Log(Average Titer", x = "Age at Draw",
+       caption = "Random Intercept Model") +
+  scale_colour_manual(name = "Lines",
+                      breaks = c("Fitted","Observed"),
+                      values = c("Fitted" = "red","Observed" = "black")) +
+  theme_bw()
+
+measles_ri_fit_plot
+
+## FINISH QUESTION 2 PART L CODE ##
+
+```
 
 
 # Question 3
@@ -401,7 +452,136 @@ G_i =
 $$
 
 * $R_i$: $\sigma_e$ = 0.0606; $R_i$ is a matrix with form $\sigma_e I_n$
-* 
+* $V_i$:
+
+$$
+V_i = 
+\begin{bmatrix}
+  1 & age_{i1} \\
+  1 & age_{i2} \\
+  \vdots & \vdots \\
+  1 & age_{in}
+\end{bmatrix}
+\begin{bmatrix}
+  11.15 & -0.91 \\
+  -0.91 & 0.0061 
+\end{bmatrix}
+\begin{bmatrix}
+  1 & 1 & \cdots & 1 \\
+  age_{i1} & age_{i2} & \cdots & age_{in}
+\end{bmatrix}
++
+0.0606 I_n
+$$
+
+**ML**
+
+* $G_i$
+
+$$
+G_i =
+\begin{bmatrix}
+  \sigma_{b0}^2 & \sigma_{b,01} \\
+  \sigma_{b,01} & \sigma_{b1}^2
+\end{bmatrix}
+=
+\begin{bmatrix}
+  10.89 & -0.91 \\
+  -0.91 & 0.0059 
+\end{bmatrix}
+$$
+* $R_i$: $\sigma_e$ = 0.0605; $R_i$ is a matrix with form $\sigma_e I_n$
+* $V_i$: 
+
+$$
+V_i = 
+\begin{bmatrix}
+  1 & age_{i1} \\
+  1 & age_{i2} \\
+  \vdots & \vdots \\
+  1 & age_{in}
+\end{bmatrix}
+\begin{bmatrix}
+  10.89 & -0.91 \\
+  -0.91 & 0.0059 
+\end{bmatrix}
+\begin{bmatrix}
+  1 & 1 & \cdots & 1 \\
+  age_{i1} & age_{i2} & \cdots & age_{in}
+\end{bmatrix}
++
+0.0605 I_n
+$$
+
+#### Part K
+Using the ML estimates, compute the ICC for the slope and interpret. What percentage of variation is due to the random effect on slope. 
+
+$$ICC(Slope) = \frac{\sigma_{b1}^2}{\sigma_{b0}^2+\sigma_{b1}^2+\sigma_e^2}=\frac{0.005917}{10.891284+0.005917+0.060546}=5.3998 \times 10^{-4}$$
+The ICC for slope is very small meaning that almost none of the variance is due to the random effect on slope. This means that there is not a lot of variance in the slopes between subjects. 
+
+$$ICC(Intercept) = \frac{\sigma_{b0}^2}{\sigma_{b0}^2+\sigma_{b1}^2+\sigma_e^2}=\frac{10.891284}{10.891284+0.005917+0.060546}=0.994$$
+The ICC for the intercept accounts for nearly of the variance in the model. This means that there is a lot of variance in the intercepts between subjects. In other words, subjects start at vastly different average titer levels. 
+
+#### Part L
+Using the ML estimates, create the EBLUP and the fitted estimates. There is nothing to turn in for this question but the code. 
+
+```{r}
+
+## START QUESTION 3 PART L CODE ##
+
+# Calculating the estimates. Converting to data.frame to extract the 
+ri_rs_eblups <- ranef(measles_ri_rs_ml,condVar = TRUE)
+
+# Calculating the fitted values. 
+ri_rs_fitted <- fitted(measles_ri_rs_ml)
+
+## FINISH QUESTION 3 PART L CODE ##
+
+```
+
+#### Part M
+Make a plot of the estimated individual specific curves compared to the observed data. How well do you think this model is capturing the variation in the data and the age trends in the data? Provide an interpretation in a few sentences. 
+
+```{r, echo = F}
+
+## START QUESTION 3 PART M CODE ##
+
+# Combining the fitted data with the original data. 
+measles_ri_rs_fitted <- cbind(measles_data,ri_rs_fitted)
+
+# Making a plot of the estimated fitted curves compared to the observed data. 
+measles_ri_rs_fit_plot <- ggplot(data = measles_ri_rs_fitted, 
+                                 aes(x = Age_At_Draw,
+                                     y = ri_rs_fitted,
+                                     group = ID)) +
+  geom_line(aes(color = "Fitted")) +
+  geom_line(aes(x = Age_At_Draw,
+                y = Avg_Titer_Log,
+                group = ID, color = "Observed")) +
+  labs(title = "Comparison Between Subject Specific Curves and Observed Data",
+       y = "Log(Average Titer", x = "Age at Draw",
+       caption = "Random Intercept and Random Slope Model") +
+  scale_colour_manual(name = "Lines",
+                      breaks = c("Fitted","Observed"),
+                      values = c("Fitted" = "red","Observed" = "black")) +
+  theme_bw()
+
+measles_ri_rs_fit_plot
+
+## FINISH QUESTION 3 PART M CODE ##
+
+```
+For each individual subject the random intercept/slope model more closely models the trend between age and the log of average titer. Most subjects have a roughly linear trend with time and the random slopes model these well, although a few subjects have trends which are not linear. 
+
+#### Part N
+Base on the fits do you think the random slope is a critical additional component to add to the model? Explain.
+
+In this scenario the random slopes do better at modeling the trends over time. In the intercept only model the average slope is increasing for all subjects. In the random slope/intercept model the subjects are allowed to have declining slopes, better modeling the actual data. 
+
+#### Part O
+The investigator is leery of these mixed effects models. How would you show him/her what the random intercept and random slope model did for estimation compared to just fitting a bunch of regression models, one for each person? 
+
+Using a random intercept/slope model allows for each subject to be modeled separately, which in effect provides the same inferences on subjects that fitting multiple regression models for each subject would. The random intercept/slope model also provides the average trends, which are what will be used for making inferences on people who have had measles vaccines. 
 
 
 

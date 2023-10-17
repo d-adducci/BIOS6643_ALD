@@ -570,6 +570,8 @@ measles_ri_rs_fit_plot
 
 ## FINISH QUESTION 3 PART M CODE ##
 
+### FINISH QUESTION 3 CODE ###
+
 ```
 For each individual subject the random intercept/slope model more closely models the trend between age and the log of average titer. Most subjects have a roughly linear trend with time and the random slopes model these well, although a few subjects have trends which are not linear. 
 
@@ -583,5 +585,60 @@ The investigator is leery of these mixed effects models. How would you show him/
 
 Using a random intercept/slope model allows for each subject to be modeled separately, which in effect provides the same inferences on subjects that fitting multiple regression models for each subject would. The random intercept/slope model also provides the average trends, which are what will be used for making inferences on people who have had measles vaccines. 
 
+\newpage
 
+# Part 2
+
+
+## Question 3
+
+```{r, echo = F}
+
+# Loading in data.
+cereal_raw <- read.csv("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 5/Cereal2.csv")
+
+# Formatting data. 
+cereal_data <- cereal_raw %>% 
+  select(Cond,C1,FamMem,Sex,Age1,Ht1,Wt1) %>%
+  subset(FamMem == 3)
+
+```
+
+#### Part A
+Use a Poisson GLM (i.e. Poisson regression) to estimate the association between condition (group) and number of breakfast servings, adjusting for sex and weight.
+
+```{r, echo = F}
+
+poisson_mod <- glm(Cond ~ C1 + Sex + Age1, 
+                   family = poisson, data = cereal_data)
+
+broom.mixed::tidy(poisson_mod, exp = T, conf.int = T) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "Condition - Poisson Model",
+      col.names = c("Term","Estimate","Std.Error",
+                    "95% Conf.Low","95% Conf.High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+
+#### Part B
+Repeat (a) allowing for overdispersion by using quasilikelihood with the Poisson GLM. 
+
+```{r, echo = F}
+
+quasipoisson_mod <- glm(Cond ~ C1 + Sex + Age1, 
+                   family = quasipoisson, data = cereal_data)
+
+broom.mixed::tidy(quasipoisson_mod, exp = T, conf.int = T) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "Condition - Poisson Model",
+      col.names = c("Term","Estimate","Std.Error",
+                    "95% Conf.Low","95% Conf.High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
 

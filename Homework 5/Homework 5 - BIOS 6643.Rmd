@@ -635,7 +635,7 @@ broom.mixed::tidy(quasipoisson_mod, exp = T, conf.int = T) %>%
   mutate(p.value = format.pval(p.value)) %>%
   select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
   kbl(digits = 4, booktabs = T, align = "cc",
-      caption = "Condition - Poisson Model",
+      caption = "Condition - QuasiPoisson Model",
       col.names = c("Term","Estimate","Std.Error",
                     "95% Conf.Low","95% Conf.High","P-Value")) %>%
   kable_styling(latex_options = "HOLD_position")

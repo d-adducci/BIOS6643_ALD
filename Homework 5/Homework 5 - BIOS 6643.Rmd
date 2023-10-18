@@ -12,6 +12,7 @@ library(lme4)
 library(lmerTest)
 library(broom.mixed)
 library(kableExtra)
+library(MASS)
 
 ```
 
@@ -130,13 +131,13 @@ What are the fixed effects estimates with 95\%CI and p-values for both fits? How
 
 reml_ri_results <- broom.mixed::tidy(measles_ri_reml,
                                      conf.int = TRUE)[c(1:2),] %>%
-  select(term,estimate,conf.low,conf.high,p.value) %>%
+  dplyr::select(term,estimate,conf.low,conf.high,p.value) %>%
   mutate(p.value = format.pval(p.value),
          term = c("Intercept","Age At Draw"))
 
 ml_ri_results <- broom.mixed::tidy(measles_ri_ml,
                                    conf.int = TRUE)[c(1:2),] %>%
-  select(term,estimate,conf.low,conf.high,p.value) %>%
+  dplyr::select(term,estimate,conf.low,conf.high,p.value) %>%
   mutate(p.value = format.pval(p.value),
          term = c("Intercept","Age At Draw"))
 
@@ -187,7 +188,7 @@ ri_ddf_comp <- data.frame(ddf_method = c("Satterthwaite",
                                       kenward_roger_ri_reml$`Pr(>Chisq)`))
 
 ri_ddf_table <- kbl(ri_ddf_comp,
-                    caption = "DDF for Different Methods",
+                    caption = "DDF for Random Intercept - Different Methods",
                     col.names = c("Method","DDF","P-Value"),
                     booktabs = TRUE, align = "cc", digits = 3) %>%
   kable_styling(latex_options = "HOLD_position")
@@ -217,7 +218,7 @@ $G_i$ and $R_i$ are both from the model summary. $V_i$ is the summation of these
 
 * $G_i$ = 2.0299
 * $R_i$ = $\sigma_e$ = 0.1151; This estimate will be in a matrix with the format $\sigma_e I_n$
-* $V_i$ = 2.1450; This estimate will be in a matrix with dimensions (nx1). 
+* $V_i$ = 2.1450; This estimate will be in a matrix with dimensions (nxn). 
 
 The estimates from the ML method will be more biased (downward). 
 
@@ -271,7 +272,7 @@ measles_ri_fit_plot <- ggplot(data = measles_ri_fitted, aes(x = Age_At_Draw,
                 y = Avg_Titer_Log,
                 group = ID, color = "Observed")) +
   labs(title = "Comparison Between Subject Specific Curves and Observed Data",
-       y = "Log(Average Titer", x = "Age at Draw",
+       y = "Log(Average Titer)", x = "Age at Draw",
        caption = "Random Intercept Model") +
   scale_colour_manual(name = "Lines",
                       breaks = c("Fitted","Observed"),
@@ -329,7 +330,8 @@ Fit a random intercept and slope model for these data using the lmer R function 
 
 # Fitting a lmer model with a random intercept and slope  using the REML method.
 measles_ri_rs_reml <- lmer(Avg_Titer_Log ~ Age_At_Draw + (1 + Age_At_Draw|ID), 
-                        data = measles_raw, REML = TRUE)
+                        data = measles_raw, REML = TRUE, 
+                        control = lmerControl(optimizer = "bobyqa"))
 
 summary(measles_ri_rs_reml)
 
@@ -355,13 +357,13 @@ What are the fixed effects estimates with 95\%CI and p-values for both fits? How
 
 reml_ri_rs_results <- broom.mixed::tidy(measles_ri_rs_reml,
                                      conf.int = TRUE)[c(1:2),] %>%
-  select(term,estimate,conf.low,conf.high,p.value) %>%
+  dplyr::select(term,estimate,conf.low,conf.high,p.value) %>%
   mutate(p.value = format.pval(p.value),
          term = c("Intercept","Age At Draw"))
 
 ml_ri_rs_results <- broom.mixed::tidy(measles_ri_rs_ml,
                                    conf.int = TRUE)[c(1:2),] %>%
-  select(term,estimate,conf.low,conf.high,p.value) %>%
+  dplyr::select(term,estimate,conf.low,conf.high,p.value) %>%
   mutate(p.value = format.pval(p.value),
          term = c("Intercept","Age At Draw"))
 
@@ -578,7 +580,7 @@ For each individual subject the random intercept/slope model more closely models
 #### Part N
 Base on the fits do you think the random slope is a critical additional component to add to the model? Explain.
 
-In this scenario the random slopes do better at modeling the trends over time. In the intercept only model the average slope is increasing for all subjects. In the random slope/intercept model the subjects are allowed to have declining slopes, better modeling the actual data. 
+Based on the ICC adding a random slope does not significantly account for variance within the model. From the plot of fitted values the fitted lines do better track with subject trends, but subjects vary enough along the y-axis that doing this does not significantly fit the model better. 
 
 #### Part O
 The investigator is leery of these mixed effects models. How would you show him/her what the random intercept and random slope model did for estimation compared to just fitting a bunch of regression models, one for each person? 
@@ -599,7 +601,8 @@ cereal_raw <- read.csv("C:/Users/domin/Documents/Biostatistics Masters Program/F
 
 # Formatting data. 
 cereal_data <- cereal_raw %>% 
-  select(Cond,C1,FamMem,Sex,Age1,Ht1,Wt1) %>%
+  dplyr::select(FamIDNO,Cond,C1,FamMem,Sex,Age1,Ht1,Wt1) %>%
+  mutate(Sex = factor(Sex)) %>%
   subset(FamMem == 3)
 
 ```
@@ -609,36 +612,246 @@ Use a Poisson GLM (i.e. Poisson regression) to estimate the association between 
 
 ```{r, echo = F}
 
-poisson_mod <- glm(Cond ~ C1 + Sex + Age1, 
+poisson_mod <- glm(C1 ~ Cond + Sex + Wt1, 
                    family = poisson, data = cereal_data)
 
 broom.mixed::tidy(poisson_mod, exp = T, conf.int = T) %>%
   mutate(p.value = format.pval(p.value)) %>%
-  select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  dplyr::select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
   kbl(digits = 4, booktabs = T, align = "cc",
-      caption = "Condition - Poisson Model",
+      caption = "Condition - Poisson Model - Exponentiated",
       col.names = c("Term","Estimate","Std.Error",
                     "95% Conf.Low","95% Conf.High","P-Value")) %>%
   kable_styling(latex_options = "HOLD_position")
 
 ```
+
+1.) $Y_i \sim Pois(\lambda_i)$; $E[Y_i]=Var[Y_i]=\lambda_i$
+
+2.) $\eta_i=\beta_0 + \beta_1Cond_i + \beta_2Sex_i + \beta_3Weight_i$
+
+3.) $\eta_i = log(\lambda_i)$
+
+The data for this analysis came from week 1 (baseline) measurements for cereal consumption for Kid1. From the Poisson regression children in the experimental group were expected to have a rate of consumption of breakfast cereal servings 2.37 (95\% CI:1.84,3.12) times greater than that of the those who did not receive anything special when controlling for sex and weight. This is a significant result with a p-value of <0.001. 
 
 #### Part B
 Repeat (a) allowing for overdispersion by using quasilikelihood with the Poisson GLM. 
 
 ```{r, echo = F}
 
-quasipoisson_mod <- glm(Cond ~ C1 + Sex + Age1, 
+quasipoisson_mod <- glm(C1 ~ Cond + Sex + Wt1, 
                    family = quasipoisson, data = cereal_data)
 
 broom.mixed::tidy(quasipoisson_mod, exp = T, conf.int = T) %>%
   mutate(p.value = format.pval(p.value)) %>%
-  select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  dplyr::select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
   kbl(digits = 4, booktabs = T, align = "cc",
-      caption = "Condition - QuasiPoisson Model",
+      caption = "Condition - QuasiPoisson Model - Exponentiated",
       col.names = c("Term","Estimate","Std.Error",
                     "95% Conf.Low","95% Conf.High","P-Value")) %>%
   kable_styling(latex_options = "HOLD_position")
 
 ```
+
+1.) $Y_i \sim Pois(\lambda_i)$; $E[Y_i]=\lambda_i$; $V[Y_i]=\phi\lambda_i$
+
+2.) $\eta_i=\beta_0 + \beta_1Cond_i + \beta_2Sex_i + \beta_3Weight_i$
+
+3.) $\eta_i = log(\lambda_i)$
+
+The data for this analysis came from week 1 (baseline) measurements for cereal consumption for Kid1. From the Quasi-Poisson regression children in the experimental group were expected to have a rate of consumption of breakfast cereal servings 2.37 (95\% CI:1.546,3.852) times greater than that of the those who did not receive anything special when controlling for sex and weight. This is a significant result with a p-value of <0.001. 
+
+#### Part C
+Repeat (a) allowing for overdispersion by adding a random normal error to the linear predictor in the Poisson GLM and using maximum likelihood estimation. 
+
+```{r, echo = F}
+
+ml_poisson_mod <- glmer(C1 ~ Cond + Sex + Wt1 + (1| FamIDNO),
+                        family = poisson, data = cereal_data)
+
+broom.mixed::tidy(ml_poisson_mod, exp = T, conf.int = T)[c(1:4),]%>%
+  mutate(p.value = format.pval(p.value)) %>%
+  dplyr::select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "Condition - Poisson Random Intercept Model - Exponentiated",
+      col.names = c("Term","Estimate","Std.Error",
+                    "95% Conf.Low","95% Conf.High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+
+1.) $Y_i|\epsilon_i \sim Pois(\lambda_i)$; $E[Y_i]=\lambda_i$; $Var[Y_i]=\lambda_i + (e^{\sigma_{\epsilon}^2}-1)\lambda_i^2$
+
+2.) $\eta_i=\beta_0 + \beta_1Cond_i + \beta_2Sex_i + \beta_3Weight_i + \epsilon_i$; $\epsilon_i \sim N(0,\sigma_{\epsilon i}^2)$
+
+3.) $\eta_i = log(\lambda_i)$
+
+The data for this analysis came from week 1 (baseline) measurements for cereal consumption for Kid1. From the Poisson with normal random error regression children in the experimental group were expected to have a rate of consumption of breakfast cereal servings 2.35 (95\% CI:1.60,3.46) times greater than that of the those who did not receive anything special when controlling for sex and weight. This is a significant result with a p-value of <0.001.
+
+#### Part D
+Repeat (a) allowing for overdispersion by using a Negative Binomial GLM estimated with maximum likelihood. 
+
+```{r, echo = F}
+
+negbinom_mod <- glm.nb(C1 ~ Cond + Sex + Wt1,
+                       data = cereal_data, link = "log") 
+
+broom.mixed::tidy(negbinom_mod, exp = T, conf.int = T) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  dplyr::select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "Condition - Negative Binomial Model - Exponentiated",
+      col.names = c("Term","Estimate","Std.Error",
+                    "95% Conf.Low","95% Conf.High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+
+1.) $Y_i \sim NB(k_i,\lambda_i)$; $E[Y_i] = \frac{k_i(1-\lambda_i)}{\lambda_i}$; $V[Y_i] = \frac{k_i(1-\lambda_i)}{\lambda_i^2}$
+
+2.) $\eta_i=\beta_0 + \beta_1Cond_i + \beta_2Sex_i + \beta_3Weight_i$
+
+3.) $\eta_i = log(\frac{\lambda_i}{\lambda_i + k_i})$
+
+The data for this analysis came from week 1 (baseline) measurements for cereal consumption for Kid1. From the Negative Binomial regression children in the experimental group were expected to have a rate of consumption of breakfast cereal servings 2.36 (95\% CI:1.60,3.47) times greater than that of the those who did not receive anything special when controlling for sex and weight. This is a significant result with a p-value of <0.001.
+
+## Question 4
+
+#### Part A
+Make a table summarizing the results of the previous models. 
+
+
+|           | "Poisson Regression" | "Poisson QL" | "Poisson + Normal error" | "NB NLMIXED" |
+|-----------|----------------------|--------------------|-------------------------|---------------------------|
+| Intercept | 0.998(0.199)         | 0.998(0.3411)      | 0.882(0.3242)           | 1.106(0.323)              |
+| Cond      | 2.374(1.838,3.123)   | 2.374(1.546,3.852) | 2.352(1.598,3.460)      | 2.357(1.603,3.470)        |
+| Sex       | 0.820(0.697,0.962)   | 0.820(0.620,1.079) | 0.858(0.648,1.136)      | 0.843(0.638,1.114)        |
+| Wt        | 1.218(0.937,1.575)   | 1.218(0.774,1.886) | 1.178(0.742,1.871)      | 1.105(0.690,1.781)        |
+| Other     |          NA          | 2.9447             | 0.5429                  | 1                         |
+
+
+#### Part B
+Write a short paragraph summarizing the results of comparing conditions, e.g. which condition gives higher consumption and by how much. 
+
+The data for this analysis came from week 1 (baseline) measurements for cereal consumption for Kid1. From the Quasi-Poisson regression children in the experimental group were expected to have a rate of consumption of breakfast cereal servings 2.37 (95\% CI:1.546,3.852) times greater than that of the those who did not receive anything special when controlling for sex and weight. This is a significant result with a p-value of <0.001. The Quasi-Poisson regression model was chosen to account for characteristics of the data. 
+
+#### Part c
+Write a short paragraph comparing the model estimated, e.g. differences between parameter estimates across models.  
+
+Both the Poisson and Quasi-Poisson models have similar estimates for all coefficients. The 95\% CI is always wider for the Quasi-Poisson model, which is due to the Quasi-Poisson model attempting to address overdispersion. This is illustrated in the "Other" row for the "Poisson QL" column, where the scale parameter is 2.9447. For the Poisson + Normal error model the coefficient is greater for Sex, and less for condition and weight. For the NB NLMIXED model the intercept is larger compared to the other models. For the condition and sex coefficients in the NB NLMIXED model the value is between the same coefficient values in other models. For the wt coefficient in the NB NLMIXED model the value is lower that any other model. 
+
+
+# Question 5
+
+```{r, echo = F}
+
+### START QUESTION 5 PART II CODE ###
+
+# Reading in the data and formatting. 
+dues_data <- read.table(url("https://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%2014%20Data%20Sets/CH14PR07.txt"))
+
+#Need variable names since none were in the online text file
+colnames(dues_data)<-c("norenewal","dueincrease")
+
+```
+
+#### Part A
+Fit a logistic regression of these data and summarize the relationship between the dues increase and not renewing. Interpret the findings including a 95\% CI and p-value. Write 1-2 complete sentences describing the findings. 
+
+```{r, echo = F}
+
+## START PART II QUESTION 5 PART A CODE ##
+
+# Fitting the logistic regression. 
+dues_mod <- glm(norenewal ~ dueincrease, data = dues_data, 
+                family = binomial(link = "logit"))
+
+broom.mixed::tidy(dues_mod, exp = T, conf.int = T) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  dplyr::select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "Nonrenewal Logistic Regression - Exponentiated",
+      col.names = c("Term","Estimate","Std.Error",
+                    "95% Conf.Low","95% Conf.High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+## FINISH PART II QUESTION 5 PART A CODE ##
+
+```
+From the logistic regression model for each increase in $1 of dues there is a 1.13 times greater rate of nonrenewal (95\% CI:1.0023,1.3097) with an insignificant p-value of 0.061. 
+
+#### Part B
+Compute the estimated probability that association members will not renew their membership if the dues are increased by $40. 
+
+```{r, echo = F}
+
+## START PART II QUESTION 5 PART B CODE ##
+
+# Using the model estimates to calculate the estimated probability that.
+beta_0 <- -4.80751
+beta_1 <- 0.12508
+
+probability <- 1/(1+exp(-(beta_0 + beta_1*40))) * 100
+
+## FINISH PART II QUESTION 5 PART B CODE ##
+
+```
+If membership dues are increased by $40 55\% of subjects are estimated to not renew. 
+
+#### Part C
+Estimate the amount of dues increase for which 75\% of the members are not expected to renew their association membership. 
+
+```{r, echo = F}
+
+## STARTING PART II QUESTION 5 PART C CODE ##
+
+# Isolating the value for dues increase for when 
+dues_increase <- (log(0.75/(1-0.75)) - beta_0)/beta_1
+
+## FINISH PART II QUESTION 5 PART C CODE ##
+
+```
+The estimated amount of dues increase for which 75\% of members are not expected to renew their association membership is $47.
+
+#### Part D
+Is the default p-value and test a Wald based test or a likelihood based test? 
+
+The p-value is a Wald based test (based on the Z-Score). 
+
+#### Part E
+Fit a quasi binomial model to these data and assess whether there is any evidence of overdispersion. Write a few sentences comparing the parameter estimates and SE's (and p-values) from this model and the regular logistic regression model (without overdispersion). 
+
+```{r, echo = F}
+
+## START PART II QUESTION 5 PART E ##
+
+# Fitting a quasi binomial model. 
+dues_mod_quasi <- glm(norenewal ~ dueincrease, data = dues_data, 
+                      family = quasibinomial(link = "logit"))
+
+broom.mixed::tidy(dues_mod_quasi, exp = T, conf.int = T) %>%
+  mutate(p.value = format.pval(p.value)) %>%
+  dplyr::select(term,estimate,std.error,conf.low,conf.high,p.value) %>%
+  kbl(digits = 4, booktabs = T, align = "cc",
+      caption = "Nonrenewal Quasi-Binomial Regression - Exponentiated",
+      col.names = c("Term","Estimate","Std.Error",
+                    "95% Conf.Low","95% Conf.High","P-Value")) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+# Calculating the dispersion.
+dispersion <- dues_mod_quasi$deviance / dues_mod_quasi$df.residual
+
+## FINISH PART II QUESTION 5 PART E ##
+
+### FINISH PART II QUESTION 5 CODE ### 
+
+```
+Taking the ratio of deviance and residual degrees of freedom returns 1.34. This is below the general threshold of 1.5, meaning that over dispersion is likely not an issue for this data set. 
+
+Comparing the two models:
+
+* Intercept- Logistic(Exp. Est.:0.0082; SD:2.6558); Quasi-Binomial(Exp. Est.:0.0082; SD:2.7537). The estimates are the same, but the standard error is larger in the Quasi-Binomial model. This is likely due to the Quasi-Binomial adjusting for the small amount of overdispersion that is present in the model. 
+
+* Due Increase - Logistic(Exp. Est.:1.1332; SD:0.0668); Quasi-Binomial(Exp. Est.:1.1332; SD:0.0692). Thes estimates are the same, but the standard error is larger in the Quasi-Binomial model. As above, this may be due to the Quasi-Binomial adjusting for the small amount of overdispersion that is present in the model. 
+
 

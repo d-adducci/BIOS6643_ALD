@@ -2,7 +2,7 @@
 title: "Homework 5 - BIOS 6643"
 author: "Dominic Adducci"
 date: "2023-09-28"
-output: pdf_document
+header-includes: \usepackage{pdfpages}
 ---
 
 ```{r, echo = F, message = F, include = F}
@@ -13,6 +13,7 @@ library(lmerTest)
 library(broom.mixed)
 library(kableExtra)
 library(MASS)
+library(table1)
 
 ```
 
@@ -22,7 +23,7 @@ We received data on the blood levels of measles vaccine titers collected randoml
 \
 Conduct a preliminary data investigation on the titer data. Analysis will be conducted on the log scale. Please make graphs on this scale. Include in your homework submission 2-3 graphs and a summary table that you believe describes the data. Interpret both the graphs and the summary data in a paragraph. 
 
-```{r, echo = F}
+```{r, echo = F, message = F}
 
 ### START QUESTION 1 CODE ###
 
@@ -56,13 +57,45 @@ measles_spaghetti <- ggplot(measles_data,aes(x = Age_At_Draw,
 measles_spaghetti
 
 ```
+\
+The above plot shows the relationship between the logged value of average measles antibody titer versus age, where each subject has their different time points connected by a line. In general there seems to be more variation between subjects compared to within subjects. 
 
 ```{r, echo = F}
 
+# Making blocks for age groups. 
+measles_age_blocks <- measles_data %>%
+  mutate(age_block = case_when(
+    Age_At_Draw >= 22.66 & Age_At_Draw<30 ~ "20-30",
+    Age_At_Draw >= 30 & Age_At_Draw<40~ "30-40",
+    Age_At_Draw >= 40 & Age_At_Draw<50~ "40-50",
+    Age_At_Draw >= 50 & Age_At_Draw<60~ "50-60",
+    Age_At_Draw >= 60 & Age_At_Draw<70~ "60+"
+  ))
 
+# Making boxplots for age groups.
+age_blocks_bp <- ggplot(measles_age_blocks, aes(x = age_block, 
+                                                y = Avg_Titer_Log)) +
+  geom_boxplot() +
+  labs(title = "Boxplots of Age Groups",
+       y = "Log(Avg. Titer)", x = "Age Group") +
+  theme_bw()
+
+age_blocks_bp
+```
+\
+The plot above shows the boxplots of measles antibody titers for different age groups. The 20-30 age group has the lowest mean and widest interquartile range. Average titer increases until ages 40-50, after which it slightly decreases as age progresses. There is a stabilization of measles titers after subjects reach the age group of 40-50. 
+```{r, echo = F}
+
+table_1_measles <- table1(~Avg_Titer_Log | age_block, measles_age_blocks,
+                          caption = "Table 1: Descriptive Statistics")
+
+table_1_measles
+
+### FINISH QUESTION 1 CODE ###
 
 ```
-
+\
+The table above shows the mean and median of average log titer for each age group. As shown in the boxplot there is an increase in average titer as age increases until the 30-40 group, after which there is a slight decrease but overall stabilization of titers. Age groups 20-30 and 60+ have the least amount of subjects compared to the intermediate age groups. 
 
 # Question 2: Random Intercept Model
 
@@ -157,12 +190,12 @@ ri_comp_table
 
 ```
 \
-The REML method has a slightly higher intercept coefficient and a slightly lower "Age At Draw" coefficient compared to the ML method. The REML method also has a slightly wider 95\% CI for the intercept term and a slightly narrower 95\% CI for the "Age At Draw" term compared to the ML method. The p-value for the intercept term is effectively the same and significant between both methods. The p-value for the "Age At Draw" term is slightly lower for the ML method, but neither REML or ML have a significant "Age At Draw" coefficient. Because the ML method tends to have a downward bias for variance the intercept for the ML method has narrower 95\% confidence intervals compared to the REML method for the model fitting a random slope. 
+The REML method has a slightly higher intercept coefficient and a slightly lower "Age At Draw" coefficient compared to the ML method. The REML method also has a slightly wider 95\% CI for the intercept term and a slightly narrower 95\% CI for the "Age At Draw" term compared to the ML method. The p-value for the intercept term is effectively the same and significant between both methods. The p-value for the "Age At Draw" term is slightly lower for the ML method, but neither REML or ML have a significant "Age At Draw" coefficient. Because the ML method tends to have a downward bias for variance the intercept for the ML method has narrower 95\% confidence intervals compared to the REML method for the model fitting a random intercept. 
 
 #### Part F
 Interpret these findings in 1-2 sentences. 
 
-Both models have approximately the same output. The intercept of 9.10 is the expected log of the average titer at age 0, which is significant in both models with p-values <0.001. The "Age At Draw" coefficient is the expected change in titer as age progresses each year, with the coefficient meaning there is an expected increase of 0.005 in log of titer each year. This coefficient is insignificant with a p-value >0.05. 
+Both models have approximately the same output, different confidence intervals (see above for explanation). The intercept of 9.10 is the expected log of the average titer at age 0, which is significant in both models with p-values <0.001. The "Age At Draw" coefficient is the expected change in titer as age progresses each year, with the coefficient meaning there is an expected increase of 0.005 in log of titer each year. This coefficient is insignificant with a p-value >0.05. 
 
 #### Part G
 What test was used to generate the p-value and what were the denominator DF? 
@@ -210,7 +243,7 @@ $G_i$ and $R_i$ are both from the model summary. $V_i$ is the summation of these
 
 * $G_i$ = 2.0834
 * $R_i$ = $\sigma_e$ = 0.1154; This estimate will be in a matrix with the format $\sigma_e I_n$
-* $V_i$ = 2.1988; This estimate will be in a matrix with dimensions (nx1). 
+* $V_i$ = Diagonal = 2.1988; off diagonal = 2.0834; 4This estimate will be in a matrix with dimensions (nx1). 
 
 **ML**
 
@@ -218,9 +251,9 @@ $G_i$ and $R_i$ are both from the model summary. $V_i$ is the summation of these
 
 * $G_i$ = 2.0299
 * $R_i$ = $\sigma_e$ = 0.1151; This estimate will be in a matrix with the format $\sigma_e I_n$
-* $V_i$ = 2.1450; This estimate will be in a matrix with dimensions (nxn). 
+* $V_i$ = Diagnoal= 2.1450; off diagonal = 2.0299; These estimates will be in a matrix with dimensions (nxn). 
 
-The estimates from the ML method will be more biased (downward). 
+The estimates from the ML method will be more biased (downward). This is because the variance values are determined using the estimates of the means.  
 
 #### Part J
 Compute the ICC and interpret. What source of variation is largest, within or between subject variation? $G_i$ is the between subject variation, $R_I$ is the within subject variation, and $V_i$ is the total variation for a specific subject. 
@@ -238,7 +271,7 @@ In the ML method there is more between subject variation compared to within subj
 #### Part K
 Using the ML estimates, create the EBLUP and the fitted estimates. The individual fitted values of the outcome are a weighted combination of two quantities. What are these two quantities? What determines the weight of the individual estimate towards each of the quantities? 
 
-```{r, echo = F}
+```{r}
 
 ## START QUESTION 2 PART K CODE ##
 
@@ -285,6 +318,7 @@ measles_ri_fit_plot
 
 ```
 
+The plot is capturing the different starting values for each subject well, as there is a significant amount of variance between subjects which the average value does not show. Because there is less within subject variation the inclusion of only a random intercept still performs well. 
 
 # Question 3
 
@@ -313,7 +347,7 @@ G_i =
 \end{bmatrix}
 =
 \begin{bmatrix}
-  \sigma_0^2 & \sigma_{01}^2 \\
+  \sigma_0^2 & \sigma_{01} \\
   \sigma_{10} & \sigma_1^2
 \end{bmatrix}
 $$
@@ -383,7 +417,7 @@ ri_rs_comp_table
 
 ```
 
-The REML method had a slightly lower intercept and a slightly higher "Age At Draw" coefficient. Intercepts were significant in both models and "Age At Draw" coefficients were insignificant in both models. Additionally the ML model gave a warning concerning convergence. Because the variance estimate of the ML method tends to be biased downwards this is why the 95\% confidence intervals of the ML method are slightly narrower here after fitting both a random slope and a random intercept. 
+The REML method had a slightly lower intercept and a slightly higher "Age At Draw" coefficient. Intercepts were significant in both models and "Age At Draw" coefficients were insignificant in both models. Additionally the ML model gave a warning concerning convergence so the optimizer was changed within the function. Because the variance estimate of the ML method tends to be biased downwards this is why the 95\% confidence intervals of the ML method are slightly narrower here after fitting both a random slope and a random intercept. 
 
 #### Part E
 Interpret these finding in 1-2 sentences.
@@ -398,12 +432,14 @@ For both the REML and ML methods the Satterthwaite's method was used to generate
 #### Part G
 How did the denominator DF in the test statistic differ between the random intercept and random slope model? Explain what is happening here (if anything). 
 
-For the test statistics denominator DF in the random intercept only model was closer to the number of subjects. Once a random slope was added to the model the test statistic denominator DF was closer to the number of subjects. This makes sense as fitting a random slope for each subjects uses up DF, and inferences on slope are collapsed closer to the number of subjects compared to the number of observations after random slopes are fitted. 
+For the test statistics the denominator DF in the random intercept only model was closer to the number of subjects. Once a random slope was added to the model the test statistic denominator DF was closer to the number of subjects. This makes sense as fitting a random slope for each subjects uses up DF, and inferences on slope are collapsed closer to the number of subjects compared to the number of observations after random slopes are fitted. 
 
 #### Part H
 Use the anova package to test the significance of the slope on age using a Satterthwaite and a Kenward-Roger DF adjustment for the REML model. Present and compare the denominator DF. Provide a 1-2 sentence intuitive answer as to why they differ (or are similar). Were there any differences in your conclusions between these different testing approaches. 
 
 ```{r, echo = F}
+
+## START QUESTION 3 PART H CODE ##
 
 satterthwaite_ri_rs_reml <- anova(measles_ri_rs_reml,ddf = "Satterthwaite")
 
@@ -423,8 +459,10 @@ ri_rs_reml_df_tbl <- kbl(ri_rs_reml_df,
 
 ri_rs_reml_df_tbl
 
+## FINISH QUESTION 2 PART H CODE ##
+
 ```
-The DDF for the Satterthwaite method is less than the Kenward-Roger method. Because a random slope was fitted this grouped data for the slope from being individual observations as it was in the random intercept only model to being observations within subjects as age progressed. This reduction accounts for both the DDF being closer to the number of subjects instead of the number of observations, as well as the difference in DDF observed between the two methods. Due to unbalanced data between subjects the Kenward-Roger method should be chosen. The p-values are very close however, and neither is statistically significant. 
+The DDF for the Satterthwaite method is less than the Kenward-Roger method. Because a random slope was fitted the degrees of freedom in was closer to the number of subjects, as opposed to the random intercept only model which had a DDF closer to the number of observations. Due to unbalanced data between subjects the Kenward-Roger method should be chosen. The p-values are very close however, and neither is statistically significant. 
 
 #### Part I
 Were there any differences between tests and denominator DF between the random intercept and random slope models? Explain.
@@ -522,7 +560,7 @@ $$ICC(Slope) = \frac{\sigma_{b1}^2}{\sigma_{b0}^2+\sigma_{b1}^2+\sigma_e^2}=\fra
 The ICC for slope is very small meaning that almost none of the variance is due to the random effect on slope. This means that there is not a lot of variance in the slopes between subjects. 
 
 $$ICC(Intercept) = \frac{\sigma_{b0}^2}{\sigma_{b0}^2+\sigma_{b1}^2+\sigma_e^2}=\frac{10.891284}{10.891284+0.005917+0.060546}=0.994$$
-The ICC for the intercept accounts for nearly of the variance in the model. This means that there is a lot of variance in the intercepts between subjects. In other words, subjects start at vastly different average titer levels. 
+The ICC for the intercept accounts for nearly all of the variance in the model. This means that there is a lot of variance in the intercepts between subjects. In other words, subjects start at vastly different average titer levels. 
 
 #### Part L
 Using the ML estimates, create the EBLUP and the fitted estimates. There is nothing to turn in for this question but the code. 
@@ -591,10 +629,16 @@ Using a random intercept/slope model allows for each subject to be modeled separ
 
 # Part 2
 
+```{r out.height = "460px", out.width='800px', echo=F}
+knitr::include_graphics("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 5/SKM_C450i23101817320.pdf")
+```
+
 
 ## Question 3
 
 ```{r, echo = F}
+
+### START PART II QUESTION 3 CODE
 
 # Loading in data.
 cereal_raw <- read.csv("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 5/Cereal2.csv")
@@ -612,6 +656,8 @@ Use a Poisson GLM (i.e. Poisson regression) to estimate the association between 
 
 ```{r, echo = F}
 
+## START PART II QUESTION 3 PART A CODE ##
+
 poisson_mod <- glm(C1 ~ Cond + Sex + Wt1, 
                    family = poisson, data = cereal_data)
 
@@ -623,6 +669,8 @@ broom.mixed::tidy(poisson_mod, exp = T, conf.int = T) %>%
       col.names = c("Term","Estimate","Std.Error",
                     "95% Conf.Low","95% Conf.High","P-Value")) %>%
   kable_styling(latex_options = "HOLD_position")
+
+## FINISH PART II QUESTION 3 PART A CODE ##
 
 ```
 
@@ -639,6 +687,8 @@ Repeat (a) allowing for overdispersion by using quasilikelihood with the Poisson
 
 ```{r, echo = F}
 
+## START PART II QUESTION 3 PART B CODE ##
+
 quasipoisson_mod <- glm(C1 ~ Cond + Sex + Wt1, 
                    family = quasipoisson, data = cereal_data)
 
@@ -650,6 +700,8 @@ broom.mixed::tidy(quasipoisson_mod, exp = T, conf.int = T) %>%
       col.names = c("Term","Estimate","Std.Error",
                     "95% Conf.Low","95% Conf.High","P-Value")) %>%
   kable_styling(latex_options = "HOLD_position")
+
+## FINISH PART II QUESTION 3 PART B CODE ##
 
 ```
 
@@ -666,6 +718,8 @@ Repeat (a) allowing for overdispersion by adding a random normal error to the li
 
 ```{r, echo = F}
 
+## START PART II QUESTION 3 PART C CODE ##
+
 ml_poisson_mod <- glmer(C1 ~ Cond + Sex + Wt1 + (1| FamIDNO),
                         family = poisson, data = cereal_data)
 
@@ -677,6 +731,8 @@ broom.mixed::tidy(ml_poisson_mod, exp = T, conf.int = T)[c(1:4),]%>%
       col.names = c("Term","Estimate","Std.Error",
                     "95% Conf.Low","95% Conf.High","P-Value")) %>%
   kable_styling(latex_options = "HOLD_position")
+
+## FINISH PART II QUESTION 3 PART C CODE ##
 
 ```
 
@@ -693,6 +749,8 @@ Repeat (a) allowing for overdispersion by using a Negative Binomial GLM estimate
 
 ```{r, echo = F}
 
+## START PART II QUESTION 3 PART D CODE ##
+
 negbinom_mod <- glm.nb(C1 ~ Cond + Sex + Wt1,
                        data = cereal_data, link = "log") 
 
@@ -704,6 +762,10 @@ broom.mixed::tidy(negbinom_mod, exp = T, conf.int = T) %>%
       col.names = c("Term","Estimate","Std.Error",
                     "95% Conf.Low","95% Conf.High","P-Value")) %>%
   kable_styling(latex_options = "HOLD_position")
+
+## FINISH PART II QUESTION 3 PART D CODE ##
+
+### FINISH PART II QUESTION 3 CODE ###
 
 ```
 
@@ -854,4 +916,7 @@ Comparing the two models:
 
 * Due Increase - Logistic(Exp. Est.:1.1332; SD:0.0668); Quasi-Binomial(Exp. Est.:1.1332; SD:0.0692). Thes estimates are the same, but the standard error is larger in the Quasi-Binomial model. As above, this may be due to the Quasi-Binomial adjusting for the small amount of overdispersion that is present in the model. 
 
+# Code
 
+```{r, ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+```

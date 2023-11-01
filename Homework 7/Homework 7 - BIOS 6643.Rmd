@@ -44,6 +44,23 @@ $$
 
 ## Exam Q4
 
+The MLE of the beta coefficients conditional on alpha (the parameters in the variance) is: $\hat{\beta}(\alpha)=\Sigma_i^NX_i^TV_i^{-1}(\alpha)X_i^{-1}\Sigma_i^NX_i^TV_i^{-1}(\alpha)Y_i$. Since $\alpha$ is unknown we need to estimate it. What are the two approaches commonly used to estimate $\alpha$? List a strength and a weakness for each approaches. 
+
+The two approaches are Maximum Likelihood (ML) and Restricted Maximum Likelihood (REML). 
+
+**MLE**
+
+Strength: LRT is applicable when using ML, allowing for more robust hypothesis testing. 
+
+Weakness: Variance estimates are biased downward by a factor of (n-p)/p. This is more significant with smaller sample sizes. 
+
+**REML**
+
+Strength: Removes $\beta$ from variance estimates, negating the bias present with the ML method, providing an unbiased estimate for $\alpha$. 
+
+Weakness: Not under full theory framework, do not have likelihood for a LRT due to restricted variance. 
+
+
 
 ## Question 1
 We have learned that for marginal GLM modeling we use GEE for estimation. GEE is based on defining moments (mean and varience and pairwise correlations) and a least squares like objective function rather than writing down a full joint likelihood and using MLE. In 2-3 sentences, explain the advantages of GEE compared to MLE in this context. 

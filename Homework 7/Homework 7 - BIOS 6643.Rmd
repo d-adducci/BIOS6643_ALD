@@ -15,6 +15,34 @@ library(kableExtra)
 library(table1)
 
 ```
+## Exam Q3
+Write out the likelihood for this marginal model. What is the distribution of the outcome for subject i including the mean and variance? Write out the structure of the marginal variance. From the previous question on the exam the model was a linear mixed effects model with a linear trend for observation year and use a marginal compound symmetry model to incorporate correlation between the cognitive measures on the same person. 
+
+Likelihood:
+$$\frac{1}{(2\pi)^{n_i}}|V_i|^{-1/2}(\alpha)|exp\left[-\frac{1}{2}(Y_i-X_i\beta)^TV_i(\alpha)^{-1}(Y_i-X_i\beta)\right]$$
+Mean:
+$$E[Y_{i}]=X_i\beta$$
+Variance:
+$$Var[Y_{i}]=R_i$$
+Where $i = 1...N$; N = Number of subjects. 
+
+Marginal variance structure:
+$$
+CS = R_i =
+\begin{bmatrix}
+  \sigma_1^2 + \sigma^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 \\
+  \sigma_1^2 & \sigma_1^2 + \sigma^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 \\
+  \sigma_1^2 & \sigma_1^2 & \sigma_1^2 + \sigma^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 \\
+  \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 + \sigma^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 \\
+  \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 + \sigma^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 \\
+  \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 + \sigma^2 & \sigma_1^2 & \sigma_1^2 \\
+  \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 + \sigma^2 & \sigma_1^2 \\
+  \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 + \sigma^2
+  
+\end{bmatrix}
+$$
+
+## Exam Q4
 
 
 ## Question 1
@@ -23,7 +51,16 @@ We have learned that for marginal GLM modeling we use GEE for estimation. GEE is
 The advantage of GEE compared to MLE in this context is that GEE does not require a distributional assumption. This means the GEE model is simpler compared to the GLM model because the GLM requires specifying the distribution. 
 
 ## Question 2
-
+On page 358 in FLW it states at the end of the development of the sandwich estimator that if we model $V_i$ correctly, meaning the working correlation structure is correct and $V_i = \Sigma_i$, and $Cov(\hat{\beta})=B^{-1}$ instead of $Cov(\hat{\beta})=B^{-1}MB^{-1}$, where $B$ and $M$ are defined at the top of page 358 in your book. Show that this equality is true. 
+$$B = \Sigma_i^N D_i^TV_i^{-1}D_i$$
+$$M = \Sigma_i^ND_i^TV_i^{-1}Cov(Y_i)V_i^{-1}D_i$$
+$$V_i = \Sigma_i^N = Cov(Y_i)$$
+$$Cov(\hat{\beta})=B^{-1}MB^{-1}$$
+Simplifying M:
+$$M = \Sigma_i^N D_i^TV_i^{-1}V_iV_i^{-1}D_i=\Sigma_i^ND_i^TV_i^{-1}D_i=B$$
+Plugging in M for the covariance equation: 
+$$Cov(\hat{\beta}) = B^{-1}MB^{-1}=B^{-1}BB^{-1}=B^{-1}I=B^{-1}$$
+Because $BB^{-1}$ is equal to the identity matrix. 
 
 ## Question 3
 A study is planned where data will be collected on asthmatic subjects on every weekday for one month. There are two outcome measures of interest, (i) medication use counts and (ii) FEV1. You are the statistician and the PI is looking for your suggestions about models to use. 

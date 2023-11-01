@@ -7,7 +7,7 @@ output:
     df_print: paged
 ---
 
-```{r, echo = F}
+```{r, echo = F, message = F}
 
 library(tidyverse)
 library(mmmgee)
@@ -274,7 +274,13 @@ Epileptic Seizure Study of a randomized trail reported in Thall and Vail (1990).
 
 ```{r, echo = F, message = F}
 
-dat.sz_raw <- read_table("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 7/epilepsy.txt")
+### START QUESTION 5 CODE
+
+# Data location:
+# Desktop: "C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 7/epilepsy.txt"
+# Laptop: "C:/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ALD/BIOS6643_ALD/Homework 7/epilepsy.txt"
+
+dat.sz_raw <- read_table("C:/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ALD/BIOS6643_ALD/Homework 7/epilepsy.txt")
 
 # Factoring the trt variable. 
 dat.sz <- dat.sz_raw %>% mutate(trt = factor(trt))
@@ -295,13 +301,13 @@ What time trend do you want to use to model visit? Investigate several different
 
 There are 4 main approaches that can be used for modeling visit. 
 
-1. Factored visit no offset: Factoring visit will give the change between each visit as time progresses. Not including an offset would over inflate the number of seizures for week 0, although the fact that all subjects have the same 8-week period at the beginning of the trial may negate this as being an issue. In this scenario visit 0 would be the reference group against each subsequent 2 weeks of treatment. 
+1. Factored visit no offset: Factoring visit will give the change between each visit as time progresses. Not including an offset would over inflate the number of seizures for week 0, although the fact that all subjects have the same 8-week period at the beginning of the trial may negate this as being an issue. In this scenario visit 0 would be the reference group against each subsequent 2 weeks of treatment. Age will also be controlled for in this model. 
 
-2. Factored visit with offset: Factoring visit and including an offset will account for visit 0 have 8 weeks while all other visits only have 2 weeks between each other. In this scenario visit 0 would be the reference again. Again baseline measurement of seizures will be controlled for. 
+2. Factored visit with offset: Factoring visit and including an offset will account for visit 0 have 8 weeks while all other visits only have 2 weeks between each other. In this scenario visit 0 would be the reference again. Again baseline measurement of seizures will be controlled for. Age will also be controlled for in this model. 
 
-3. Continuous visit with no offset: Having a continuous visit variable means that there will only be one coefficient for visit. Again baseline measurements will be controlled for. In this scenario not including an offset for visit 0 may be a problem. 
+3. Continuous visit with no offset: Having a continuous visit variable means that there will only be one coefficient for visit. Again baseline measurements will be controlled for. In this scenario not including an offset for visit 0 may be a problem. Age will also be controlled for in this model. 
 
-4. Continuous visit with offset: Including an offset would account for visit 0 having 8 weeks instead of 2. Similar to option 3, this model will only have a single variable for visit. 
+4. Continuous visit with offset: Including an offset would account for visit 0 having 8 weeks instead of 2. Similar to option 3, this model will only have a single variable for visit. Age will also be controlled for in this model. 
 
 Overall if the investigators were interested in tracking the change for each specific visit option 2 may be the best option. If they were only interested in general change for increasing visits then option 4 would be preferable. 
 
@@ -315,10 +321,14 @@ Do you see any evidence of a need for over dispersion based on summary statistic
 
 ```{r, echo = F, warning = F}
 
+## START QUESTION 5 PART C CODE ##
+
 seizure_summary <- table1(~ seize | visit*trt, dat.sz,
                           caption = "Summary Statistics: Seizure Data")
 
 seizure_summary
+
+## FINISHE QUESTION 5 PART C CODE ##
 
 ```
 \
@@ -330,7 +340,64 @@ Do you actually need to incorporate overdispersion in a GEE model? Explain.
 In general no you do not need to incorporate overdispersion in a GEE model. The GEE model already has a quasi-likelihood, and can incorporate the overdispersion that exists in the data set. 
 
 #### Part E
+Fit a marginal GEE model to these data with treatment, linear time, and an interaction with treatment and time. Provide code and summary output. 
+
+```{r, echo = T}
+
+## START QUESTION 5 PART E CODE ##
+
+# Fitting a GEE model for the number of seizures. 
+seizure_mod <- geem2(seize ~ trt + visit + age + trt:visit, data = dat.sz, 
+                     id = dat.sz$subj, family = poisson(link = "log"))
+
+summary(seizure_mod)
+
+## FINISH QUESTION 5 PART E CODE ##
+
+```
+
+#### PART F
+Test whether there is an interaction between time and treatment and interpret the interaction if it is significant. If not, refit the model removing the interaction and interpret the model with just the main effects. Include point estimates, 95\% CI, and p-values with statistical conclusions. 
+
+The p-value for the interaction term is 0.54, meaning that it is not significant. If it were significant the interpretation would be the difference in expected seizures as visit increases for treatment compared to the placebo. In other words if the interaction had been significant it would incorporate the additional decrease in seizures for the treatment group as visits number increased. 
+
+```{r, echo = F}
+
+## START QUESTION 5 PART F CODE ##
+
+# Model which excludes the interaction term. 
+seizure_mod2 <- geem2(seize ~ trt + visit + age, data = dat.sz, 
+                     id = dat.sz$subj, family = poisson(link = "log"))
+
+seizure_mod2_sum <- summary(seizure_mod2)
+
+# Calculating the treatment rate and confidence intervals. 
+trt_rate <- exp(seizure_mod2_sum$coef[2,1])
+
+trt_lower <- exp(seizure_mod2_sum$coef[2,1] - seizure_mod2_sum$coef[2,3]*1.96)
+
+trt_upper <- exp(seizure_mod2_sum$coef[2,1] + seizure_mod2_sum$coef[2,3]*1.96)
+
+# Calculating the visit rate confidence intervals. 
+visit_rate <- exp(seizure_mod2_sum$coef[3,])
+
+visit_lower <- exp(seizure_mod2_sum$coef[3,1] - seizure_mod2_sum$coef[3,3]*1.96)
+
+visit_upper <- exp(seizure_mod2_sum$coef[3,1] + seizure_mod2_sum$coef[3,3]*1.96)
+
+seizure_mod2_sum
+
+## FINISH QUESTION 5 PART F CODE ##
+
+### FINISH QUESTION 5 CODE ###
 
 
 
+```
+The above printout shows the results of the GEE model with only main effects. For the treatment coefficient the rate of seizures is `r trt_rate` (95\% CI:`r trt_lower`,`r trt_upper`), meaning that the rate of seizures for the treatment group is 0.97 the rate for the placebo group. The p-value is insignificant at 0.923, meaning the outcomes for the treatment group are not significantly different from the non-treatment group. For the visit coefficient the rate of seizures is `r visit_rate` (95\% CI:`r visit_lower`,`r visit_upper`), meaning that the rate of seizures for each visit is 0.67 the rate of seizures as visit number. 
 
+
+
+# Code
+```{r, ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+```

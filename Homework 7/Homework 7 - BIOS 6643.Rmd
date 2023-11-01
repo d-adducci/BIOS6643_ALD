@@ -1,0 +1,282 @@
+---
+title: "Homework 7 - BIOS 6643"
+author: "Dominic Adducci"
+date: "2023-10-31"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r, echo = F}
+
+library(tidyverse)
+library(mmmgee)
+library(kableExtra)
+library(table1)
+
+```
+
+
+## Question 1
+We have learned that for marginal GLM modeling we use GEE for estimation. GEE is based on defining moments (mean and varience and pairwise correlations) and a least squares like objective function rather than writing down a full joint likelihood and using MLE. In 2-3 sentences, explain the advantages of GEE compared to MLE in this context. 
+
+The advantage of GEE compared to MLE in this context is that GEE does not require a distributional assumption. This means the GEE model is simpler compared to the GLM model because the GLM requires specifying the distribution. 
+
+## Question 2
+
+
+## Question 3
+A study is planned where data will be collected on asthmatic subjects on every weekday for one month. There are two outcome measures of interest, (i) medication use counts and (ii) FEV1. You are the statistician and the PI is looking for your suggestions about models to use. 
+
+#### Part A
+If it is anticipated that responses within subjects over time are serially correlated (but with some decay the further measurements are apart) for both outcomes, which R function (and package) would you suggest using to fit the data? 
+
+Outcome (i):
+
+The outcome of interest is count data. For this scenario we can use the "gls" function in R from the "nlme" package. Because this is count data we can specify the link function to be "poisson(link = "log")". Because there is some decay in correlation the further away measurements are apart an AR1 correlation structure will be used. 
+
+Outcome (ii):
+
+The outcome of interest in this case is continous. For this scenario we can use the "geem2" function in R from the "mmmgee" package. This is continous data meaning we do not need to specify the link function (the default in geem2 is gaussian). We can again specify the correlation as AR1 to account for the decay in correlation the further apart time points are. 
+
+#### Part B
+Suppose that we now consider an indicator of whether subjects are on medication A or medication B (A use = 0,B use = 1). The investigator is interested in population level effects of treatment use on the ouctomes. Will a marginal model have the correct interpretation of the treatment effects for each ouctomes? Explain. 
+
+Because of the way the medication variable is coded medication A will be the reference which medication B is compared against. The interpretation of treatment effect will be B relative to A. For outcome (i) the population level interpretation will relate to the number of times medication is needed for B compared to A. For outcome (ii) the population level interpretation will relate to the FEV1 value when using treatment B vs using treatment A. 
+
+#### Part C
+What are the drawbacks of using a marginal approach? 
+
+The drawbacks of a marginal approach are that you can only make population mean interpretation, you cannot make inferances on the subject level. 
+
+#### Part D
+Will the marginal approach allow us to quantify and study subject-to-subject variation in the weekly trends?
+
+No, you would not be able to quantify subject-to-subject variation within a treatment group because the marginal model only makes inferences for the population averages. In other words you can make inferences between treatments, but you cannot make inferences between subjects within the treatment groups. 
+
+## Question 4
+A randomized double blink trial of 294 patients was conducted to compare 2 oral treatments, corresponding to Itraconazole (treat=0) Terbinafine (treat=1), for toenail infection. The response variable was the binary indicator for presence of onycholysis (separation of the nail plate from the nail bed). Patients were evaluated for onycholysis at baseline (week 0) and at weeks 4,8,12,24,36, and 48. Suppose the interest is in finding the effect of treatment on changes in risk of onycholysis over time. Response is a binary indicator for moderate or severe (response=1) versus none or mild (response=0) onycholysis. 
+
+#### Part A
+Fit a GEE model with month and the interaction between treatment and month, and fit the model using three different working correlation structures (AR(1), independence, and exchangeable). Assume that there is no difference between treatments at baseline. Assume the scale parameter $\phi = 1$. Interpret the results of the AR(1) model. 
+
+```{r, echo = F, message = F}
+
+### START QUESTION 4 CODE ###
+
+## START QUESTION 4 PART A ##
+
+# Reading in data.
+onycholysis_data_raw <- read_table("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 7/toenail-data.txt")
+
+onycholysis_data <- onycholysis_data_raw %>%
+  mutate(treat = factor(treat))
+
+# geem2 was saying id not the same dimension as the data frame. I extracted
+# out the ids as a vector and set that for the id parameter in geem2. 
+id_vector <- onycholysis_data$id
+
+```
+
+AR(1) Model:
+
+```{r, echo = T}
+
+onycholysis_ar1 <- geem2(response ~ month + treat:month, id = id_vector,
+                        data = onycholysis_data,
+                        family = binomial(link = "logit"),
+                        corstr = "ar1", init.phi = 1, scale.fix = TRUE)
+
+onycholysis_ar1_sum <- summary(onycholysis_ar1)
+
+# 95% CI for the month estimate.
+month_lower <- exp(onycholysis_ar1_sum$coef[2,1] - 
+                     onycholysis_ar1_sum$coef[2,3]*1.96)
+
+month_upper <- exp(onycholysis_ar1_sum$coef[2,1] + 
+                     onycholysis_ar1_sum$coef[2,3]*1.96)
+
+# 95% CI for the month:treat1 coefficient.
+month_trt_lower <- exp(onycholysis_ar1_sum$coef[3,1] - 
+                         onycholysis_ar1_sum$coef[3,3]*1.96)
+
+month_trt_upper <- exp(onycholysis_ar1_sum$coef[3,1] + 
+                         onycholysis_ar1_sum$coef[3,3]*1.96)
+
+onycholysis_ar1_sum
+
+```
+For the AR(1) model:
+
+* $e^{\beta_{month}}=e^{-0.14057} = 0.869$: This means that for each month after starting treatment the odds ratio of having an event (moderate or severe onycholysis) is 0.869 times the risk of the previous month. The odds ratio have a 95\% CI of (`r month_lower`,`r month_upper`), and a significant p-value <0.001. 
+
+* $e^{\beta_{month:treat1}}=e^{-0.09053} = 0.913$: This means that for each additional month treatment 1 (Terbinafine) has an odds ratio of an event (moderate or severe onycholysis) 0.913 times the risk when using treatment 0 (Itraconazole). The odds ratio have a 95\% CI of (`r month_trt_lower`,`r month_trt_upper`), and a significant p-value of 0.044. 
+
+Independence Model: 
+
+```{r, echo = T}
+
+onycholysis_ind <- geem2(response ~ month + treat:month, id = id_vector,
+                        data = onycholysis_data,
+                        family = binomial(link = "logit"),
+                        corstr = "independence", init.phi = 1, scale.fix = TRUE)
+
+onycholysis_ind_sum <- summary(onycholysis_ind)
+
+onycholysis_ind_sum
+
+```
+
+Exchangeable Model:
+
+```{r, echo = T}
+
+onycholysis_exch <- geem2(response ~ month + treat:month, id = id_vector,
+                        data = onycholysis_data,
+                        family = binomial(link = "logit"),
+                        corstr = "exchangeable", init.phi = 1, scale.fix = TRUE)
+
+onycholysis_exch_sum <- summary(onycholysis_exch)
+
+onycholysis_exch_sum
+
+## FINISH QUESTION 4 PART A CODE ##
+
+```
+
+#### Part B
+Compare the efficiency of the estimates using the different correlation structures (efficiency is related to the SE estimates). Were there any differences in the SE's, which one was smallest, largest. Explain why you think they are different and which working structure you would choose as your primary analysis and why. 
+
+```{r, echo = F}
+
+## START QUESTION 4 PART B CODE ##
+
+efficiency_df <- data.frame(term = c("Beta_0","Beta_month",
+                                     "Beta_trt:month"),
+                            ar_1 = c(0.12592,0.02587,0.04495),
+                            independence = c(0.12524,0.02917,0.04753),
+                            exchangeable = c(0.13039,0.02956,0.05378))
+
+efficiency_df <- kbl(efficiency_df,
+                     caption = "Robust Standard Errors",
+                     col.names = c("Term","AR(1)","Independence",
+                                   "Exchangeable"),
+                     booktabs = T, align = "cc") %>%
+  kable_styling(latex_options = "HOLD_position")
+
+efficiency_df
+
+## FINISH QUESTION 4 PART B CODE ##
+
+```
+For the $B_0$ term the independence correlation structure had the smallest (most efficient) SE, followed closely by AR(1), and lastly by the exchangeable structure. For the $B_{trt}$ and the $B_{trt:month}$ terms the AR(1) correlation structure had the smallest (most efficient) SEs, followed by independence and exchangeable. Exchangeable has the largest error because time has an effect on the outcome. Exchangeable does not take that into account. Between independent and AR(1) correlation structures AR(1) performs better which may be due to further time points having less correlation with each other. For this analysis I would choose the AR(1) structure. 
+
+#### Part C
+Did the data structure meet the assumptions of when GEE performs best? If not what biases might be in your analysis and why?
+
+Assumptions:
+
+* Large number of individuals: There are 294 subjects in this data set, which satisfies this assumption. 
+* Missing data: There is not any missing data in this data set, satisfying this assumption. 
+* Same number of observations: This assumption may be violated. The histogram below shows that most subjects have 7 observations, but some have fewer observations. The amount of subjects with less than 7 observations is not too significant so this may not be an issue. 
+
+```{r, echo = F, message = F}
+
+obs_count <- onycholysis_data %>% dplyr::group_by(id) %>% summarise(Count = n())
+
+obs_count_plot <- ggplot(obs_count, aes(x = Count)) +
+  geom_histogram() +
+  labs(title = "Histogram of Observations for Subjects",
+       x = "Observations for Subjects", y = "Frequencey") +
+  theme_bw()
+
+obs_count_plot
+
+```
+\
+The above plot shows the number of observations for individual subjects. 
+
+#### Part D
+Write up the model notation for the AR(1) model. Include the outcome, expected value of the outcome, variance of the outcome, and pairwise correlation function, systematic component specific to your model, and the link function. Define all subscripts (i's and j's, number of people, observations on a person). 
+
+
+Outcome:
+$$Y_{ij} \sim Bernoulli(\mu_{ij})$$
+Expected Value:
+$$E[Y_{ij}] = \mu_{ij}$$
+Variance:
+$$Var[Y_{ij}] = \mu_{ij}(1-\mu_{ij})$$
+Pairwise Correlation:
+$$Corr(Y_{ij},Y_{ik})= \alpha^{|k-j|}$$
+Systematic Component:
+$$\eta_{ij} = \beta_0 + \beta_{Month}Month_{ij} + \beta_{Trt:Month}Trt_{ij}Month_{ij} + \epsilon_{ij}$$
+Link Function:
+$$\eta_{ij} = log\left(\frac{\mu_{ij}}{1-\mu_{ij}}\right)$$
+$$i = 1...n;n=Number\,\,of\,\,subjects$$
+$$j=1...n_i;n_i = Number\,\,of\,\,Observations\,\,for\,\,a\,\,subject.$$
+
+## Question 5
+Epileptic Seizure Study of a randomized trail reported in Thall and Vail (1990). -59 subjects with epilepsy suffering from simple or partial seizures were assigned at random to receive either the anti-epileptic drug progabide or a placebo in addition to a standard chemotherapy regimen all were taken. Fit a marginal GEE model to assess whether treatment modifies the time pattern. 
+
+```{r, echo = F, message = F}
+
+dat.sz_raw <- read_table("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 7/epilepsy.txt")
+
+# Factoring the trt variable. 
+dat.sz <- dat.sz_raw %>% mutate(trt = factor(trt))
+
+# Creating other covariates. dat.sz$o is the number of weeeks in the observation
+# time (8 weeks or 2 weeks). 
+dat.sz$o <- 8*(dat.sz$visit==0)+2*(dat.sz$visit>0)
+
+# Creates an offset for the difference in the number of weeks for each obs.
+dat.sz$logo <- log(dat.sz$o)
+dat.sz$vm0 <- as.numeric(dat.sz$visit>0)
+
+
+```
+
+#### Part A
+What time trend do you want to use to model visit? Investigate several different approaches and justify. 
+
+There are 4 main approaches that can be used for modeling visit. 
+
+1. Factored visit no offset: Factoring visit will give the change between each visit as time progresses. Not including an offset would over inflate the number of seizures for week 0, although the fact that all subjects have the same 8-week period at the beginning of the trial may negate this as being an issue. In this scenario visit 0 would be the reference group against each subsequent 2 weeks of treatment. 
+
+2. Factored visit with offset: Factoring visit and including an offset will account for visit 0 have 8 weeks while all other visits only have 2 weeks between each other. In this scenario visit 0 would be the reference again. Again baseline measurement of seizures will be controlled for. 
+
+3. Continuous visit with no offset: Having a continuous visit variable means that there will only be one coefficient for visit. Again baseline measurements will be controlled for. In this scenario not including an offset for visit 0 may be a problem. 
+
+4. Continuous visit with offset: Including an offset would account for visit 0 having 8 weeks instead of 2. Similar to option 3, this model will only have a single variable for visit. 
+
+Overall if the investigators were interested in tracking the change for each specific visit option 2 may be the best option. If they were only interested in general change for increasing visits then option 4 would be preferable. 
+
+#### Part B
+Do you need an offset for this model? Explain how you figured that out. 
+
+In this model an offset should be included. Visit 0 incorporating 8 weeks would over inflates the number of seizures for this time point. For factored visit this may be less of an issue because each subject has the same number of weeks for each visit. 
+
+#### Part C
+Do you see any evidence of a need for over dispersion based on summary statistics (mean and variance summary measures)? 
+
+```{r, echo = F, warning = F}
+
+seizure_summary <- table1(~ seize | visit*trt, dat.sz,
+                          caption = "Summary Statistics: Seizure Data")
+
+seizure_summary
+
+```
+\
+From the summary table we will need to account for overdispersion, as the variance is significantly larger than the mean. 
+
+#### Part D
+Do you actually need to incorporate overdispersion in a GEE model? Explain. 
+
+In general no you do not need to incorporate overdispersion in a GEE model. The GEE model already has a quasi-likelihood, and can incorporate the overdispersion that exists in the data set. 
+
+#### Part E
+
+
+
+

@@ -394,7 +394,7 @@ seizure_mod2_sum
 
 
 ```
-The above printout shows the results of the GEE model with only main effects. For the treatment coefficient the rate of seizures is `r trt_rate` (95\% CI:`r trt_lower`,`r trt_upper`), meaning that the rate of seizures for the treatment group is 0.97 the rate for the placebo group. The p-value is insignificant at 0.923, meaning the outcomes for the treatment group are not significantly different from the non-treatment group. For the visit coefficient the rate of seizures is `r visit_rate` (95\% CI:`r visit_lower`,`r visit_upper`), meaning that the rate of seizures for each visit is 0.67 the rate of seizures as visit number. 
+The above printout shows the results of the GEE model with only main effects. For the treatment coefficient the rate of seizures is `r trt_rate` (95\% CI:`r trt_lower`,`r trt_upper`), meaning that the rate of seizures for the treatment group is 0.97 the rate for the placebo group. The p-value is insignificant at 0.923, meaning the outcomes for the treatment group are not significantly different from the non-treatment group. For the visit coefficient the rate of seizures is `r visit_rate` (95\% CI:`r visit_lower`,`r visit_upper`), meaning that the rate of seizures for each visit is 0.67 the rate of seizures as visit number. Test
 
 
 

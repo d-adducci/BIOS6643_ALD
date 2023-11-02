@@ -1,0 +1,37 @@
+---
+title: "Homework 8 - BIOS 6643"
+author: "Dominic Adducci"
+date: "2023-11-02"
+output: html_document
+---
+
+```{r, echo = F, message = F}
+
+library(tidyverse)
+
+```
+
+
+
+## Question 1
+Write the generalized linear mixed model notation for the general case and for a model with one covariates and a random intercept, and one covariates and a random intercept and slope models for a count outcome. Define the distribution you will use, mean, variance, systematic component (for the three different models), and the random effects distribution. For the random effects define the different dimensions of the Normal distribution. 
+
+**Generalized Case**
+$$\eta_{ij} = X_{ij}^T\beta + Z_{ij}^Tb_i$$
+$$g(E[Y_{ij}|b_i]) = \eta_{ij}$$
+$$Var(Y_{ij}|b_i) = Var[E[Y_{ij}|b_i]]\phi$$
+* $i = 1...n$: where n is the number of subjects.
+* $j = 1...n_i$: $n_i$ number of observations for a subject.
+
+*Modle with one covariate and a random intercept:*
+A count outcome will require a Poisson model.  
+$$\eta_{ij} = \beta_0 + \beta_1X_{ij} + b_{i0} + \epsilon_{ij}$$
+$$log(E[Y_{ij}|b_i]) = n_{ij}$$
+$$Var[Y_{ij}|b_i] = \phi E[Y_{ij}|b_i]$$
+The distribution of the random effect is $b_i \sim N(0,G_i)$, where $G_i$ has dimensions of (qxq). Because this is an intercept only model q is equal to 1, so $G_i$ has dimensions of (1x1). 
+
+**Model with one covariate and a random intercept and slope:**
+This will again require a Poisson distribution.
+$$\eta_{ij} = \beta_0 + \beta_1X_{ij} + b_{i0} + b_{1j}X_{ij} + \epsilon_{ij}$$
+
+

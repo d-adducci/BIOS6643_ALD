@@ -26,9 +26,8 @@ Variance:
 $$Var[Y_{i}]=R_i$$
 Where $i = 1...N$; N = Number of subjects. 
 
-Marginal variance structure:
+Marginal variance structure $V_i = R_i$:
 $$
-CS = R_i =
 \begin{bmatrix}
   \sigma_1^2 + \sigma^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 \\
   \sigma_1^2 & \sigma_1^2 + \sigma^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 \\
@@ -38,7 +37,6 @@ CS = R_i =
   \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 + \sigma^2 & \sigma_1^2 & \sigma_1^2 \\
   \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 + \sigma^2 & \sigma_1^2 \\
   \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 & \sigma_1^2 + \sigma^2
-  
 \end{bmatrix}
 $$
 
@@ -60,12 +58,15 @@ Strength: Removes $\beta$ from variance estimates, negating the bias present wit
 
 Weakness: Not under full theory framework, do not have likelihood for a LRT due to restricted variance. 
 
+## Question 0 
+What is the project you want to do for your project?
 
+In order of preference: 2,3,1. 
 
 ## Question 1
-We have learned that for marginal GLM modeling we use GEE for estimation. GEE is based on defining moments (mean and varience and pairwise correlations) and a least squares like objective function rather than writing down a full joint likelihood and using MLE. In 2-3 sentences, explain the advantages of GEE compared to MLE in this context. 
+We have learned that for marginal GLM modeling we use GEE for estimation. GEE is based on defining moments (mean and variance and pairwise correlations) and a least squares like objective function rather than writing down a full joint likelihood and using MLE. In 2-3 sentences, explain the advantages of GEE compared to MLE in this context. 
 
-The advantage of GEE compared to MLE in this context is that GEE does not require a distributional assumption. This means the GEE model is simpler compared to the GLM model because the GLM requires specifying the distribution. 
+The advantage of GEE compared to MLE in this context is that GEE does not require a distributional assumption. This means the GEE model is simpler compared to the GLM model.
 
 ## Question 2
 On page 358 in FLW it states at the end of the development of the sandwich estimator that if we model $V_i$ correctly, meaning the working correlation structure is correct and $V_i = \Sigma_i$, and $Cov(\hat{\beta})=B^{-1}$ instead of $Cov(\hat{\beta})=B^{-1}MB^{-1}$, where $B$ and $M$ are defined at the top of page 358 in your book. Show that this equality is true. 
@@ -85,23 +86,23 @@ A study is planned where data will be collected on asthmatic subjects on every w
 #### Part A
 If it is anticipated that responses within subjects over time are serially correlated (but with some decay the further measurements are apart) for both outcomes, which R function (and package) would you suggest using to fit the data? 
 
-Outcome (i):
+*Outcome (i):*
 
-The outcome of interest is count data. For this scenario we can use the "gls" function in R from the "nlme" package. Because this is count data we can specify the link function to be "poisson(link = "log")". Because there is some decay in correlation the further away measurements are apart an AR1 correlation structure will be used. 
+The outcome of interest is count data. For this scenario we can use the "gls" function in R from the "nlme" package. Because this is count data we can specify the link function to be "poisson(link = "log")". Because there is some decay in correlation the further away measurements are from each other an AR1 correlation structure will be used. 
 
-Outcome (ii):
+*Outcome (ii):*
 
-The outcome of interest in this case is continous. For this scenario we can use the "geem2" function in R from the "mmmgee" package. This is continous data meaning we do not need to specify the link function (the default in geem2 is gaussian). We can again specify the correlation as AR1 to account for the decay in correlation the further apart time points are. 
+The outcome of interest in this case is continuous. For this scenario we can use the "geem2" function in R from the "mmmgee" package. This is continuous data meaning we do not need to specify the link function (the default in geem2 is Gaussian). We can again specify the correlation as AR1 to account for the decay in correlation the further apart time points are. 
 
 #### Part B
-Suppose that we now consider an indicator of whether subjects are on medication A or medication B (A use = 0,B use = 1). The investigator is interested in population level effects of treatment use on the ouctomes. Will a marginal model have the correct interpretation of the treatment effects for each ouctomes? Explain. 
+Suppose that we now consider an indicator of whether subjects are on medication A or medication B (A use = 0,B use = 1). The investigator is interested in population level effects of treatment use on the outcomes. Will a marginal model have the correct interpretation of the treatment effects for each outcome? Explain. 
 
 Because of the way the medication variable is coded medication A will be the reference which medication B is compared against. The interpretation of treatment effect will be B relative to A. For outcome (i) the population level interpretation will relate to the number of times medication is needed for B compared to A. For outcome (ii) the population level interpretation will relate to the FEV1 value when using treatment B vs using treatment A. 
 
 #### Part C
 What are the drawbacks of using a marginal approach? 
 
-The drawbacks of a marginal approach are that you can only make population mean interpretation, you cannot make inferances on the subject level. 
+The drawbacks of a marginal approach are that you can only make population mean interpretation, you cannot make inferences on the subject level. 
 
 #### Part D
 Will the marginal approach allow us to quantify and study subject-to-subject variation in the weekly trends?
@@ -132,7 +133,7 @@ id_vector <- onycholysis_data$id
 
 ```
 
-AR(1) Model:
+*AR(1) Model:*
 
 ```{r, echo = T}
 
@@ -162,11 +163,11 @@ onycholysis_ar1_sum
 ```
 For the AR(1) model:
 
-* $e^{\beta_{month}}=e^{-0.14057} = 0.869$: This means that for each month after starting treatment the odds ratio of having an event (moderate or severe onycholysis) is 0.869 times the risk of the previous month. The odds ratio have a 95\% CI of (`r month_lower`,`r month_upper`), and a significant p-value <0.001. 
+* $e^{\beta_{month}}=e^{-0.14057} = 0.869$: This means that for each month after starting treatment the odds ratio of having an event (moderate or severe onycholysis) is 0.869 times the risk of the previous month. The odds ratio have a 95\% CI of (`r round(month_lower,3)`,`r round(month_upper,3)`), and a significant p-value <0.001. 
 
-* $e^{\beta_{month:treat1}}=e^{-0.09053} = 0.913$: This means that for each additional month treatment 1 (Terbinafine) has an odds ratio of an event (moderate or severe onycholysis) 0.913 times the risk when using treatment 0 (Itraconazole). The odds ratio have a 95\% CI of (`r month_trt_lower`,`r month_trt_upper`), and a significant p-value of 0.044. 
+* $e^{\beta_{month:treat1}}=e^{-0.09053} = 0.913$: This means that for each additional month treatment 1 (Terbinafine) has an odds ratio of an event (moderate or severe onycholysis) 0.913 times the risk when using treatment 0 (Itraconazole). The odds ratio have a 95\% CI of (`r round(month_trt_lower,3)`,`r round(month_trt_upper,3)`), and a significant p-value of 0.044. 
 
-Independence Model: 
+*Independence Model:* 
 
 ```{r, echo = T}
 
@@ -181,7 +182,7 @@ onycholysis_ind_sum
 
 ```
 
-Exchangeable Model:
+*Exchangeable Model:*
 
 ```{r, echo = T}
 
@@ -223,7 +224,7 @@ efficiency_df
 ## FINISH QUESTION 4 PART B CODE ##
 
 ```
-For the $B_0$ term the independence correlation structure had the smallest (most efficient) SE, followed closely by AR(1), and lastly by the exchangeable structure. For the $B_{trt}$ and the $B_{trt:month}$ terms the AR(1) correlation structure had the smallest (most efficient) SEs, followed by independence and exchangeable. Exchangeable has the largest error because time has an effect on the outcome. Exchangeable does not take that into account. Between independent and AR(1) correlation structures AR(1) performs better which may be due to further time points having less correlation with each other. For this analysis I would choose the AR(1) structure. 
+For the $B_0$ term the independence correlation structure had the smallest (most efficient) SE, followed closely by AR(1), and lastly by the exchangeable structure. For the $B_{trt}$ and the $B_{trt:month}$ terms the AR(1) correlation structure had the smallest (most efficient) SEs, followed by independence and exchangeable. Exchangeable has the largest error because time has an effect on the outcome, and exchangeable does not take that into account. Between independent and AR(1) correlation structures AR(1) performs better which may be due to further time points having less correlation with each other. For this analysis I would choose the AR(1) structure. 
 
 #### Part C
 Did the data structure meet the assumptions of when GEE performs best? If not what biases might be in your analysis and why?
@@ -236,6 +237,8 @@ Assumptions:
 
 ```{r, echo = F, message = F}
 
+## START QUESTION 4 PART C CODE ##
+
 obs_count <- onycholysis_data %>% dplyr::group_by(id) %>% summarise(Count = n())
 
 obs_count_plot <- ggplot(obs_count, aes(x = Count)) +
@@ -245,6 +248,10 @@ obs_count_plot <- ggplot(obs_count, aes(x = Count)) +
   theme_bw()
 
 obs_count_plot
+
+## FINISH QUESTION 4 PART C CODE ##
+
+### FINISH QUESTION 4 CODE ###
 
 ```
 \
@@ -278,9 +285,9 @@ Epileptic Seizure Study of a randomized trail reported in Thall and Vail (1990).
 
 # Data location:
 # Desktop: "C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 7/epilepsy.txt"
-# Laptop: "C:/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ALD/BIOS6643_ALD/Homework 7/epilepsy.txt"
+# Laptop: "C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 7/epilepsy.txt"
 
-dat.sz_raw <- read_table("C:/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ALD/BIOS6643_ALD/Homework 7/epilepsy.txt")
+dat.sz_raw <- read_table("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 7/epilepsy.txt")
 
 # Factoring the trt variable. 
 dat.sz <- dat.sz_raw %>% mutate(trt = factor(trt))
@@ -299,22 +306,61 @@ dat.sz$vm0 <- as.numeric(dat.sz$visit>0)
 #### Part A
 What time trend do you want to use to model visit? Investigate several different approaches and justify. 
 
-There are 4 main approaches that can be used for modeling visit. 
+1. Factored visit: Factoring visit will give the change between each visit as time progresses.  In this scenario visit 0 would be the reference group against each subsequent 2 weeks of treatment. The benefit of this approach is that we can see how each individual visit relates to the baseline visit. Age and treatment will controlled in this model and an offset will be included. The correlation structure is independent. 
+```{r, echo = T}
 
-1. Factored visit no offset: Factoring visit will give the change between each visit as time progresses. Not including an offset would over inflate the number of seizures for week 0, although the fact that all subjects have the same 8-week period at the beginning of the trial may negate this as being an issue. In this scenario visit 0 would be the reference group against each subsequent 2 weeks of treatment. Age will also be controlled for in this model. 
+## START QUESTION 5 PART A CODE ##
 
-2. Factored visit with offset: Factoring visit and including an offset will account for visit 0 have 8 weeks while all other visits only have 2 weeks between each other. In this scenario visit 0 would be the reference again. Again baseline measurement of seizures will be controlled for. Age will also be controlled for in this model. 
+seizure_fac_visit <- geem2(seize ~ trt + factor(visit) + age + offset(logo),
+                           data = dat.sz, id = dat.sz$subj, 
+                           family = poisson(link = "log")) 
 
-3. Continuous visit with no offset: Having a continuous visit variable means that there will only be one coefficient for visit. Again baseline measurements will be controlled for. In this scenario not including an offset for visit 0 may be a problem. Age will also be controlled for in this model. 
+summary(seizure_fac_visit)
 
-4. Continuous visit with offset: Including an offset would account for visit 0 having 8 weeks instead of 2. Similar to option 3, this model will only have a single variable for visit. Age will also be controlled for in this model. 
+```
 
-Overall if the investigators were interested in tracking the change for each specific visit option 2 may be the best option. If they were only interested in general change for increasing visits then option 4 would be preferable. 
+2. Continuous visit with an offset: A model where visit is considered continuous will be modeled next. The advantage of this model is that there is only one visit coefficient, making interpretation a little easier. Age and treatment will be controlled for and an offset will be included. The correlation structure will be independent. 
+```{r, echo = T}
+
+seizure_cont_visit <- geem2(seize ~ trt + visit + age + offset(logo),
+                            data = dat.sz, id = dat.sz$subj,
+                            family = poisson(link = "log"))
+
+summary(seizure_cont_visit)
+
+```
+
+3. Continuous visit with a squared term: A squared term may fit the data better. Age and treatment will be controlled for and an offset will be included. The correlation structure will again be independent. 
+```{r, echo = T}
+
+seizure_cont_visit_sq <- geem2(seize ~ trt + visit + I(visit^2) + age + offset(logo),
+                            data = dat.sz, id = dat.sz$subj,
+                            family = poisson(link = "log"))
+
+summary(seizure_cont_visit_sq)
+
+```
+
+4. Continuous visit AR(1) structure: Lastly, an AR(1) correlation structure for the continuous visit will be tested. This model will again control for age and treatment and will include an offset. The AR(1) structure will assume that visits that are further away from each other have less correlation. 
+```{r, echo = T}
+
+seizure_cont_visit_ar1 <- geem2(seize ~ trt + age + offset(logo),
+                            data = dat.sz, id = dat.sz$subj,
+                            family = poisson(link = "log"), corstr = "ar1")
+
+summary(seizure_cont_visit_ar1)
+
+## FINISH QUESTION 5 PART A CODE ##
+
+```
+
+
+Overall no model has any significant terms other than the intercept. The model with the squared term however did appear to perform best for the Wald test of coefficients (although none of the variables of interest are significant).
 
 #### Part B
 Do you need an offset for this model? Explain how you figured that out. 
 
-In this model an offset should be included. Visit 0 incorporating 8 weeks would over inflates the number of seizures for this time point. For factored visit this may be less of an issue because each subject has the same number of weeks for each visit. 
+In this model an offset should be included. Visit 0 incorporating 8 weeks would over inflate the number of seizures for this time point. 
 
 #### Part C
 Do you see any evidence of a need for over dispersion based on summary statistics (mean and variance summary measures)? 
@@ -347,7 +393,7 @@ Fit a marginal GEE model to these data with treatment, linear time, and an inter
 ## START QUESTION 5 PART E CODE ##
 
 # Fitting a GEE model for the number of seizures. 
-seizure_mod <- geem2(seize ~ trt + visit + age + trt:visit, data = dat.sz, 
+seizure_mod <- geem2(seize ~ trt + visit + age + trt:visit + offset(logo), data = dat.sz, 
                      id = dat.sz$subj, family = poisson(link = "log"))
 
 summary(seizure_mod)
@@ -359,14 +405,14 @@ summary(seizure_mod)
 #### PART F
 Test whether there is an interaction between time and treatment and interpret the interaction if it is significant. If not, refit the model removing the interaction and interpret the model with just the main effects. Include point estimates, 95\% CI, and p-values with statistical conclusions. 
 
-The p-value for the interaction term is 0.54, meaning that it is not significant. If it were significant the interpretation would be the difference in expected seizures as visit increases for treatment compared to the placebo. In other words if the interaction had been significant it would incorporate the additional decrease in seizures for the treatment group as visits number increased. 
+The p-value for the interaction term is 0.536, meaning that it is not significant. If it were significant the interpretation would be the difference in expected seizures as visit increases for treatment compared to the placebo. In other words if the interaction had been significant it would incorporate the additional decrease in seizures for the treatment group as visits number increased. 
 
 ```{r, echo = F}
 
 ## START QUESTION 5 PART F CODE ##
 
 # Model which excludes the interaction term. 
-seizure_mod2 <- geem2(seize ~ trt + visit + age, data = dat.sz, 
+seizure_mod2 <- geem2(seize ~ trt + visit + age + offset(logo), data = dat.sz, 
                      id = dat.sz$subj, family = poisson(link = "log"))
 
 seizure_mod2_sum <- summary(seizure_mod2)
@@ -378,14 +424,22 @@ trt_lower <- exp(seizure_mod2_sum$coef[2,1] - seizure_mod2_sum$coef[2,3]*1.96)
 
 trt_upper <- exp(seizure_mod2_sum$coef[2,1] + seizure_mod2_sum$coef[2,3]*1.96)
 
-# Calculating the visit rate confidence intervals. 
-visit_rate <- exp(seizure_mod2_sum$coef[3,])
+# Calculating the visit rate and confidence intervals. 
+visit_rate <- exp(seizure_mod2_sum$coef[3,1])
 
 visit_lower <- exp(seizure_mod2_sum$coef[3,1] - seizure_mod2_sum$coef[3,3]*1.96)
 
 visit_upper <- exp(seizure_mod2_sum$coef[3,1] + seizure_mod2_sum$coef[3,3]*1.96)
 
 seizure_mod2_sum
+
+# Calculating the age rate and confidence intervals.
+age_rate <- exp(seizure_mod2_sum$coef[4,1])
+
+age_lower <- exp(seizure_mod2_sum$coef[4,1] - seizure_mod2_sum$coef[4,3]*1.96)
+
+age_upper <- exp(seizure_mod2_sum$coef[4,1] + seizure_mod2_sum$coef[4,3]*1.96)
+
 
 ## FINISH QUESTION 5 PART F CODE ##
 
@@ -394,7 +448,7 @@ seizure_mod2_sum
 
 
 ```
-The above printout shows the results of the GEE model with only main effects. For the treatment coefficient the rate of seizures is `r trt_rate` (95\% CI:`r trt_lower`,`r trt_upper`), meaning that the rate of seizures for the treatment group is 0.97 the rate for the placebo group. The p-value is insignificant at 0.923, meaning the outcomes for the treatment group are not significantly different from the non-treatment group. For the visit coefficient the rate of seizures is `r visit_rate` (95\% CI:`r visit_lower`,`r visit_upper`), meaning that the rate of seizures for each visit is 0.67 the rate of seizures as visit number. Test
+The above printout shows the results of the GEE model with only main effects. For the treatment coefficient the rate of seizures is `r round(trt_rate,3)` (95\% CI:`r round(trt_lower,3)`,`r round(trt_upper,3)`), meaning that the rate of seizures for the treatment group is 0.95 times the rate for the placebo group. The p-value is insignificant at 0.838, meaning the outcomes for the treatment group are not significantly different from the non-treatment group. For the visit coefficient the rate of seizures is `r round(visit_rate,3)` (95\% CI:`r round(visit_lower,3)`,`r round(visit_upper,3)`), meaning that the rate of seizures for each visit is 0.999 the rate of seizures as visit number. The p-value is insignificant at 0.974. For the age coefficient the rate of seizures is `r round(age_rate,3)` (95\% CI:`r round(age_lower,3)`,`r round(age_upper,3)`), meaning that the rate of seizure for each year of increased age is 0.981 times the rate of the previous year of age. The p-value is insignificant at 0.334. 
 
 
 

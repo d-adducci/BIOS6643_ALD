@@ -1948,47 +1948,99 @@ display: none;
 </div>
 
 
-<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-## ✔ dplyr     1.1.2     ✔ readr     2.1.4
-## ✔ forcats   1.0.0     ✔ stringr   1.5.0
-## ✔ ggplot2   3.4.2     ✔ tibble    3.2.1
-## ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
-## ✔ purrr     1.0.1     
-## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-## ✖ dplyr::filter() masks stats::filter()
-## ✖ dplyr::lag()    masks stats::lag()
-## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors
-## 
-## Attaching package: &#39;kableExtra&#39;
-## 
-## 
-## The following object is masked from &#39;package:dplyr&#39;:
-## 
-##     group_rows
-## 
-## 
-## 
-## Attaching package: &#39;table1&#39;
-## 
-## 
-## The following objects are masked from &#39;package:base&#39;:
-## 
-##     units, units&lt;-</code></pre>
+<div id="exam-q3" class="section level2">
+<h2>Exam Q3</h2>
+<p>Write out the likelihood for this marginal model. What is the
+distribution of the outcome for subject i including the mean and
+variance? Write out the structure of the marginal variance. From the
+previous question on the exam the model was a linear mixed effects model
+with a linear trend for observation year and use a marginal compound
+symmetry model to incorporate correlation between the cognitive measures
+on the same person.</p>
+<p>Likelihood: <span class="math display">\[\frac{1}{(2\pi)^{n_i}}|V_i|^{-1/2}(\alpha)|exp\left[-\frac{1}{2}(Y_i-X_i\beta)^TV_i(\alpha)^{-1}(Y_i-X_i\beta)\right]\]</span>
+Mean: <span class="math display">\[E[Y_{i}]=X_i\beta\]</span> Variance:
+<span class="math display">\[Var[Y_{i}]=R_i\]</span> Where <span class="math inline">\(i = 1...N\)</span>; N = Number of subjects.</p>
+<p>Marginal variance structure <span class="math inline">\(V_i =
+R_i\)</span>: <span class="math display">\[
+\begin{bmatrix}
+  \sigma_1^2 + \sigma^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp;
+\sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp;
+\sigma_1^2 \\
+  \sigma_1^2 &amp; \sigma_1^2 + \sigma^2 &amp; \sigma_1^2 &amp;
+\sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp;
+\sigma_1^2 \\
+  \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 + \sigma^2 &amp;
+\sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp;
+\sigma_1^2 \\
+  \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 +
+\sigma^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp;
+\sigma_1^2 \\
+  \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp;
+\sigma_1^2 + \sigma^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2
+\\
+  \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp;
+\sigma_1^2 &amp; \sigma_1^2 + \sigma^2 &amp; \sigma_1^2 &amp; \sigma_1^2
+\\
+  \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp;
+\sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 + \sigma^2 &amp; \sigma_1^2
+\\
+  \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp;
+\sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 &amp; \sigma_1^2 + \sigma^2
+\end{bmatrix}
+\]</span></p>
+</div>
+<div id="exam-q4" class="section level2">
+<h2>Exam Q4</h2>
+<p>The MLE of the beta coefficients conditional on alpha (the parameters
+in the variance) is: <span class="math inline">\(\hat{\beta}(\alpha)=\Sigma_i^NX_i^TV_i^{-1}(\alpha)X_i^{-1}\Sigma_i^NX_i^TV_i^{-1}(\alpha)Y_i\)</span>.
+Since <span class="math inline">\(\alpha\)</span> is unknown we need to
+estimate it. What are the two approaches commonly used to estimate <span class="math inline">\(\alpha\)</span>? List a strength and a weakness
+for each approaches.</p>
+<p>The two approaches are Maximum Likelihood (ML) and Restricted Maximum
+Likelihood (REML).</p>
+<p><strong>MLE</strong></p>
+<p>Strength: LRT is applicable when using ML, allowing for more robust
+hypothesis testing.</p>
+<p>Weakness: Variance estimates are biased downward by a factor of
+(n-p)/p. This is more significant with smaller sample sizes.</p>
+<p><strong>REML</strong></p>
+<p>Strength: Removes <span class="math inline">\(\beta\)</span> from
+variance estimates, negating the bias present with the ML method,
+providing an unbiased estimate for <span class="math inline">\(\alpha\)</span>.</p>
+<p>Weakness: Not under full theory framework, do not have likelihood for
+a LRT due to restricted variance.</p>
+</div>
+<div id="question-0" class="section level2">
+<h2>Question 0</h2>
+<p>What is the project you want to do for your project?</p>
+<p>In order of preference: 2,3,1.</p>
+</div>
 <div id="question-1" class="section level2">
 <h2>Question 1</h2>
 <p>We have learned that for marginal GLM modeling we use GEE for
-estimation. GEE is based on defining moments (mean and varience and
+estimation. GEE is based on defining moments (mean and variance and
 pairwise correlations) and a least squares like objective function
 rather than writing down a full joint likelihood and using MLE. In 2-3
 sentences, explain the advantages of GEE compared to MLE in this
 context.</p>
 <p>The advantage of GEE compared to MLE in this context is that GEE does
 not require a distributional assumption. This means the GEE model is
-simpler compared to the GLM model because the GLM requires specifying
-the distribution.</p>
+simpler compared to the GLM model.</p>
 </div>
 <div id="question-2" class="section level2">
 <h2>Question 2</h2>
+<p>On page 358 in FLW it states at the end of the development of the
+sandwich estimator that if we model <span class="math inline">\(V_i\)</span> correctly, meaning the working
+correlation structure is correct and <span class="math inline">\(V_i =
+\Sigma_i\)</span>, and <span class="math inline">\(Cov(\hat{\beta})=B^{-1}\)</span> instead of <span class="math inline">\(Cov(\hat{\beta})=B^{-1}MB^{-1}\)</span>, where
+<span class="math inline">\(B\)</span> and <span class="math inline">\(M\)</span> are defined at the top of page 358 in
+your book. Show that this equality is true. <span class="math display">\[B = \Sigma_i^N D_i^TV_i^{-1}D_i\]</span> <span class="math display">\[M =
+\Sigma_i^ND_i^TV_i^{-1}Cov(Y_i)V_i^{-1}D_i\]</span> <span class="math display">\[V_i = \Sigma_i^N = Cov(Y_i)\]</span> <span class="math display">\[Cov(\hat{\beta})=B^{-1}MB^{-1}\]</span>
+Simplifying M: <span class="math display">\[M = \Sigma_i^N
+D_i^TV_i^{-1}V_iV_i^{-1}D_i=\Sigma_i^ND_i^TV_i^{-1}D_i=B\]</span>
+Plugging in M for the covariance equation: <span class="math display">\[Cov(\hat{\beta}) =
+B^{-1}MB^{-1}=B^{-1}BB^{-1}=B^{-1}I=B^{-1}\]</span> Because <span class="math inline">\(BB^{-1}\)</span> is equal to the identity
+matrix.</p>
 </div>
 <div id="question-3" class="section level2">
 <h2>Question 3</h2>
@@ -2003,17 +2055,17 @@ use.</p>
 serially correlated (but with some decay the further measurements are
 apart) for both outcomes, which R function (and package) would you
 suggest using to fit the data?</p>
-<p>Outcome (i):</p>
+<p><em>Outcome (i):</em></p>
 <p>The outcome of interest is count data. For this scenario we can use
 the “gls” function in R from the “nlme” package. Because this is count
 data we can specify the link function to be “poisson(link =”log”)“.
 Because there is some decay in correlation the further away measurements
-are apart an AR1 correlation structure will be used.</p>
-<p>Outcome (ii):</p>
-<p>The outcome of interest in this case is continous. For this scenario
+are from each other an AR1 correlation structure will be used.</p>
+<p><em>Outcome (ii):</em></p>
+<p>The outcome of interest in this case is continuous. For this scenario
 we can use the “geem2” function in R from the “mmmgee” package. This is
-continous data meaning we do not need to specify the link function (the
-default in geem2 is gaussian). We can again specify the correlation as
+continuous data meaning we do not need to specify the link function (the
+default in geem2 is Gaussian). We can again specify the correlation as
 AR1 to account for the decay in correlation the further apart time
 points are.</p>
 </div>
@@ -2021,9 +2073,9 @@ points are.</p>
 <h4>Part B</h4>
 <p>Suppose that we now consider an indicator of whether subjects are on
 medication A or medication B (A use = 0,B use = 1). The investigator is
-interested in population level effects of treatment use on the ouctomes.
+interested in population level effects of treatment use on the outcomes.
 Will a marginal model have the correct interpretation of the treatment
-effects for each ouctomes? Explain.</p>
+effects for each outcome? Explain.</p>
 <p>Because of the way the medication variable is coded medication A will
 be the reference which medication B is compared against. The
 interpretation of treatment effect will be B relative to A. For outcome
@@ -2036,7 +2088,7 @@ treatment B vs using treatment A.</p>
 <h4>Part C</h4>
 <p>What are the drawbacks of using a marginal approach?</p>
 <p>The drawbacks of a marginal approach are that you can only make
-population mean interpretation, you cannot make inferances on the
+population mean interpretation, you cannot make inferences on the
 subject level.</p>
 </div>
 <div id="part-d" class="section level4">
@@ -2069,7 +2121,7 @@ structures (AR(1), independence, and exchangeable). Assume that there is
 no difference between treatments at baseline. Assume the scale parameter
 <span class="math inline">\(\phi = 1\)</span>. Interpret the results of
 the AR(1) model.</p>
-<p>AR(1) Model:</p>
+<p><em>AR(1) Model:</em></p>
 <pre class="r"><code>onycholysis_ar1 &lt;- geem2(response ~ month + treat:month, id = id_vector,
                         data = onycholysis_data,
                         family = binomial(link = &quot;logit&quot;),
@@ -2110,15 +2162,15 @@ onycholysis_ar1_sum</code></pre>
 0.869\)</span>: This means that for each month after starting treatment
 the odds ratio of having an event (moderate or severe onycholysis) is
 0.869 times the risk of the previous month. The odds ratio have a 95% CI
-of (0.8258985,0.9140637), and a significant p-value &lt;0.001.</p></li>
+of (0.826,0.914), and a significant p-value &lt;0.001.</p></li>
 <li><p><span class="math inline">\(e^{\beta_{month:treat1}}=e^{-0.09053}
 = 0.913\)</span>: This means that for each additional month treatment 1
 (Terbinafine) has an odds ratio of an event (moderate or severe
 onycholysis) 0.913 times the risk when using treatment 0 (Itraconazole).
-The odds ratio have a 95% CI of (0.836416,0.9975783), and a significant
-p-value of 0.044.</p></li>
+The odds ratio have a 95% CI of (0.836,0.998), and a significant p-value
+of 0.044.</p></li>
 </ul>
-<p>Independence Model:</p>
+<p><em>Independence Model:</em></p>
 <pre class="r"><code>onycholysis_ind &lt;- geem2(response ~ month + treat:month, id = id_vector,
                         data = onycholysis_data,
                         family = binomial(link = &quot;logit&quot;),
@@ -2139,7 +2191,7 @@ onycholysis_ind_sum</code></pre>
 ##  Number of GEE iterations: 2 
 ##  Number of Clusters:  294    Maximum Cluster Size:  7 
 ##  Number of observations with nonzero weight:  1908</code></pre>
-<p>Exchangeable Model:</p>
+<p><em>Exchangeable Model:</em></p>
 <pre class="r"><code>onycholysis_exch &lt;- geem2(response ~ month + treat:month, id = id_vector,
                         data = onycholysis_data,
                         family = binomial(link = &quot;logit&quot;),
@@ -2240,11 +2292,11 @@ followed closely by AR(1), and lastly by the exchangeable structure. For
 the <span class="math inline">\(B_{trt}\)</span> and the <span class="math inline">\(B_{trt:month}\)</span> terms the AR(1) correlation
 structure had the smallest (most efficient) SEs, followed by
 independence and exchangeable. Exchangeable has the largest error
-because time has an effect on the outcome. Exchangeable does not take
-that into account. Between independent and AR(1) correlation structures
-AR(1) performs better which may be due to further time points having
-less correlation with each other. For this analysis I would choose the
-AR(1) structure.</p>
+because time has an effect on the outcome, and exchangeable does not
+take that into account. Between independent and AR(1) correlation
+structures AR(1) performs better which may be due to further time points
+having less correlation with each other. For this analysis I would
+choose the AR(1) structure.</p>
 </div>
 <div id="part-c-1" class="section level4">
 <h4>Part C</h4>
@@ -2295,40 +2347,123 @@ treatment modifies the time pattern.</p>
 <h4>Part A</h4>
 <p>What time trend do you want to use to model visit? Investigate
 several different approaches and justify.</p>
-<p>There are 4 main approaches that can be used for modeling visit.</p>
 <ol style="list-style-type: decimal">
-<li><p>Factored visit no offset: Factoring visit will give the change
-between each visit as time progresses. Not including an offset would
-over inflate the number of seizures for week 0, although the fact that
-all subjects have the same 8-week period at the beginning of the trial
-may negate this as being an issue. In this scenario visit 0 would be the
-reference group against each subsequent 2 weeks of treatment.</p></li>
-<li><p>Factored visit with offset: Factoring visit and including an
-offset will account for visit 0 have 8 weeks while all other visits only
-have 2 weeks between each other. In this scenario visit 0 would be the
-reference again. Again baseline measurement of seizures will be
-controlled for.</p></li>
-<li><p>Continuous visit with no offset: Having a continuous visit
-variable means that there will only be one coefficient for visit. Again
-baseline measurements will be controlled for. In this scenario not
-including an offset for visit 0 may be a problem.</p></li>
-<li><p>Continuous visit with offset: Including an offset would account
-for visit 0 having 8 weeks instead of 2. Similar to option 3, this model
-will only have a single variable for visit.</p></li>
+<li>Factored visit: Factoring visit will give the change between each
+visit as time progresses. In this scenario visit 0 would be the
+reference group against each subsequent 2 weeks of treatment. The
+benefit of this approach is that we can see how each individual visit
+relates to the baseline visit. Age and treatment will controlled in this
+model and an offset will be included. The correlation structure is
+independent.</li>
 </ol>
-<p>Overall if the investigators were interested in tracking the change
-for each specific visit option 2 may be the best option. If they were
-only interested in general change for increasing visits then option 4
-would be preferable.</p>
+<pre class="r"><code>## START QUESTION 5 PART A CODE ##
+
+seizure_fac_visit &lt;- geem2(seize ~ trt + factor(visit) + age + offset(logo),
+                           data = dat.sz, id = dat.sz$subj, 
+                           family = poisson(link = &quot;log&quot;)) 
+
+summary(seizure_fac_visit)</code></pre>
+<pre><code>##                Estimate Model SE Robust SE    Wald         p
+## (Intercept)     1.93656  0.35039   0.54866  3.5296 0.0004162
+## trt1           -0.05287  0.14134   0.25837 -0.2046 0.8378590
+## factor(visit)1  0.13678  0.21326   0.14256  0.9595 0.3373229
+## factor(visit)2  0.06820  0.21907   0.08955  0.7616 0.4463178
+## factor(visit)3  0.07829  0.21820   0.16379  0.4780 0.6326762
+## factor(visit)4 -0.06620  0.23116   0.09766 -0.6779 0.4978349
+## age            -0.01957  0.01156   0.02042 -0.9583 0.3379102
+## 
+##  Estimated Correlation Parameter:  0 
+##  Correlation Structure:  independence 
+##  Est. Scale Parameter:  18.66 
+## 
+##  Number of GEE iterations: 2 
+##  Number of Clusters:  59    Maximum Cluster Size:  5 
+##  Number of observations with nonzero weight:  295</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Continuous visit with an offset: A model where visit is considered
+continuous will be modeled next. The advantage of this model is that
+there is only one visit coefficient, making interpretation a little
+easier. Age and treatment will be controlled for and an offset will be
+included. The correlation structure will be independent.</li>
+</ol>
+<pre class="r"><code>seizure_cont_visit &lt;- geem2(seize ~ trt + visit + age + offset(logo),
+                            data = dat.sz, id = dat.sz$subj,
+                            family = poisson(link = &quot;log&quot;))
+
+summary(seizure_cont_visit)</code></pre>
+<pre><code>##               Estimate Model SE Robust SE     Wald         p
+## (Intercept)  1.9666621  0.35162   0.55478  3.54496 0.0003927
+## trt1        -0.0528702  0.14283   0.25837 -0.20463 0.8378590
+## visit       -0.0009649  0.04796   0.02999 -0.03218 0.9743312
+## age         -0.0195680  0.01168   0.02042 -0.95830 0.3379102
+## 
+##  Estimated Correlation Parameter:  0 
+##  Correlation Structure:  independence 
+##  Est. Scale Parameter:  19.06 
+## 
+##  Number of GEE iterations: 2 
+##  Number of Clusters:  59    Maximum Cluster Size:  5 
+##  Number of observations with nonzero weight:  295</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Continuous visit with a squared term: A squared term may fit the
+data better. Age and treatment will be controlled for and an offset will
+be included. The correlation structure will again be independent.</li>
+</ol>
+<pre class="r"><code>seizure_cont_visit_sq &lt;- geem2(seize ~ trt + visit + I(visit^2) + age + offset(logo),
+                            data = dat.sz, id = dat.sz$subj,
+                            family = poisson(link = &quot;log&quot;))
+
+summary(seizure_cont_visit_sq)</code></pre>
+<pre><code>##             Estimate Model SE Robust SE    Wald         p
+## (Intercept)  1.94038  0.35027   0.55098  3.5217 0.0004288
+## trt1        -0.05287  0.14151   0.25837 -0.2046 0.8378590
+## visit        0.12697  0.17047   0.09877  1.2856 0.1986001
+## I(visit^2)  -0.03603  0.04630   0.02114 -1.7048 0.0882301
+## age         -0.01957  0.01158   0.02042 -0.9583 0.3379102
+## 
+##  Estimated Correlation Parameter:  0 
+##  Correlation Structure:  independence 
+##  Est. Scale Parameter:  18.71 
+## 
+##  Number of GEE iterations: 2 
+##  Number of Clusters:  59    Maximum Cluster Size:  5 
+##  Number of observations with nonzero weight:  295</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Continuous visit AR(1) structure: Lastly, an AR(1) correlation
+structure for the continuous visit will be tested. This model will again
+control for age and treatment and will include an offset. The AR(1)
+structure will assume that visits that are further away from each other
+have less correlation.</li>
+</ol>
+<pre class="r"><code>seizure_cont_visit_ar1 &lt;- geem2(seize ~ trt + age + offset(logo),
+                            data = dat.sz, id = dat.sz$subj,
+                            family = poisson(link = &quot;log&quot;), corstr = &quot;ar1&quot;)
+
+summary(seizure_cont_visit_ar1)</code></pre>
+<pre><code>##              Estimate Model SE Robust SE     Wald         p
+## (Intercept)  2.408342  0.46694   0.44282  5.43866 5.000e-08
+## trt1         0.005207  0.19182   0.20285  0.02567 9.795e-01
+## age         -0.040494  0.01611   0.01451 -2.79112 5.253e-03
+## 
+##  Estimated Correlation Parameter:  0.8117 
+##  Correlation Structure:  ar1 
+##  Est. Scale Parameter:  21.09 
+## 
+##  Number of GEE iterations: 4 
+##  Number of Clusters:  59    Maximum Cluster Size:  5 
+##  Number of observations with nonzero weight:  295</code></pre>
+<pre class="r"><code>## FINISH QUESTION 5 PART A CODE ##</code></pre>
+<p>Overall no model has any significant terms other than the intercept.
+The model with the squared term however did appear to perform best for
+the Wald test of coefficients (although none of the variables of
+interest are significant).</p>
 </div>
 <div id="part-b-2" class="section level4">
 <h4>Part B</h4>
 <p>Do you need an offset for this model? Explain how you figured that
 out.</p>
 <p>In this model an offset should be included. Visit 0 incorporating 8
-weeks would over inflates the number of seizures for this time point.
-For factored visit this may be less of an issue because each subject has
-the same number of weeks for each visit.</p>
+weeks would over inflate the number of seizures for this time point.</p>
 </div>
 <div id="part-c-2" class="section level4">
 <h4>Part C</h4>
@@ -2411,7 +2546,302 @@ summary statistics (mean and variance summary measures)?</p>
 </tbody>
 </table>
 </div>
+<p><br />
+From the summary table we will need to account for overdispersion, as
+the variance is significantly larger than the mean.</p>
 </div>
+<div id="part-d-2" class="section level4">
+<h4>Part D</h4>
+<p>Do you actually need to incorporate overdispersion in a GEE model?
+Explain.</p>
+<p>In general no you do not need to incorporate overdispersion in a GEE
+model. The GEE model already has a quasi-likelihood, and can incorporate
+the overdispersion that exists in the data set.</p>
+</div>
+<div id="part-e" class="section level4">
+<h4>Part E</h4>
+<p>Fit a marginal GEE model to these data with treatment, linear time,
+and an interaction with treatment and time. Provide code and summary
+output.</p>
+<pre class="r"><code>## START QUESTION 5 PART E CODE ##
+
+# Fitting a GEE model for the number of seizures. 
+seizure_mod &lt;- geem2(seize ~ trt + visit + age + trt:visit + offset(logo), data = dat.sz, 
+                     id = dat.sz$subj, family = poisson(link = &quot;log&quot;))
+
+summary(seizure_mod)</code></pre>
+<pre><code>##              Estimate Model SE Robust SE     Wald         p
+## (Intercept)  1.941901  0.35844   0.56890  3.41343 0.0006415
+## trt1        -0.005428  0.18702   0.22361 -0.02428 0.9806324
+## visit        0.018542  0.06860   0.03996  0.46406 0.6426019
+## age         -0.019568  0.01171   0.02042 -0.95830 0.3379102
+## trt1:visit  -0.037979  0.09619   0.06140 -0.61859 0.5361870
+## 
+##  Estimated Correlation Parameter:  0 
+##  Correlation Structure:  independence 
+##  Est. Scale Parameter:  19.15 
+## 
+##  Number of GEE iterations: 2 
+##  Number of Clusters:  59    Maximum Cluster Size:  5 
+##  Number of observations with nonzero weight:  295</code></pre>
+<pre class="r"><code>## FINISH QUESTION 5 PART E CODE ##</code></pre>
+</div>
+<div id="part-f" class="section level4">
+<h4>PART F</h4>
+<p>Test whether there is an interaction between time and treatment and
+interpret the interaction if it is significant. If not, refit the model
+removing the interaction and interpret the model with just the main
+effects. Include point estimates, 95% CI, and p-values with statistical
+conclusions.</p>
+<p>The p-value for the interaction term is 0.536, meaning that it is not
+significant. If it were significant the interpretation would be the
+difference in expected seizures as visit increases for treatment
+compared to the placebo. In other words if the interaction had been
+significant it would incorporate the additional decrease in seizures for
+the treatment group as visits number increased.</p>
+<pre><code>##               Estimate Model SE Robust SE     Wald         p
+## (Intercept)  1.9666621  0.35162   0.55478  3.54496 0.0003927
+## trt1        -0.0528702  0.14283   0.25837 -0.20463 0.8378590
+## visit       -0.0009649  0.04796   0.02999 -0.03218 0.9743312
+## age         -0.0195680  0.01168   0.02042 -0.95830 0.3379102
+## 
+##  Estimated Correlation Parameter:  0 
+##  Correlation Structure:  independence 
+##  Est. Scale Parameter:  19.06 
+## 
+##  Number of GEE iterations: 2 
+##  Number of Clusters:  59    Maximum Cluster Size:  5 
+##  Number of observations with nonzero weight:  295</code></pre>
+<p>The above printout shows the results of the GEE model with only main
+effects. For the treatment coefficient the rate of seizures is 0.949
+(95% CI:0.572,1.574), meaning that the rate of seizures for the
+treatment group is 0.95 times the rate for the placebo group. The
+p-value is insignificant at 0.838, meaning the outcomes for the
+treatment group are not significantly different from the non-treatment
+group. For the visit coefficient the rate of seizures is 0.999 (95%
+CI:0.942,1.06), meaning that the rate of seizures for each visit is
+0.999 the rate of seizures as visit number. The p-value is insignificant
+at 0.974. For the age coefficient the rate of seizures is 0.981 (95%
+CI:0.942,1.021), meaning that the rate of seizure for each year of
+increased age is 0.981 times the rate of the previous year of age. The
+p-value is insignificant at 0.334.</p>
+</div>
+</div>
+<div id="code" class="section level1">
+<h1>Code</h1>
+<pre class="r"><code>library(tidyverse)
+library(mmmgee)
+library(kableExtra)
+library(table1)
+
+
+### START QUESTION 4 CODE ###
+
+## START QUESTION 4 PART A ##
+
+# Reading in data.
+onycholysis_data_raw &lt;- read_table(&quot;C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 7/toenail-data.txt&quot;)
+
+onycholysis_data &lt;- onycholysis_data_raw %&gt;%
+  mutate(treat = factor(treat))
+
+# geem2 was saying id not the same dimension as the data frame. I extracted
+# out the ids as a vector and set that for the id parameter in geem2. 
+id_vector &lt;- onycholysis_data$id
+
+
+onycholysis_ar1 &lt;- geem2(response ~ month + treat:month, id = id_vector,
+                        data = onycholysis_data,
+                        family = binomial(link = &quot;logit&quot;),
+                        corstr = &quot;ar1&quot;, init.phi = 1, scale.fix = TRUE)
+
+onycholysis_ar1_sum &lt;- summary(onycholysis_ar1)
+
+# 95% CI for the month estimate.
+month_lower &lt;- exp(onycholysis_ar1_sum$coef[2,1] - 
+                     onycholysis_ar1_sum$coef[2,3]*1.96)
+
+month_upper &lt;- exp(onycholysis_ar1_sum$coef[2,1] + 
+                     onycholysis_ar1_sum$coef[2,3]*1.96)
+
+# 95% CI for the month:treat1 coefficient.
+month_trt_lower &lt;- exp(onycholysis_ar1_sum$coef[3,1] - 
+                         onycholysis_ar1_sum$coef[3,3]*1.96)
+
+month_trt_upper &lt;- exp(onycholysis_ar1_sum$coef[3,1] + 
+                         onycholysis_ar1_sum$coef[3,3]*1.96)
+
+onycholysis_ar1_sum
+
+
+onycholysis_ind &lt;- geem2(response ~ month + treat:month, id = id_vector,
+                        data = onycholysis_data,
+                        family = binomial(link = &quot;logit&quot;),
+                        corstr = &quot;independence&quot;, init.phi = 1, scale.fix = TRUE)
+
+onycholysis_ind_sum &lt;- summary(onycholysis_ind)
+
+onycholysis_ind_sum
+
+
+onycholysis_exch &lt;- geem2(response ~ month + treat:month, id = id_vector,
+                        data = onycholysis_data,
+                        family = binomial(link = &quot;logit&quot;),
+                        corstr = &quot;exchangeable&quot;, init.phi = 1, scale.fix = TRUE)
+
+onycholysis_exch_sum &lt;- summary(onycholysis_exch)
+
+onycholysis_exch_sum
+
+## FINISH QUESTION 4 PART A CODE ##
+
+
+## START QUESTION 4 PART B CODE ##
+
+efficiency_df &lt;- data.frame(term = c(&quot;Beta_0&quot;,&quot;Beta_month&quot;,
+                                     &quot;Beta_trt:month&quot;),
+                            ar_1 = c(0.12592,0.02587,0.04495),
+                            independence = c(0.12524,0.02917,0.04753),
+                            exchangeable = c(0.13039,0.02956,0.05378))
+
+efficiency_df &lt;- kbl(efficiency_df,
+                     caption = &quot;Robust Standard Errors&quot;,
+                     col.names = c(&quot;Term&quot;,&quot;AR(1)&quot;,&quot;Independence&quot;,
+                                   &quot;Exchangeable&quot;),
+                     booktabs = T, align = &quot;cc&quot;) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+efficiency_df
+
+## FINISH QUESTION 4 PART B CODE ##
+
+
+## START QUESTION 4 PART C CODE ##
+
+obs_count &lt;- onycholysis_data %&gt;% dplyr::group_by(id) %&gt;% summarise(Count = n())
+
+obs_count_plot &lt;- ggplot(obs_count, aes(x = Count)) +
+  geom_histogram() +
+  labs(title = &quot;Histogram of Observations for Subjects&quot;,
+       x = &quot;Observations for Subjects&quot;, y = &quot;Frequencey&quot;) +
+  theme_bw()
+
+obs_count_plot
+
+## FINISH QUESTION 4 PART C CODE ##
+
+### FINISH QUESTION 4 CODE ###
+
+
+### START QUESTION 5 CODE
+
+# Data location:
+# Desktop: &quot;C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 7/epilepsy.txt&quot;
+# Laptop: &quot;C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 7/epilepsy.txt&quot;
+
+dat.sz_raw &lt;- read_table(&quot;C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 7/epilepsy.txt&quot;)
+
+# Factoring the trt variable. 
+dat.sz &lt;- dat.sz_raw %&gt;% mutate(trt = factor(trt))
+
+# Creating other covariates. dat.sz$o is the number of weeeks in the observation
+# time (8 weeks or 2 weeks). 
+dat.sz$o &lt;- 8*(dat.sz$visit==0)+2*(dat.sz$visit&gt;0)
+
+# Creates an offset for the difference in the number of weeks for each obs.
+dat.sz$logo &lt;- log(dat.sz$o)
+dat.sz$vm0 &lt;- as.numeric(dat.sz$visit&gt;0)
+
+
+
+## START QUESTION 5 PART A CODE ##
+
+seizure_fac_visit &lt;- geem2(seize ~ trt + factor(visit) + age + offset(logo),
+                           data = dat.sz, id = dat.sz$subj, 
+                           family = poisson(link = &quot;log&quot;)) 
+
+summary(seizure_fac_visit)
+
+
+seizure_cont_visit &lt;- geem2(seize ~ trt + visit + age + offset(logo),
+                            data = dat.sz, id = dat.sz$subj,
+                            family = poisson(link = &quot;log&quot;))
+
+summary(seizure_cont_visit)
+
+
+seizure_cont_visit_sq &lt;- geem2(seize ~ trt + visit + I(visit^2) + age + offset(logo),
+                            data = dat.sz, id = dat.sz$subj,
+                            family = poisson(link = &quot;log&quot;))
+
+summary(seizure_cont_visit_sq)
+
+
+seizure_cont_visit_ar1 &lt;- geem2(seize ~ trt + age + offset(logo),
+                            data = dat.sz, id = dat.sz$subj,
+                            family = poisson(link = &quot;log&quot;), corstr = &quot;ar1&quot;)
+
+summary(seizure_cont_visit_ar1)
+
+## FINISH QUESTION 5 PART A CODE ##
+
+
+## START QUESTION 5 PART C CODE ##
+
+seizure_summary &lt;- table1(~ seize | visit*trt, dat.sz,
+                          caption = &quot;Summary Statistics: Seizure Data&quot;)
+
+seizure_summary
+
+## FINISHE QUESTION 5 PART C CODE ##
+
+
+## START QUESTION 5 PART E CODE ##
+
+# Fitting a GEE model for the number of seizures. 
+seizure_mod &lt;- geem2(seize ~ trt + visit + age + trt:visit + offset(logo), data = dat.sz, 
+                     id = dat.sz$subj, family = poisson(link = &quot;log&quot;))
+
+summary(seizure_mod)
+
+## FINISH QUESTION 5 PART E CODE ##
+
+
+## START QUESTION 5 PART F CODE ##
+
+# Model which excludes the interaction term. 
+seizure_mod2 &lt;- geem2(seize ~ trt + visit + age + offset(logo), data = dat.sz, 
+                     id = dat.sz$subj, family = poisson(link = &quot;log&quot;))
+
+seizure_mod2_sum &lt;- summary(seizure_mod2)
+
+# Calculating the treatment rate and confidence intervals. 
+trt_rate &lt;- exp(seizure_mod2_sum$coef[2,1])
+
+trt_lower &lt;- exp(seizure_mod2_sum$coef[2,1] - seizure_mod2_sum$coef[2,3]*1.96)
+
+trt_upper &lt;- exp(seizure_mod2_sum$coef[2,1] + seizure_mod2_sum$coef[2,3]*1.96)
+
+# Calculating the visit rate and confidence intervals. 
+visit_rate &lt;- exp(seizure_mod2_sum$coef[3,1])
+
+visit_lower &lt;- exp(seizure_mod2_sum$coef[3,1] - seizure_mod2_sum$coef[3,3]*1.96)
+
+visit_upper &lt;- exp(seizure_mod2_sum$coef[3,1] + seizure_mod2_sum$coef[3,3]*1.96)
+
+seizure_mod2_sum
+
+# Calculating the age rate and confidence intervals.
+age_rate &lt;- exp(seizure_mod2_sum$coef[4,1])
+
+age_lower &lt;- exp(seizure_mod2_sum$coef[4,1] - seizure_mod2_sum$coef[4,3]*1.96)
+
+age_upper &lt;- exp(seizure_mod2_sum$coef[4,1] + seizure_mod2_sum$coef[4,3]*1.96)
+
+
+## FINISH QUESTION 5 PART F CODE ##
+
+### FINISH QUESTION 5 CODE ###</code></pre>
 </div>
 
 

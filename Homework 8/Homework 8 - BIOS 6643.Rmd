@@ -27,11 +27,56 @@ $$Var(Y_{ij}|b_i) = Var[E[Y_{ij}|b_i]]\phi$$
 A count outcome will require a Poisson model.  
 $$\eta_{ij} = \beta_0 + \beta_1X_{ij} + b_{i0} + \epsilon_{ij}$$
 $$log(E[Y_{ij}|b_i]) = n_{ij}$$
+$$E[Y_{ij}|b_i] = e^{\beta_0 + \beta_1X_{ij} + b_{i0} + \epsilon_{ij}}$$
 $$Var[Y_{ij}|b_i] = \phi E[Y_{ij}|b_i]$$
-The distribution of the random effect is $b_i \sim N(0,G_i)$, where $G_i$ has dimensions of (qxq). Because this is an intercept only model q is equal to 1, so $G_i$ has dimensions of (1x1). 
+The distribution of the random effect is $b_i \sim N(0,G_i)$, where $G_i$ has dimensions of (qxq). Because this is a random intercept only model q is equal to 1, so $G_i$ has dimensions of (1x1). 
 
 **Model with one covariate and a random intercept and slope:**
 This will again require a Poisson distribution.
 $$\eta_{ij} = \beta_0 + \beta_1X_{ij} + b_{i0} + b_{1j}X_{ij} + \epsilon_{ij}$$
+$$log(E[Y_{ij}|b_i]) = n_{ij}$$
+$$E[Y_{ij}|b_i] = e^{\beta_0 + \beta_1X_{ij} + b_{i0} + b_{1j}X_{ij} + \epsilon_{ij}}$$
+$$Var[Y_{ij}|b_i] = \phi E[Y_{ij}|b_i]$$
+The distribution of the random effect is $b_i \sim N(0,G_i)$, where $G_i$ has dimensions of (qxq). Because this is a random intercept and slope model q is equal to 2, so $G_i$ has dimensions of (2x2). 
+
+# Question 2
+Consider the MCRF example we partially completed in class (see MCRF GEE Exmaple1.html in the Week 9 module). For this problem we will simplify the fixed effects model to only be linear in age for this problem. This would be the GLMM code for a random intercept and slope model:
+
+\begin{verbatim}
+model1<-glmer(Obesity~Sex + Age + Age*Sex + (1+Age:id), data=mcrf, family = binomial(link = "logit"),nAGQ = 1)
+\end{verbatim}
+
+Note: the nAGQ parameter is for the estimation algorithm, which we will be covering in class next week. 
+
+Interpret the age and sex effects (and the interaction term) assuming the interaction is significant with a negative coefficient. Age has a positive coefficient and Sex a negative coefficient. Be precise in your interpretation reflecting the new interpretations for GLMM's. 
+
+
+This is a binomial model, meaning a binary outcome. The coefficients will be odds ratios, which in this case will be the odds ratio of being obese versus not being obese. 
+
+**Effects:**
+
+* Age: Age has a positive coefficient meaning that for the populations as subjects age the odds ratio of being obese versus not obese increases. There is a random slope for age meaning that individual subjects have different trajectories as they age. Some subjects individual trajectories may increase or decrease, but the population level effect is fixed as positive (increasing odds ratio). 
+
+* Sex: Sex has a negative coefficient meaning that females in the population have lower odds ratios of being obese versus non-obese compared to men. 
+
+* Age*Sex: The interaction has a negative coefficient meaning that for the population as female subjects age they have a lower odds ratio of being obese versus non-obese compared to men aging. 
+
+
+# Question 3
+Read in the datasets for your project and perform data cleaning. Make a Table 1 and 3 graphs of the data and write 2 questions about your project that you have for Jared and Nichole. 
+
+```{r, echo = F}
+
+
+
+```
+
+
+
+
+
+
+
+
 
 

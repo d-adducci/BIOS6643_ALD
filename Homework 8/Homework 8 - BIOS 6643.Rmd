@@ -8,9 +8,23 @@ output: html_document
 ```{r, echo = F, message = F}
 
 library(tidyverse)
+library(kableExtra)
+library(table1)
+library(patchwork)
 
 ```
 
+## Exam Q5
+Below is the model output from fitting the compound symmetry marginal model. Interpret the fixed effects including the point estimate, SE, and statistical significance. 
+
+Intercept: For the baseline (first year evaluation), the subjects have an expected value of 13.18 from the logical memory scale test. The p-value of 0.0000 is statistically significant, assuming an $\alpha$ of 0.05. Because the intercept is not accounting for between subject differences the SE is larger compared to the slope effect. 
+
+Eval.Num: For each subsequent yearly observation the subjects are expected to decrease by ~ 0.0826 per yer on the logical memory scale. The p-value of 0.1252 is not statistically significant. The SE is smaller because the degree of freedom for the within subject covariate of time is closer to the number of observations. 
+
+## Exam Q6
+You wanted to investigate the other var-cov structures and use a statistic to decide which one to use. Can the above model output be used for comparing these statistics? Why or why not?
+
+The above was run with the REML method, so AIC/BIC cannot be accurately applied (need ML to do this).
 
 
 ## Question 1
@@ -55,28 +69,161 @@ This is a binomial model, meaning a binary outcome. The coefficients will be odd
 
 **Effects:**
 
-* Age: Age has a positive coefficient meaning that for the populations as subjects age the odds ratio of being obese versus not obese increases. There is a random slope for age meaning that individual subjects have different trajectories as they age. Some subjects individual trajectories may increase or decrease, but the population level effect is fixed as positive (increasing odds ratio). 
+* $e^{Age}$: Age has a positive coefficient meaning that for the populations as subjects age the odds ratio of being obese versus not obese increases. There is a random slope for age meaning that individual subjects have different trajectories as they age. Some subjects individual trajectories may increase or decrease, but the population level effect is fixed as positive (increasing odds ratio). Because the reference group is men the Age coefficient applies to men aging.  
 
-* Sex: Sex has a negative coefficient meaning that females in the population have lower odds ratios of being obese versus non-obese compared to men. 
+* $e^{Sex}$: Sex has a negative coefficient meaning that females in the population have lower odds ratios of being obese versus non-obese compared to men. 
 
-* Age*Sex: The interaction has a negative coefficient meaning that for the population as female subjects age they have a lower odds ratio of being obese versus non-obese compared to men aging. 
+* $e^{Age*Sex}$: The interaction has a negative coefficient meaning that for the population as female subjects age they have a lower odds ratio of being obese versus non-obese. 
+
+* $e^{Age + Sex + Age*Sex}$: Including the interaction term with the age and sex coefficients describes the odds ratio of being obese versus non-obese for women as they age compared to men. 
 
 
 # Question 3
 Read in the datasets for your project and perform data cleaning. Make a Table 1 and 3 graphs of the data and write 2 questions about your project that you have for Jared and Nichole. 
 
+Cleaning Data:
+
+There are more subjects in the clinical data than the variogram data. Will need to select subjects from the clinical data based on the variogram data. 
+
+```{r, echo = F, message = F}
+
+### START QUESTION 3 CODE ###
+
+# Loading in the variogram data. 
+variogram_raw <- read_csv("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/RawData/6643Project_VariogramDataV2.csv")
+
+# Selecting out data for project 2, factoring lungs, and removing the project
+# specific variables. 
+variogram_data <- variogram_raw %>% subset(P2 == 1) %>%
+  mutate(lung = factor(lung,labels = c("Left","Right"))) %>% select(-P1,-P2,-P3)
+
+# Loading in the clinical data. 
+clinical_data_raw <- read_csv("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/RawData/6643Project_ClinicalData.csv")
+
+# Determining number of subjects who are in both data frames:
+variogram_number <- length(unique(variogram_data$ID)) 
+clinical_number <- length(unique(clinical_data_raw$ID))
+
+# Formatting the clinical data. Will factor variables and will select out subjects
+# who are in both df. 
+clinical_data <- clinical_data_raw %>%
+  filter(ID %in% variogram_data$ID) %>%
+  mutate(Ground_Glass = factor(Ground_Glass),
+         Traction_Bronchiectasis = factor(Traction_Bronchiectasis),
+         Fibrosis = factor(Fibrosis),
+         Interlobular_Septal_Thick = factor(Interlobular_Septal_Thick),
+         Mosaic_Attenuation = factor(Mosaic_Attenuation),
+         Med_Lymphadenopathy = factor(Med_Lymphadenopathy),
+         Race = factor(Race))
+
+# Combining two data frames together by ID. Dropping observations which are missing specified
+# values and demographic data. 
+project2_data <- merge(variogram_data,clinical_data,
+                       by = "ID", sort = FALSE) %>% arrange(ID,lung) %>%
+  drop_na(POSTFEV1,POSTFVC,POSTFEVFVC,Fibrosis,Med_Lymphadenopathy,
+          Traction_Bronchiectasis,Race)
+
+# Writing the data frame to a csv file. 
+#write.csv(project2_data,"C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/ProcessedData/project2_data.csv",row.names = FALSE)
+
+```
+
 ```{r, echo = F}
+
+# Formatting column names for table. 
+label(clinical_data$Ground_Glass) = "Ground Glass"
+label(clinical_data$Traction_Bronchiectasis) = "Traction Bronchiectasis"
+label(clinical_data$Fibrosis) = "Fibrosis"
+label(clinical_data$Interlobular_Septal_Thick) = "Interlobular Septal Thick"
+label(clinical_data$Mosaic_Attenuation) = "Mosaic Attenuation"
+label(clinical_data$Med_Lymphadenopathy) = "Med Lymphadenopathy"
+label(clinical_data$POSTFEV1) = "FEV1"
+label(clinical_data$POSTFVC) = "FVC"
+label(clinical_data$POSTFEVFVC) = "FEV/FVC"
+
+
+# Making a table 1 of the clinical data. 
+clinical_table_1 <- table1(~ Age + BMI + Gender + Height + Race +
+                        Ground_Glass + Traction_Bronchiectasis + Fibrosis +
+                        Interlobular_Septal_Thick + Mosaic_Attenuation +
+                        Med_Lymphadenopathy + POSTFEV1 + POSTFVC + POSTFEVFVC,
+                        data = clinical_data, 
+                      caption = "Table 1: Clinical Data")
+
+clinical_table_1
 
 
 
 ```
 
+```{r, echo = F, warning = F}
 
+fev_bp <- ggplot(clinical_data, aes(x = "", y = POSTFEV1)) +
+  geom_boxplot(fill = "skyblue") +
+  labs(title = "FEV1 Boxplot", y = "",x = "") +
+  theme_bw()
 
+fvc_bp <- ggplot(clinical_data, aes(x = "", y = POSTFVC)) +
+  geom_boxplot(fill = "forestgreen") +
+  labs(title = "FVC Boxplot",y = "",x = "") +
+  theme_bw()
 
+fev_fvc_bp <- ggplot(clinical_data, aes(x = "",y = POSTFEVFVC)) +
+  geom_boxplot(fill = "goldenrod") +
+  labs(title = "FEV/FVC Boxplot",y = "",x = "") +
+  theme_bw()
 
+fev_bp + fvc_bp + fev_fvc_bp
 
+```
+\
+The above boxplots show the distribution for FEV1, FVC, and FEV1/FVC for the entire data set. FEV1/FVC seems to have more spread so the boxplots by race will be plotted to see if there is a difference in distribution for each race group. 
 
+```{r, echo = F, warning = F}
+
+fev_fvc_race_bp <- ggplot(na.omit(clinical_data), aes(x = Race, y = POSTFEVFVC)) +
+  geom_boxplot() +
+  scale_x_discrete(labels = function(x) stringr::str_wrap(x,width = 10)) +
+  labs(title = "FEV/FVC Boxplots by Race", x = "",y = "FEV/FVC") +
+  theme_bw()
+
+fev_fvc_race_bp
+
+```
+\
+The above boxplots show the distribution of FEv/FVC for each race category. 
+
+```{r, echo = F}
+
+fibrosis_bar <- ggplot(na.omit(clinical_data), aes(x = Fibrosis)) +
+  geom_bar() +
+  labs(title = "Fibrosis",x = "Code",y = "Count") +
+  theme_bw() +
+  theme(plot.title = element_text(size = 9))
+
+med_lymphadenopathy_bar <- ggplot(na.omit(clinical_data), 
+                                  aes(x = Med_Lymphadenopathy)) +
+  geom_bar() +
+  labs(title = "Mediastinal Lymphadenopathy",x = "Code",y = "Count") +
+  theme_bw() +
+  theme(plot.title = element_text(size = 9))
+
+traction_bronchiectasis_bar <- ggplot(na.omit(clinical_data), 
+                                      aes(x = Traction_Bronchiectasis)) +
+  geom_bar() +
+  labs(title = "Traction Bronchiectasis", x = "Code", y = "Count") +
+  theme_bw() +
+  theme(plot.title = element_text(size = 9))
+
+fibrosis_bar + med_lymphadenopathy_bar + traction_bronchiectasis_bar
+
+```
+\
+The above bar plots show the occurrences of different codes for Fibrosis, Mediastinal Lymphadenopathy, and Traction Bronchiectasis. 
+
+# Code
+```{r, ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+```
 
 
 

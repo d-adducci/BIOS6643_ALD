@@ -219,7 +219,13 @@ fibrosis_bar + med_lymphadenopathy_bar + traction_bronchiectasis_bar
 
 ```
 \
-The above bar plots show the occurrences of different codes for Fibrosis, Mediastinal Lymphadenopathy, and Traction Bronchiectasis. 
+The above bar plots show the occurrences of different codes for Fibrosis, Mediastinal Lymphadenopathy, and Traction Bronchiectasis.
+
+Questions:
+
+1. How should be handle the multiple codes for the VAS measurements?
+
+2. Should we do a complete case analysis, or use all subjects who have measurements when analyzing a specific variable (PFT,VAS,demographic, etc.)?
 
 # Code
 ```{r, ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}

@@ -1,0 +1,63 @@
+---
+title: "Project 2 BIOS6643 EDA"
+output: html_document
+---
+
+```{r, echo = F}
+
+library(tidyverse)
+
+```
+
+```{r, echo = F}
+
+project2_data <- readRDS("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/ProcessedData/project2_data.rds")
+
+```
+
+```{r, echo = F}
+
+right_lung_data <- project2_data %>% subset(lung == "Right")
+
+left_lung_data <- project2_data %>% subset(lung == "Left")
+
+right_lung_count <- right_lung_data %>% count(ID)
+
+left_lung_count <- left_lung_data %>% count(ID)
+
+setdiff(right_lung_data$ID, left_lung_data$ID)
+
+setdiff(left_lung_data$ID, right_lung_data$ID)
+
+```
+
+All subjects who have right lung data have 50 data points for that lung. All subjects who have left lung data have 50 data points for that lung. Subject 01S042 has right lung data but no left lung data. 
+
+```{r, echo = F}
+
+range_range <- range(project2_data$range)
+
+highest_range_sub <- project2_data %>% subset(range == max(range))
+
+```
+
+```{r, echo = F}
+
+psill_range <- range(project2_data$psill)
+
+boxplot(psill_range)
+
+```
+
+```{r, echo = F}
+
+fvc_range <- range(project2_data$POSTFVC)
+
+fev_range <- range(project2_data$POSTFEV1)
+
+fev_fvc_range <- range(project2_data$POSTFEVFVC)
+
+```
+
+
+

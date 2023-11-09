@@ -34,22 +34,26 @@ Write the generalized linear mixed model notation for the general case and for a
 $$\eta_{ij} = X_{ij}^T\beta + Z_{ij}^Tb_i$$
 $$g(E[Y_{ij}|b_i]) = \eta_{ij}$$
 $$Var(Y_{ij}|b_i) = Var[E[Y_{ij}|b_i]]\phi$$
+
 * $i = 1...n$: where n is the number of subjects.
+
 * $j = 1...n_i$: $n_i$ number of observations for a subject.
 
-*Modle with one covariate and a random intercept:*
+* For the general model G has dimensions of (qxq).
+
+**Model with one covariate and a random intercept:**
 A count outcome will require a Poisson model.  
-$$\eta_{ij} = \beta_0 + \beta_1X_{ij} + b_{i0} + \epsilon_{ij}$$
+$$\eta_{ij} = \beta_0 + \beta_1X_{ij} + b_{i0} $$
 $$log(E[Y_{ij}|b_i]) = n_{ij}$$
-$$E[Y_{ij}|b_i] = e^{\beta_0 + \beta_1X_{ij} + b_{i0} + \epsilon_{ij}}$$
+$$E[Y_{ij}|b_i] = e^{\beta_0 + \beta_1X_{ij} + b_{i0}}$$
 $$Var[Y_{ij}|b_i] = \phi E[Y_{ij}|b_i]$$
 The distribution of the random effect is $b_i \sim N(0,G_i)$, where $G_i$ has dimensions of (qxq). Because this is a random intercept only model q is equal to 1, so $G_i$ has dimensions of (1x1). 
 
 **Model with one covariate and a random intercept and slope:**
 This will again require a Poisson distribution.
-$$\eta_{ij} = \beta_0 + \beta_1X_{ij} + b_{i0} + b_{1j}X_{ij} + \epsilon_{ij}$$
+$$\eta_{ij} = \beta_0 + \beta_1X_{ij} + b_{i0} + b_{1j}X_{ij}$$
 $$log(E[Y_{ij}|b_i]) = n_{ij}$$
-$$E[Y_{ij}|b_i] = e^{\beta_0 + \beta_1X_{ij} + b_{i0} + b_{1j}X_{ij} + \epsilon_{ij}}$$
+$$E[Y_{ij}|b_i] = e^{\beta_0 + \beta_1X_{ij} + b_{i0} + b_{1j}X_{ij}}$$
 $$Var[Y_{ij}|b_i] = \phi E[Y_{ij}|b_i]$$
 The distribution of the random effect is $b_i \sim N(0,G_i)$, where $G_i$ has dimensions of (qxq). Because this is a random intercept and slope model q is equal to 2, so $G_i$ has dimensions of (2x2). 
 
@@ -65,15 +69,15 @@ Note: the nAGQ parameter is for the estimation algorithm, which we will be cover
 Interpret the age and sex effects (and the interaction term) assuming the interaction is significant with a negative coefficient. Age has a positive coefficient and Sex a negative coefficient. Be precise in your interpretation reflecting the new interpretations for GLMM's. 
 
 
-This is a binomial model, meaning a binary outcome. The coefficients will be odds ratios, which in this case will be the odds ratio of being obese versus not being obese. 
+This is a binomial model, meaning a binary outcome. The coefficients will be odds ratios, which in this case will be the odds ratio of being obese versus not being obese. Men are assumed to be the reference group for the interpretation of effects. 
 
 **Effects:**
 
-* $e^{Age}$: Age has a positive coefficient meaning that for the populations as subjects age the odds ratio of being obese versus not obese increases. There is a random slope for age meaning that individual subjects have different trajectories as they age. Some subjects individual trajectories may increase or decrease, but the population level effect is fixed as positive (increasing odds ratio). Because the reference group is men the Age coefficient applies to men aging.  
+* $e^{\beta_0}$: The intercept is the odds ratio of being obese vs non-obese for the average male subject at 0 years of age. Not interpretable in this analysis. There is also a random intercept, meaning each subject has different start points. 
 
-* $e^{Sex}$: Sex has a negative coefficient meaning that females in the population have lower odds ratios of being obese versus non-obese compared to men. 
+* $e^{\beta_{Age}}$: Age has a positive coefficient meaning that as the average subject ages the odds ratio of being obese versus not obese increases. There is a random slope for age meaning that individual subjects have different trajectories as they age. Some subjects individual trajectories may increase or decrease, but the population level effect is fixed as positive (increasing odds ratio). Because the reference group is men the Age coefficient applies to men aging.  
 
-* $e^{Age*Sex}$: The interaction has a negative coefficient meaning that for the population as female subjects age they have a lower odds ratio of being obese versus non-obese. 
+* $e^{\beta_{Sex}}$: Sex has a negative coefficient meaning that the average female in the population has a lower odds ratios of being obese versus non-obese compared to men. 
 
 * $e^{Age + Sex + Age*Sex}$: Including the interaction term with the age and sex coefficients describes the odds ratio of being obese versus non-obese for women as they age compared to men. 
 
@@ -83,7 +87,7 @@ Read in the datasets for your project and perform data cleaning. Make a Table 1 
 
 Cleaning Data:
 
-There are more subjects in the clinical data than the variogram data. Will need to select subjects from the clinical data based on the variogram data. 
+There are more subjects in the clinical data than the variogram data. Will need to select subjects from the clinical data based on the variogram data. Will also select out variogram data based on the project 2 indicator. The data frames will be combined by ID. 
 
 ```{r, echo = F, message = F}
 
@@ -158,6 +162,8 @@ clinical_table_1
 
 ```{r, echo = F, warning = F}
 
+# Making boxplots for PFT measurements. 
+
 fev_bp <- ggplot(clinical_data, aes(x = "", y = POSTFEV1)) +
   geom_boxplot(fill = "skyblue") +
   labs(title = "FEV1 Boxplot", y = "",x = "") +
@@ -181,19 +187,24 @@ The above boxplots show the distribution for FEV1, FVC, and FEV1/FVC for the ent
 
 ```{r, echo = F, warning = F}
 
+# Making a boxplot of FEV1/FVC broken down by race groups. 
+
 fev_fvc_race_bp <- ggplot(na.omit(clinical_data), aes(x = Race, y = POSTFEVFVC)) +
   geom_boxplot() +
   scale_x_discrete(labels = function(x) stringr::str_wrap(x,width = 10)) +
-  labs(title = "FEV/FVC Boxplots by Race", x = "",y = "FEV/FVC") +
+  labs(title = "FEV1/FVC Boxplots by Race", x = "",y = "FEV/FVC") +
   theme_bw()
 
 fev_fvc_race_bp
 
 ```
 \
-The above boxplots show the distribution of FEv/FVC for each race category. 
+The above boxplots show the distribution of FEV1/FVC for each race category. 
 
 ```{r, echo = F}
+
+# Making bar plots for each VAS measurement to get an idea of the counts for 
+# each factor variable. 
 
 fibrosis_bar <- ggplot(na.omit(clinical_data), aes(x = Fibrosis)) +
   geom_bar() +
@@ -217,13 +228,15 @@ traction_bronchiectasis_bar <- ggplot(na.omit(clinical_data),
 
 fibrosis_bar + med_lymphadenopathy_bar + traction_bronchiectasis_bar
 
+### FINISHE QUESTION 3 CODE ###
+
 ```
 \
 The above bar plots show the occurrences of different codes for Fibrosis, Mediastinal Lymphadenopathy, and Traction Bronchiectasis.
 
 Questions:
 
-1. How should be handle the multiple codes for the VAS measurements?
+1. How should we handle the multiple codes for the VAS measurements?
 
 2. Should we do a complete case analysis, or use all subjects who have measurements when analyzing a specific variable (PFT,VAS,demographic, etc.)?
 

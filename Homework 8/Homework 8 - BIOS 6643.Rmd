@@ -130,6 +130,9 @@ project2_data <- merge(variogram_data,clinical_data,
 # Writing the data frame to a csv file. 
 #write.csv(project2_data,"C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/ProcessedData/project2_data.csv",row.names = FALSE)
 
+# Writing the data to a RDS file. 
+#saveRDS(project2_data,"C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/ProcessedData/project2_data.rds")
+
 ```
 
 ```{r, echo = F}

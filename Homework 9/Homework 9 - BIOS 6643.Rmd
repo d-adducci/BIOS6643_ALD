@@ -1,0 +1,44 @@
+---
+title: "Homework 9 - BIOS 6642"
+author: "Dominic Adducci"
+date: "2023-11-17"
+output: html_document
+---
+
+
+
+
+# Question 1
+We have learned that for GLMM that estimation is more challenging that for LMM. Explain in 1-2 sentences what makes maximizing the likelihood more difficult. 
+
+For a LMM the following equality holds:
+$$E[Y_i] = E[X_i \beta + Z_ib_i] = X_i \beta$$
+
+However, due to the link functions of GLMMs this same scenario does not hold:
+$$E(Y_i) \neq h(X_i\beta)$$
+
+
+# Question 2
+In a class we have written the general case of the likelihood ($\prod_{i=1}^n \int f(Y_i|b_i)f(b_i)db_i$). Write the likelihood for the specific case of a Bernoulli outcome with a random intercept. Specifically, what is the distribution of $f(Y_i|b_i)$ and $f(b_i)$? Next, write $f(Y_i|b_i)$ in terms of the $\beta$'s that need estimating.
+
+The conditional expection for a random intercept model:
+$$E[Y_{ij}|b_{0i}] = \mu_{ij}^{y_{ij}}(1-\mu_{ij})^{1 - y_{ij}}$$
+Exponential family format for the Bernoulli distribution:
+$$f(Y_{ij}|b_{0i}) = exp\left[y_{ij}log\left(\frac{\mu_{ij}}{1-\mu_{ij}}\right)+log(1-\mu_{ij})\right]$$
+The distribution of $f(b_{0i})$:
+$$f(b_{0i}) \sim N(0,\tau^2)$$
+
+The canonical link function is $log\left(\frac{\mu_{ij}}{1 - \mu_{ij}}\right) = X^T\beta + b_{0i}$.
+
+$f(Y_{ij}|b_i)$ written in terms of $\beta$'s. 
+
+$$f(Y_{ij}|b_{0i}) = exp\left[y_{ij}(X^T\beta + b_{0i}) + log\left(\frac{1}{1+e^{X^T \beta + b_{0i}}}\right)\right]$$
+
+# Question 3
+There are two major control parameters in the glmr package for maximizing the likelihood. One is the nAGQ number and the other is part of the control options. Explain the two components of maximizing the likelihood and how these options in the package change the MLE algorith. Do this is in 5 sentences or less. 
+
+nAGQ refers to the number of Guassian Quadrature points. As model complexity increases more quadrature points will be required. However, the computational demands will increase rapidly as models get more complex. The other component is the optimizer. The default is Nelder-Mead, but can be changed if convergence is a problem. 
+
+
+
+

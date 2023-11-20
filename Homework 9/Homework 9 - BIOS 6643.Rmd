@@ -5,7 +5,14 @@ date: "2023-11-17"
 output: html_document
 ---
 
+```{r, echo = F, message = F, warning = F}
 
+library(tidyverse)
+library(lme4)
+library(kableExtra)
+library(mmmgee)
+
+```
 
 
 # Question 1
@@ -35,9 +42,172 @@ $f(Y_{ij}|b_i)$ written in terms of $\beta$'s.
 $$f(Y_{ij}|b_{0i}) = exp\left[y_{ij}(X^T\beta + b_{0i}) + log\left(\frac{1}{1+e^{X^T \beta + b_{0i}}}\right)\right]$$
 
 # Question 3
-There are two major control parameters in the glmr package for maximizing the likelihood. One is the nAGQ number and the other is part of the control options. Explain the two components of maximizing the likelihood and how these options in the package change the MLE algorith. Do this is in 5 sentences or less. 
+There are two major control parameters in the glmr package for maximizing the likelihood. One is the nAGQ number and the other is part of the control options. Explain the two components of maximizing the likelihood and how these options in the package change the MLE algorithm. Do this is in 5 sentences or less. 
 
 nAGQ refers to the number of Guassian Quadrature points. As model complexity increases more quadrature points will be required. However, the computational demands will increase rapidly as models get more complex. The other component is the optimizer. The default is Nelder-Mead, but can be changed if convergence is a problem. 
+
+# Question 4
+A study is planned where data will be collected on asthmatic subjects on every weekday for one month. There are two outcome measures of interest, (i) medication use counts and (ii) FEV1. The investigator is interested in modeling the subject level curves over the month and understanding how much variation there is between subjects and how different medications impact these patterns over the model. You are the statistician and the PI is looking for your suggestions about models to use. 
+
+### Part A
+\
+It is anticipated that there is variation due to both the subject (meaning they just have a higher or lower average response) and that patterns of each outcome will vary across subjects over the month. What model and R function (and package) would you suggest using to fit the data? Answer separately for each outcome. 
+
+**(i) Medication Use Counts:**
+
+For medication use counts a Poisson model will be used to model the counts of medication use. A random intercept and slope will be included to account for the difference in outcomes across subjects over the month. The glmm function from the glmm package will be used to model this (specifying the family as Poisson). 
+
+**(ii) FEV1:**
+
+For FEV1 a Gaussian model will be used to model the FEV1 value change over the month. A random intercept will account for differences in FEV1 at start, and a random slope will account for individual changes in FEV1 as the month progresses. The glmm function from the glmm package will be used to model this (specifying the family as Gaussian). 
+
+### Part B
+\
+Suppose that we now consider an indicator of whether subjects are on medication A or medication B (A *use* = 0, B *use* = 1) and a linear time trend over the month (this time trend probably makes no sense...but will make for a simpler answer for this problem). How will you interpret the interaction for each outcome? Give precise interpretations. 
+
+**(i) Medication Use Counts:**
+
+* $e^{\beta_{time} + \beta{time*treat}}$: This the rate ratio for medication use count for someone who is using medication B compared to medication A as time changes. The interaction coefficient accounts for the difference between A and B as time progresses. 
+
+**(ii) FEV1:**
+
+* $e^{\beta_{time} + \beta{time*treat}}$: This is the expected FEV1 measurement for someone who is using medication B compared to medication A as time changes. Again, the interaction coefficient accounts for the difference between FEV1 measurement for medication A and B as time progresses. 
+
+### Part C
+What are the drawbacks of using a subject-specific (random effects) approach to model each outcome (list only 1-2 for each outcome or note if you don't think there are any drawbacks for a particular outcome)? 
+
+**(i) Medication Use Counts:**
+
+For medication use counts the outcome will be subject-specific instead of marginal. This means interpretation will be based on how individual subject medication use count changes instead of the difference between medication A and B. Additionally a GLMM model generally requires more data in order to account for subject-specific trends. 
+
+**(ii) FEV1:**
+
+For FEV1 the change over time will be subject-specific instead of marginal. This means interpretation will be based on how individual subjects change in FEV1 instead of the difference between medication A and B. Additionally a GLMM model generally requires more data in order to account for subject-specific trends. 
+
+### Part D
+Will subject specific (i.e. random effects) approach allow us to quantify and study population effects in the weekly trends? Explain in a few sentences for each outcome. 
+
+**(i) Medication Use Counts:**
+
+No, a subject-specific model will not be the best approach for quantifying population effects in weekly trends. The number of medication use counts will be subject-specific instead of the effect from medication A versus medication B. 
+
+**(ii) FEV1:**
+
+Again, a subject-specific model will not be the best approach for quantifying population effects in weekly trends of FEV1. The FEV1 coefficients will be subject-specific instead of illustrating the difference between medication A versus medication B. 
+
+# Question 5
+A randomized double blinded trial of 294 patients was conducted to compare 2 oral treatments, corresponding to Itraconazole (treat=0) and Terbinafine (treat=1), for toenail infection. The response variable was the binary indicator of presence of onycholysis (separation of the nail plate from the nail bed). Patients were evaluated for onycholysis at baseline (week 0) and at weeks 4, 8, 12, 24, 36, and 48. Suppose the interest is in finding the effect of treatment on changes in the risk of onycholysis over time. The data are available in *tonail-data.txt* file; response is a binary indicator for moderate or severe (response=1) versus non or mild (response=0) onycholysis. 
+
+```{r, echo = F, message = F}
+
+### START QUESTION 5 CODE ###
+
+toenail_data_raw <- read_table("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 9/toenail-data.txt",)
+
+toenail_data <- tonail_data_raw %>% mutate(treat = factor(treat,
+                                                          labels = c("Itraconazole",
+                                                                     "Terbinafine")))
+
+```
+
+### Part A
+\
+Fit a GLMM model with month and the interaction between treatment and month, and random intercepts. Assume that there is no difference between treatments at baseline. Assume a linear trend for month. Assume the scale parameter $\phi = 1$ and the random intercepts follow a normal distribution. Interpret the results for the model, including the coefficient of month and that of the interaction. 
+
+```{r, echo = F}
+
+## START QUESTION 5 PART A CODE ##
+
+toenail_glmm <- glmer(response ~ month + month:treat + (1|id), 
+                     family = binomial(link = "logit"), data = toenail_data)
+
+toenail_glmm_results <- broom.mixed::tidy(toenail_glmm,conf.int = T, 
+                                          exp = T)[c(1:3),] %>% 
+  select(term,estimate,conf.low,conf.high,p.value) %>%
+  mutate(p.value = format.pval(p.value,digits = 4)) %>%
+  kbl(caption = "Onycholysis GLMM - Random Intercept",
+      col.names = c("Term","Exp(Estimate)","Exp(Conf.Low)",
+                    "Exp(Conf.High)","P-Value"),
+      booktabs = T,align = "cc",digits = 4) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+toenail_glmm_results
+
+## FINISH QUESTION 5 PART A CODE ##
+
+```
+\
+* $e^{\beta_{month}}$: The exponentiated estimate is 0.6733 (95\% CI:0.6156,0.7363) with a significant p-value of <0.0001. The exponentiated coefficient means that for each month the odds of severe or moderate onycholysis is 0.6733 times the previous month for the average subject (random intercept = 0) who is on the Itraconazole treatment. 
+
+* $e^{\beta_{month*treatTerbinafine}}$: The exponentiated estimate is 0.8646 (95\% CI:0.7584,0.9856) with a significant p-value of 0.0295. Because the odds ratio is less than 1 this means that subjects taking Terbinafine have lower odds of onycholysis for each subsequent month compared to someone who was taking Itraconazole. 
+
+* $e^{\beta_{month} + \beta_{month*treatTerginafine}}$: This gives the odds ratio of onycholysis for someone on Terbinifine for each subsequent month compared to someone on Itraconazole. 
+
+### Part B
+\
+Compare your estimates to those from you GEE fit with the exchangeable working correlation structure (also assuming a linear time trend). Why do these two estimates differ?
+
+```{r, echo = F}
+
+## START QUESTION 5 PART B CODE ##
+
+toenail_gee <- geem2(response ~ month + month:treat, id = toenail_data$id,
+                     data = toenail_data, 
+                     family = binomial(link = "logit"),
+                     corstr = "exchangeable", init.phi = 1, scale.fix = T)
+
+toenail_gee_sum <- summary(toenail_gee)
+
+# Exponentiating the estimates.
+gee_int_exp <- exp(toenail_gee_sum$coef[1,1])
+gee_month_exp <- exp(toenail_gee_sum$coef[2,1])
+gee_monthtrt_exp <- exp(toenail_gee_sum$coef[3,1])
+
+estimate_gee_df <- data.frame(estimate = c(gee_int_exp,gee_month_exp,
+                                           gee_monthtrt_exp))
+
+# Calculating lower confidence interval. 
+gee_int_lower <- exp(toenail_gee_sum$coef[1,1] - 
+                       toenail_gee_sum$coef[1,3]*1.96)
+gee_month_lower <- exp(toenail_gee_sum$coef[2,1] -
+                         toenail_gee_sum$coef[2,3]*1.96)
+gee_monthtrt_lower <- exp(toenail_gee_sum$coef[3,1] -
+                            toenail_gee_sum$coef[3,3]*1.96)
+
+lower_gee_df <- data.frame(lower_ci = c(gee_int_lower,gee_month_lower,
+                                        gee_monthtrt_lower))
+
+# Calculating upper confidence interval. 
+gee_int_upper <- exp(toenail_gee_sum$coef[1,1] + 
+                       toenail_gee_sum$coef[1,3]*1.96)
+gee_month_upper <- exp(toenail_gee_sum$coef[2,1] +
+                         toenail_gee_sum$coef[2,3]*1.96)
+gee_monthtrt_upper <- exp(toenail_gee_sum$coef[3,1] +
+                            toenail_gee_sum$coef[3,3]*1.96)
+
+upper_gee_df <- data.frame(upper_ci = c(gee_int_upper,gee_month_upper,
+                                        gee_monthtrt_upper))
+
+# Extracting p-values.
+gee_pval <- data.frame(toenail_gee_sum$coef[,5])
+colnames(gee_pval) <- "p_value"
+
+# Combining these into a data frame. 
+terms <- data.frame(term = c("Intercept","Month","Month*Terginafine"))
+
+gee_table <- cbind(terms,estimate_gee_df,lower_gee_df,upper_gee_df,gee_pval)
+row.names(gee_table) <- NULL
+
+gee_results_table <- kbl(gee_table,
+                         caption = "Onycholysis GEE",
+                         col.names = c("Terms","Exp(Estimate)","Exp(Conf.Low)",
+                                       "Exp(Conf.High)","P-Value"),
+                         booktabs = T, align = "cc", digits = 4) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+gee_results_table
+
+```
 
 
 

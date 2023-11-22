@@ -118,7 +118,10 @@ clinical_data <- clinical_data_raw %>%
          Interlobular_Septal_Thick = factor(Interlobular_Septal_Thick),
          Mosaic_Attenuation = factor(Mosaic_Attenuation),
          Med_Lymphadenopathy = factor(Med_Lymphadenopathy),
-         Race = factor(Race))
+         Race = factor(Race, levels = c("White","Black or African American",
+                                        "Asian","Unknown","American Indian or Alaskan Native",
+                                        "Multi_racial or No Primary Race")),
+         Gender = factor(Gender, levels = c("Female","Male")))
 
 # Combining two data frames together by ID. Dropping observations which are missing specified
 # values and demographic data. 

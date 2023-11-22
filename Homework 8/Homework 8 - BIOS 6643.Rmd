@@ -114,14 +114,20 @@ clinical_data <- clinical_data_raw %>%
   filter(ID %in% variogram_data$ID) %>%
   mutate(Ground_Glass = factor(Ground_Glass),
          Traction_Bronchiectasis = factor(Traction_Bronchiectasis),
-         Fibrosis = factor(Fibrosis),
+         Fibrosis = factor(Fibrosis, labels = c("No","Yes")),
          Interlobular_Septal_Thick = factor(Interlobular_Septal_Thick),
          Mosaic_Attenuation = factor(Mosaic_Attenuation),
          Med_Lymphadenopathy = factor(Med_Lymphadenopathy),
          Race = factor(Race, levels = c("White","Black or African American",
                                         "Asian","Unknown","American Indian or Alaskan Native",
                                         "Multi_racial or No Primary Race")),
-         Gender = factor(Gender, levels = c("Female","Male")))
+         Gender = factor(Gender, levels = c("Female","Male"))) %>%
+  mutate(Traction_Bronchiectasis = fct_collapse(Traction_Bronchiectasis,
+                                                No = 0,
+                                                Yes = c(1,2,3)),
+         Med_Lymphadenopathy = fct_collapse(Med_Lymphadenopathy,
+                                            No = 0,
+                                            Yes = c(2,3)))
 
 # Combining two data frames together by ID. Dropping observations which are missing specified
 # values and demographic data. 

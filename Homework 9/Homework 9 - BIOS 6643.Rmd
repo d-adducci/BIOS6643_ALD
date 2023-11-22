@@ -9,10 +9,14 @@ output: html_document
 
 library(tidyverse)
 library(lme4)
+library(lmerTest)
 library(kableExtra)
 library(mmmgee)
+library(patchwork)
 
 ```
+
+# Homework 9 Part A
 
 # Exam Q7
 \
@@ -82,7 +86,7 @@ For medication use counts a Poisson model will be used to model the counts of me
 
 **(ii) FEV1:**
 
-For FEV1 a Gaussian model will be used to model the FEV1 value change over the month. A random intercept will account for differences in FEV1 at start, and a random slope will account for individual changes in FEV1 as the month progresses. The glmm function from the glmm package will be used to model this (specifying the family as Gaussian). 
+For FEV1 a Gaussian model will be used to model the FEV1 value change over the month. A random intercept will account for differences in FEV1 at start, and a random slope will account for individual changes in FEV1 as the month progresses. The lmer function from the lme4 package will be used to model this. 
 
 ### Part B
 \
@@ -160,6 +164,7 @@ toenail_glmm_results
 
 ```
 \
+
 * $e^{\beta_{month}}$: The exponentiated estimate is 0.6733 (95\% CI:0.6156,0.7363) with a significant p-value of <0.0001. The exponentiated coefficient means that for each month the odds of severe or moderate onycholysis is 0.6733 times the previous month for the average subject (random intercept = 0) who is on the Itraconazole treatment. 
 
 * $e^{\beta_{month*treatTerbinafine}}$: The exponentiated estimate is 0.8646 (95\% CI:0.7584,0.9856) with a significant p-value of 0.0295. Because the odds ratio is less than 1 this means that subjects taking Terbinafine have lower odds of onycholysis for each subsequent month compared to someone who was taking Itraconazole. 
@@ -301,11 +306,11 @@ summary(seizure_glmm)
 
 * $e^{\beta_{age}} = 0.985$: The expected rate ratio of seizures for an average subject in the placebo group as they increase each year in age when controlling for treatment, starting treatment, and the interaction between treatment and starting treatment. This means the expected rate ratio of seizures for each additional year for these subjects is 0.985 (95\% CI:0.953,1.017) with an insignificant p-value of 0.352. 
 
-* $e^{\beta_{vm0}} = 1.117$: The expected rate ratio of seizures for an average subject after starting the trial controlling for age and treatment group. This means the expected rate ratio of seizures after starting treatment is 1.117 (95\% CI: 1.019,1.225) with a significant p-value of 0.018. 
+* $e^{\beta_{vm0}} = 1.117$: The expected rate ratio of seizures for an average subject after starting the trial compared to before starting controlling for age and treatment group. This means the expected rate ratio of seizures after starting treatment is 1.117 (95\% CI: 1.019,1.225) with a significant p-value of 0.018. 
  
-* $e^{\beta_{trt}} = 0.957$: The expected rate ratio of seizures for an average in the treatment group compared to someone in the placebo group controlling for age and initialization of treatment. This means the expected rate ratio of seizures for these subjects is 0.957 (95\% CI:0.634,1.445) with an insignificant p-value of 0.834. This makes sense as baseline measurements were taken before starting treatment for both groups. 
+* $e^{\beta_{trt}} = 0.957$: The expected rate ratio of seizures for an average subject in the treatment group compared to someone in the placebo group controlling for age and initialization of treatment. This means the expected rate ratio of seizures for these subjects is 0.957 (95\% CI:0.634,1.445) with an insignificant p-value of 0.834. This makes sense as baseline measurements were taken before starting treatment for both groups. 
 
-* $e^{\beta_{trt} + \beta_{vm0*trt} = 0.863$: The expected rate of seizures for the average subject in the treatment group after starting treatment compared to baseline. The interaction term has an insignificant p-value of 0.110. 
+* $e^{\beta_{trt} + \beta_{vm0*trt}} = 0.863$: The expected rate of seizures for the average subject in the treatment group after starting treatment compared to baseline. The interaction term has an insignificant p-value of 0.110. 
 
 ```{r}
 
@@ -324,7 +329,7 @@ summary(seizure_gee)
 
 * $e^{\beta_{age}} = 0.968$: The expected rate ratio of seizures for each additional year of age when controlling for treatment and initialization of the trial. This means the expected rate ratio is 0.968 (95\% CI: 0.941,0.997) with a significant p-value of 0.030.
 
-* $e^{\beta_{vm0}} = 1.117$: The expected rate ratio of seizures after starting the trial compared to baseline when controlling for treatment and age. This means the expected rate ratio is 1.117 (95\% CI: 0.890,1.403) with a insignificant p-value of 0.340. 
+* $e^{\beta_{vm0}} = 1.117$: The expected rate ratio of seizures after starting the trial compared to baseline when controlling for treatment and age. This means the expected rate ratio is 1.117 (95\% CI: 0.890,1.403) with an insignificant p-value of 0.340. 
 
 * $e^{\beta_{trt}} = 0.983$: The expected rate ratio of seizures for someone in the treatment group compared to someone in the placebo group when controlling for age and initialization of the trial. This means the expected rate ratio is 0.983 (95\% CI: 0.646,1.495) with a insignificant p-value of 0.935. 
 
@@ -388,7 +393,123 @@ In real life, what model would you want to use for this problem (GLMM or GEE)?
 A GEE model would be better for interpreting the effect of treatment versus placebo. A GLMM would give you subject-specific interpretations. 
 
 
+# Homework 9 Part B
+\
+Fit several preliminary models. Consider fitting cubic models instead of the spline model to start model fitting. 
+
+Left and right lungs will be modeled separately, and the two outcomes of psill and range will also be modeled separately. Covariates which will be included in all models include BMI, age, gender, height, VAS (fibrosis, mediastinal lymphadenopathy, traction bronchiectasis), PFT (FEV1, FVC, FEV1/FVC), and normalized slice. Normalized slice will be included with cubic terms in order to approximate the results of a penalized spline. Two models will be compared for each outcome/lung combination. One including race as a covariate and one not including race as a covariate. 
+
+```{r, echo = F}
+
+### HOMEWORK 9 PART B CODE ###
+
+vario_data <- readRDS("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/ProcessedData/project2_data.rds")
+
+left_vario_data <- vario_data %>% filter(lung == "Left")
+right_vario_data <- vario_data %>% filter(lung == "Right")
+
+```
+
+# Linear Mixed Model - Left Lung Psill
+
+```{r, echo = T, message = F}
+
+left_psill_no_race <- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
+                           Med_Lymphadenopathy + Traction_Bronchiectasis +
+                           POSTFEV1 + POSTFVC + POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+summary(left_psill_no_race)
+
+left_psill_race <- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
+                           Med_Lymphadenopathy + Traction_Bronchiectasis +
+                           POSTFEV1 + POSTFVC + POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + 
+                          Race + (1|ID),
+                         data = left_vario_data, REML = F)
+
+summary(left_psill_race)
+
+```
+
+Between the two left lung psill models the LMM without race has a slightly lower AIC. Additionally, none of the race factor levels are significant in the model which includes race. 
+
+# Linear Mixed Model - Right Lung Psill
+
+```{r, message = F}
+
+right_psill_no_race <- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
+                           Med_Lymphadenopathy + Traction_Bronchiectasis +
+                           POSTFEV1 + POSTFVC + POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+summary(right_psill_no_race)
+
+right_psill_race <- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
+                           Med_Lymphadenopathy + Traction_Bronchiectasis +
+                           POSTFEV1 + POSTFVC + POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + 
+                           Race + (1|ID),
+                         data = right_vario_data, REML = F)
+
+summary(right_psill_race)
+
+```
+
+As with the left lung, the right lung model where psill as the output has a lower AIC when race is not included. Additionally, none of the race factors in the model that does include race are significant. 
 
 
+# Linear Mixed Model - Left Lung Range
 
 
+```{r, message = F}
+
+left_range_no_race <- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
+                           Med_Lymphadenopathy + Traction_Bronchiectasis +
+                           POSTFEV1 + POSTFVC + POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+summary(left_range_no_race)
+
+left_range_race <- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
+                           Med_Lymphadenopathy + Traction_Bronchiectasis +
+                           POSTFEV1 + POSTFVC + POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + 
+                             Race + (1|ID),
+                         data = left_vario_data, REML = F)
+
+summary(left_range_race)
+
+
+```
+
+The model without race has a lower AIC, and none of the factored race terms in the model with race are significant. 
+
+```{r, message = F}
+
+right_range_no_race <- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
+                           Med_Lymphadenopathy + Traction_Bronchiectasis +
+                           POSTFEV1 + POSTFVC + POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+summary(right_range_no_race)
+
+right_range_race <- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
+                           Med_Lymphadenopathy + Traction_Bronchiectasis +
+                           POSTFEV1 + POSTFVC + POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + 
+                           Race + (1|ID),
+                         data = right_vario_data, REML = F)
+
+summary(right_range_race)
+
+```
+As with the left lung, the right lung range LMM has a lower AIC for the model without race. Additionally none of the factored race terms are significant. 
+
+# Code
+```{r, ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+```

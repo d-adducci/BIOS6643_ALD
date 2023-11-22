@@ -14,6 +14,29 @@ library(mmmgee)
 
 ```
 
+# Exam Q7
+\
+Define the marginal and subject specific models for the random intercept model. What are the distributions, expected values, and variances for each? 
+
+**Marginal Model:**
+
+$$Y = X\beta + Zb  + E$$
+Where $X\beta$ is fixed, and $Zb$ and E are random. 
+
+$$Y \sim MVN(X \beta,Z^TGZ+R)$$
+
+**Subject-Specific Model:**
+
+$$Y_i|b_i = X_i\beta + Z_i b_{0i} + E_i $$
+Where $X_i\beta$ and $Z_i b_{0i}$ are fixed, and $E_i$ is random. 
+
+$$Y \sim MVN(X_i\beta + Z_ib_{0i},R_i)$$
+
+# Exam Q8
+\
+What model (marginal or subject-specific) is used in the likelihood to estimate the fixed effects (and variance terms) for the above random intercept? 
+
+The marginal likelihood is used. 
 
 # Question 1
 We have learned that for GLMM that estimation is more challenging that for LMM. Explain in 1-2 sentences what makes maximizing the likelihood more difficult. 
@@ -102,9 +125,9 @@ A randomized double blinded trial of 294 patients was conducted to compare 2 ora
 
 ### START QUESTION 5 CODE ###
 
-toenail_data_raw <- read_table("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 9/toenail-data.txt",)
+toenail_data_raw <- read_table("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 9/toenail-data.txt")
 
-toenail_data <- tonail_data_raw %>% mutate(treat = factor(treat,
+toenail_data <- toenail_data_raw %>% mutate(treat = factor(treat,
                                                           labels = c("Itraconazole",
                                                                      "Terbinafine")))
 
@@ -151,11 +174,11 @@ Compare your estimates to those from you GEE fit with the exchangeable working c
 
 ## START QUESTION 5 PART B CODE ##
 
-toenail_gee <- geem2(response ~ month + month:treat, id = toenail_data$id,
+toenail_gee <- geem2(response ~ month + treat:month, id = toenail_data$id,
                      data = toenail_data, 
                      family = binomial(link = "logit"),
                      corstr = "exchangeable", init.phi = 1, scale.fix = T)
-
+ 
 toenail_gee_sum <- summary(toenail_gee)
 
 # Exponentiating the estimates.
@@ -190,6 +213,7 @@ upper_gee_df <- data.frame(upper_ci = c(gee_int_upper,gee_month_upper,
 
 # Extracting p-values.
 gee_pval <- data.frame(toenail_gee_sum$coef[,5])
+gee_pval <- data.frame(format.pval(gee_pval,digits=4))
 colnames(gee_pval) <- "p_value"
 
 # Combining these into a data frame. 
@@ -207,7 +231,163 @@ gee_results_table <- kbl(gee_table,
 
 gee_results_table
 
+## FINISH QUESTION 5 PART B CODE ##
+
+### FINISH QUESTION 5 CODE ###
+
 ```
+
+All of the estimates in the GEE model are larger than the estimates in the GLMM. The reason for this is because the GLMM model accounts for differences between subjects, while the GEE model is strictly marginal and only considers fixed effects. Additionally in the GLMM all coefficients are significant, while in the GEE model only the intercept and month coefficients are significant.
+
+### Part C
+\
+Write up the model notation for your GLMM model. Include the distribution of the outcome, expected value of the outcome, variance of the outcome, your systematic component specific to your model, the link function, and the distribution of the random effect. Define all subscripts (i's and j's, number of people, observations on a person). 
+
+$$Y_{ij}|b_i \sim Bernoulli$$
+$$\eta_{ij} = \beta_0 + \beta_1Month_{ij} + \beta_3Month*Terginafine + b_{0i}$$
+
+$$Link\,\,Function = \eta_{ij} = log(E[Y_{ij}|b_i])$$
+$$Var[Y_{ij}|b_i] = E[Y_{ij}|b_i](1-E[Y_{ij}|b_i])$$
+$$b_i \sim N(0,G_i);\,\,G_i \,\,dimensions\,\,of\,\,(1x1)$$
+i = 1....n; n = # of subjects.
+j = 1....$n_i$; $n_i$ = # of observations on a subject.
+
+
+# Question 6
+\
+Epileptic Seizure Study of a randomized trial reported in Thall and Vail (1990). -59 subjects with epilepsy suffering from simple or partial seizures were assigned to receive either the anti-epileptic drug progabide or a placebo in addition to a standard chemotherapy regime all were taking. 
+
+* Because each individual might be prone to different rates of experiencing seizures, the investigators first tried to get a sense of this by recording the number of seizures suffered by each subject over the 8-week period prior to the start of administration of the assigned treatment. 
+  - It is common in such studies to record such baseline measurements, so that the effect of treatment for each subject can be measured relative to how that subject behaved prior to treatment. 
+
+* Following initiation of treatment, the number of seizures for each subject was counted for each of 4 consecutive 2-week periods. 
+
+* The age of each subject at the start of the study was also recorded, as it was suspected that subject age might be associated with the effect of the treatment. 
+
+```{r, echo = F}
+
+### START QUESTION 6 CODE ###
+
+# Loading in the data.
+dat.sz <- read.table("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Homework 9/epilepsy.txt",header = T)
+colnames(dat.sz) <- c("subj","seize","visit","trt","base","age")
+
+# dat.sz$0 is the number of weeks in the observation time (8 weeks or 2 weeks)
+dat.sz$o <- 8*(dat.sz$visit==0)+2*(dat.sz$visit>0)
+
+# Creates an offset for the difference in the number of weeks for each obs. 
+dat.sz$logo <- log(dat.sz$o)
+dat.sz$vm0 <- as.numeric(dat.sz$visit>0)
+
+```
+
+### Part A
+\
+Fit both a GLMM with a random intercept and a marginal GEE model (with an exchangeable working correlation) to assess whether treatment modifies the time effect. Use the vm0 variable for time (0 if baseline and 1 otherwise). This means that time is really a repeated measure and we expect to get the average increase from baseline rather than assuming a linear trend, for example. Recall, you need an offset. For both models, assume overdispersion is addressed in your random effects specification or the GEE assumptions. Adjust for age in this model. Provide code and summary output here and interpret your parameters for both models and compare them. How do they compare? 
+
+```{r}
+
+## START QUESTION 6 PART A ##
+
+seizure_glmm <- glmer(seize ~ age + vm0 + trt + vm0:trt + 
+                        offset(logo) + (1|subj), nAGQ = 50,
+                      data = dat.sz, family = poisson(link = "log"))
+
+summary(seizure_glmm)
+
+```
+
+* $e^{\beta_0} = 4.394$: The expected rate of seizures for an average subject who is 0 years old at baseline who is in the placebo group. This means the expected rate of seizures is 4.39 per week (95\% CI:1.635,11.811), with a significant p-value of 0.003. Not interetable for this analysis. 
+
+* $e^{\beta_{age}} = 0.985$: The expected rate ratio of seizures for an average subject in the placebo group as they increase each year in age when controlling for treatment, starting treatment, and the interaction between treatment and starting treatment. This means the expected rate ratio of seizures for each additional year for these subjects is 0.985 (95\% CI:0.953,1.017) with an insignificant p-value of 0.352. 
+
+* $e^{\beta_{vm0}} = 1.117$: The expected rate ratio of seizures for an average subject after starting the trial controlling for age and treatment group. This means the expected rate ratio of seizures after starting treatment is 1.117 (95\% CI: 1.019,1.225) with a significant p-value of 0.018. 
+ 
+* $e^{\beta_{trt}} = 0.957$: The expected rate ratio of seizures for an average in the treatment group compared to someone in the placebo group controlling for age and initialization of treatment. This means the expected rate ratio of seizures for these subjects is 0.957 (95\% CI:0.634,1.445) with an insignificant p-value of 0.834. This makes sense as baseline measurements were taken before starting treatment for both groups. 
+
+* $e^{\beta_{trt} + \beta_{vm0*trt} = 0.863$: The expected rate of seizures for the average subject in the treatment group after starting treatment compared to baseline. The interaction term has an insignificant p-value of 0.110. 
+
+```{r}
+
+seizure_gee <- geem2(seize ~ age + vm0 + trt + vm0:trt +
+                     offset(logo), init.phi = 1, scale.fix = T,
+                     family = poisson(link = "log"),
+                     id = subj, data = dat.sz, corstr = "exchangeable")
+
+summary(seizure_gee)
+
+## FINISH QUESTION 6 PART B CODE ##
+
+```
+
+* $e^{\beta_0} = 9.584$: The expected rate of seizures for someone who is 0 years old, in the placebo group, and at baseline. This means that someone with these parameters the expected rate of seizures is 9.584 per week (95\% CI:4.100:22.401) with a significant p-value <0.001. 
+
+* $e^{\beta_{age}} = 0.968$: The expected rate ratio of seizures for each additional year of age when controlling for treatment and initialization of the trial. This means the expected rate ratio is 0.968 (95\% CI: 0.941,0.997) with a significant p-value of 0.030.
+
+* $e^{\beta_{vm0}} = 1.117$: The expected rate ratio of seizures after starting the trial compared to baseline when controlling for treatment and age. This means the expected rate ratio is 1.117 (95\% CI: 0.890,1.403) with a insignificant p-value of 0.340. 
+
+* $e^{\beta_{trt}} = 0.983$: The expected rate ratio of seizures for someone in the treatment group compared to someone in the placebo group when controlling for age and initialization of the trial. This means the expected rate ratio is 0.983 (95\% CI: 0.646,1.495) with a insignificant p-value of 0.935. 
+
+* $e^{\beta_{trt} + \beta{vm0*trt}} = 0.885$: The expected rate ratio of seizures after starting the trial for someone in the treatment group compared to someone in the placebo group. The interaction term is insignificant with a p-value of 0.627. 
+
+### Part B
+\
+For the GLMM, test whether there is an interaction between time and treatment and give a precise interpretation specific to GLMM's of the interaction if it is significant. If not, refit the model removing the interaction and interpret the model with just the main effects. Include point estimates, 95\% CI, and p-values with statistical conclusions. 
+
+
+```{r}
+
+## STARTING QUESTION 6 PART B CODE ##
+
+# Setting up a matrix to test interaction term:
+L <- matrix(c(0,0,0,0,1),nrow=1)
+
+# Setting up the formula.
+contr.cov <- solve(L%*%summary(seizure_glmm)$vcov%*%t(L))
+contr <- t(L%*%summary(seizure_glmm)$coefficients[,2])%*%contr.cov%*%(L%*%summary(seizure_glmm)$coefficients[,2])
+int_test <- pchisq(contr[1,1],nrow(L),lower.tail = F)
+
+int_test
+
+```
+
+After testing the interaction term it is not significant. Refitting the model:
+
+```{r, echo = F}
+
+seizure_glmm_2 <- glmer(seize ~ age + vm0 + trt +
+                        offset(logo) + (1|subj), nAGQ = 50,
+                      data = dat.sz, family = poisson(link = "log"))
+
+summary(seizure_glmm_2)
+
+seizure_glmm_2_tbl <- (broom.mixed::tidy(seizure_glmm_2,exp=T,conf.int=T) %>%
+  mutate(p.value = format.pval(p.value,digits=4)) %>%
+  select(term,estimate,std.error,conf.low,conf.high,p.value))[c(1:4),] %>%
+  kbl(caption = "Seizure GLMM - No Interaction",
+      col.names = c("Term","Exp(Estimate)","Std.Error","Exp(Conf.Low)",
+                    "Exp(Conf.High)","P-Value"),
+      digits = 4, booktabs = T, align = "cc") %>%
+  kable_styling(latex_options = "HOLD_position")
+
+seizure_glmm_2_tbl
+
+```
+
+* $e^{\beta_0} = 4.519$: This is the rate of seizures per week for someone who is 0 years of age, in the placebo group, and at baseline. This means that the expected rate of seizures per week is 4.519 (95\% CI: 1.683,12.140) with a significant p-value of 0.003.
+
+* $e^{\beta_{age}} = 0.985$: This is the rate ratio of seizures for each additional year of age controlling for treatment group and initialization of treatment. This means that the rate ratio is 0.985 (95\% CI: 0.953,1.017) with an insignificant p-value of 0.352. 
+* $e^{\beta_{vm0}} = 1.059$: This is the rate ratio of seizures after starting treatment compared to baseline when controlling for treatment group and age. This means that the rate ratio is 1.059 (95\% CI: 0.993,1.128) with an insignificant p-value of 0.078. 
+
+* $e^{\beta_{trt}} = 0.907$: This is the rate ratio of seizures between the treatment and placebo group when controlling for age and initialization of treatment. This means the rate ratio is 0.907 (95\% CI: 0.604,1.363) with an insignificant p-value of 0.639. 
+
+### Part C
+\
+In real life, what model would you want to use for this problem (GLMM or GEE)? 
+
+A GEE model would be better for interpreting the effect of treatment versus placebo. A GLMM would give you subject-specific interpretations. 
+
+
 
 
 

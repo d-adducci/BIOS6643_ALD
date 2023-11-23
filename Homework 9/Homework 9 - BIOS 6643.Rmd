@@ -420,7 +420,11 @@ left_psill_no_race <- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
                            I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
                          data = left_vario_data, REML = F)
 
-summary(left_psill_no_race)
+broom.mixed::tidy(left_psill_no_race) %>% 
+  select(term,estimate,p.value) %>%
+  kbl(caption = "Right Lung Range - LMM Adjusted for Race",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
 
 left_psill_race <- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
                            Med_Lymphadenopathy + Traction_Bronchiectasis +
@@ -429,10 +433,14 @@ left_psill_race <- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
                           Race + (1|ID),
                          data = left_vario_data, REML = F)
 
-summary(left_psill_race)
+broom.mixed::tidy(left_psill_race) %>% 
+  select(term,estimate,p.value) %>%
+  kbl(caption = "Left Lung Psill - LMM Adjusted for Race",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
 
 ```
-
+\
 Between the two left lung psill models the LMM without race has a slightly lower AIC. Additionally, none of the race factor levels are significant in the model which includes race. 
 
 # Linear Mixed Model - Right Lung Psill
@@ -445,7 +453,11 @@ right_psill_no_race <- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
                            I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
                          data = right_vario_data, REML = F)
 
-summary(right_psill_no_race)
+broom.mixed::tidy(right_psill_no_race) %>% 
+  select(term,estimate,p.value) %>%
+  kbl(caption = "Right Lung Range - LMM Not Adjusted for Race",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
 
 right_psill_race <- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
                            Med_Lymphadenopathy + Traction_Bronchiectasis +
@@ -454,10 +466,14 @@ right_psill_race <- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
                            Race + (1|ID),
                          data = right_vario_data, REML = F)
 
-summary(right_psill_race)
+broom.mixed::tidy(right_psill_race) %>% 
+  select(term,estimate,p.value) %>%
+  kbl(caption = "Right Lung Psill - LMM Adjusted for Race",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
 
 ```
-
+\
 As with the left lung, the right lung model where psill as the output has a lower AIC when race is not included. Additionally, none of the race factors in the model that does include race are significant. 
 
 
@@ -472,7 +488,11 @@ left_range_no_race <- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
                            I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
                          data = left_vario_data, REML = F)
 
-summary(left_range_no_race)
+broom.mixed::tidy(left_range_no_race) %>% 
+  select(term,estimate,p.value) %>%
+  kbl(caption = "Left Lung Range - LMM Not Adjusted for Race",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
 
 left_range_race <- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
                            Med_Lymphadenopathy + Traction_Bronchiectasis +
@@ -481,11 +501,15 @@ left_range_race <- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
                              Race + (1|ID),
                          data = left_vario_data, REML = F)
 
-summary(left_range_race)
+broom.mixed::tidy(left_range_race) %>% 
+  select(term,estimate,p.value) %>%
+  kbl(caption = "Left Lung Range - LMM Adjusted for Race",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
 
 
 ```
-
+\
 The model without race has a lower AIC, and none of the factored race terms in the model with race are significant. 
 
 ```{r, message = F}
@@ -496,7 +520,11 @@ right_range_no_race <- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
                            I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
                          data = right_vario_data, REML = F)
 
-summary(right_range_no_race)
+broom.mixed::tidy(right_range_no_race) %>% 
+  select(term,estimate,p.value) %>%
+  kbl(caption = "Right Lung Range - LMM Not Adjusted for Race",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
 
 right_range_race <- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
                            Med_Lymphadenopathy + Traction_Bronchiectasis +
@@ -505,10 +533,391 @@ right_range_race <- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
                            Race + (1|ID),
                          data = right_vario_data, REML = F)
 
-summary(right_range_race)
+broom.mixed::tidy(right_range_race) %>% 
+  select(term,estimate,p.value) %>%
+  kbl(caption = "Right Lung Range - LMM Adjusted for Race",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
 
 ```
+\
 As with the left lung, the right lung range LMM has a lower AIC for the model without race. Additionally none of the factored race terms are significant. 
+
+# Modeling Individual VAS and PFT Measurements
+
+The purpose of this section is to see how the clinical measurements (VAS and PFT) associate with the outcomes after adjusting for demographics. 
+
+## FEV1
+
+```{r, echo = F}
+
+fev1_left_range <- lmer(range ~ BMI + Age + Gender + Height +
+                           POSTFEV1 + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fev1_left_range,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,4)) %>%
+  kbl(caption = "Left Lung Range - FEV1 LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+fev1_right_range <- lmer(range ~ BMI + Age + Gender + Height +
+                           POSTFEV1 + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fev1_right_range,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,digits=4)) %>%
+  kbl(caption = "Right Lung Range - FEV1 LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+\
+After controlling for demographic data, up to the cubic term for normalized slice, and FEV1, the FEV1 value is significant for both the left and right lung when the outcome is range. The estimate between the left and right lung is relativly close. 
+
+```{r, echo = F}
+
+fev1_left_psill <- lmer(psill ~ BMI + Age + Gender + Height +
+                           POSTFEV1 + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fev1_left_psill,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,4)) %>%
+  kbl(caption = "Left Lung Psill - FEV1 LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+fev1_right_psill <- lmer(psill ~ BMI + Age + Gender + Height +
+                           POSTFEV1 + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fev1_right_psill,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,digits=4)) %>%
+  kbl(caption = "Right Lung Psill - FEV1 LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+\
+After controlling for demographic data, up to the cubic term for normalized slice, and FEV1, the FEV1 value is significant for both the left and right lung when the outcome is psill. The estimate for the right lung is noticeably higher, but the estimate for both lungs have the same magnitude. 
+
+## FVC
+
+```{r, echo = F}
+
+fvc_left_range <- lmer(range ~ BMI + Age + Gender + Height +
+                           POSTFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fvc_left_range,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,4)) %>%
+  kbl(caption = "Left Lung Range - FVC LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+fvc_right_range <- lmer(range ~ BMI + Age + Gender + Height +
+                           POSTFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fvc_right_range,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,digits=4)) %>%
+  kbl(caption = "Right Lung Range - FVC LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+\
+After controlling for demographic data, up to the cubic term for normalized slice, and FVC, the FVC value is significant for both the left and right lung when the outcome is range. The estimates for both lungs are close to each other. 
+
+```{r, echo = F}
+
+fvc_left_psill <- lmer(psill ~ BMI + Age + Gender + Height +
+                           POSTFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fvc_left_psill,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,4)) %>%
+  kbl(caption = "Left Lung Psill - FVC LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+fvc_right_psill <- lmer(psill ~ BMI + Age + Gender + Height +
+                           POSTFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fvc_right_psill,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,digits=4)) %>%
+  kbl(caption = "Right Lung Psill - FVC LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+\
+After controlling for demographic data, up to the cubic term for normalized slice, and FVC, the FVC value is significant for both the left and right lung when the outcome is psill. The estimates for both lungs are very close to each other. 
+
+## FEV1/FVC
+
+```{r, echo = F}
+
+fevfvc_left_range <- lmer(range ~ BMI + Age + Gender + Height +
+                           POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fevfvc_left_range,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,4)) %>%
+  kbl(caption = "Left Lung Range - FEV/FVC LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+fevfvc_right_range <- lmer(range ~ BMI + Age + Gender + Height +
+                           POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fevfvc_right_range,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,digits=4)) %>%
+  kbl(caption = "Right Lung Range - FEV/FVC LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+\
+After controlling for demographic data, up to the cubic term for normalized slice, and FEV1/FVC, the FEV1/FVC value is significant for both the left and right lung when the outcome is range. The estimates for both lungs are close to each other. 
+
+```{r, echo = F}
+
+fevfvc_left_psill <- lmer(psill ~ BMI + Age + Gender + Height +
+                           POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fevfvc_left_psill,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,4)) %>%
+  kbl(caption = "Left Lung Psill - FEV/FVC LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+fevfvc_right_psill <- lmer(psill ~ BMI + Age + Gender + Height +
+                           POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fevfvc_right_psill,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,digits=4)) %>%
+  kbl(caption = "Right Lung Psill - FEV/FVC LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+\
+After controlling for demographic data, up to the cubic term for normalized slice, and FEV1/FVC, the FEV1/FVC estimate is significent in neither the left or right lung. The estimates are signficantly different from each other, with the right lung performing much worse. 
+
+# Fibrosis
+
+```{r, echo = F}
+
+fibrosis_left_range <- lmer(range ~ BMI + Age + Gender + Height +
+                           Fibrosis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fibrosis_left_range,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,4)) %>%
+  kbl(caption = "Left Lung Range - Fibrosis LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+fibrosis_right_range <- lmer(range ~ BMI + Age + Gender + Height +
+                           Fibrosis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fibrosis_right_range,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,digits=4)) %>%
+  kbl(caption = "Right Lung Range - Fibrosis LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+\
+After controlling for demographic data, up to the cubic term for normalized slice, and fibrosis, the fibrosis value is significant for both the left and right lung when the outcome is range. The estimates for both lungs are relatively close to each other. 
+
+```{r, echo = F}
+
+fibrosis_left_psill <- lmer(psill ~ BMI + Age + Gender + Height +
+                           Fibrosis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fibrosis_left_psill,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,4)) %>%
+  kbl(caption = "Left Lung Psill - Fibrosis LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+fibrosis_right_psill <- lmer(psill ~ BMI + Age + Gender + Height +
+                           Fibrosis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fibrosis_right_psill,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,digits=4)) %>%
+  kbl(caption = "Right Lung Psill - Fibrosis LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+\
+After controlling for demographic data, up to the cubic term for normalized slice, and fibrosis, the fibrosis value is significant for both the left and right lung when the outcome is psill. The estimates for both lungs are noticaebly different from each other, but they are the same magnitude.
+
+# Traction Bronchiectasis
+
+```{r, echo = F}
+
+TB_left_range <- lmer(range ~ BMI + Age + Gender + Height +
+                           Traction_Bronchiectasis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(TB_left_range,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,4)) %>%
+  kbl(caption = "Left Lung Range - Traction Bronchiectasis LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+TB_right_range <- lmer(range ~ BMI + Age + Gender + Height +
+                           Traction_Bronchiectasis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(TB_right_range,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,digits=4)) %>%
+  kbl(caption = "Right Lung Range - Traction Bronchiectasis LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+\
+After controlling for demographic data, up to the cubic term for normalized slice, and traction bronchiectasis, the traction bronchiectasis value is significant for both the left and right lung when the outcome is range. The estimates for both lungs are relatively close to each other. 
+
+```{r, echo = F}
+
+TB_left_psill <- lmer(psill ~ BMI + Age + Gender + Height +
+                           Traction_Bronchiectasis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(TB_left_psill,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,4)) %>%
+  kbl(caption = "Left Lung Psill - Traction Bronchiectasis LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+TB_right_psill <- lmer(psill ~ BMI + Age + Gender + Height +
+                           Traction_Bronchiectasis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(TB_right_psill,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,digits=4)) %>%
+  kbl(caption = "Right Lung Psill - Traction Bronchiectasis LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+After controlling for demographic data, up to the cubic term for normalized slice, and traction bronchiectasis, the traction bronchiectasis value is significant for both the left and right lung when the outcome is psill. The estimates for both lungs are relatively close to each other. 
+
+# Mediastinal Lymphadenopathy
+
+```{r, echo = F}
+
+ML_left_range <- lmer(range ~ BMI + Age + Gender + Height +
+                           Med_Lymphadenopathy + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(ML_left_range,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,4)) %>%
+  kbl(caption = "Left Lung Range - Mediastinal Lymphadenopathy LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+ML_right_range <- lmer(range ~ BMI + Age + Gender + Height +
+                           Med_Lymphadenopathy + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(ML_right_range,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,digits=4)) %>%
+  kbl(caption = "Right Lung Range - Mediastinal Lymphadenopathy LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+\
+After controlling for demographic data, up to the cubic term for normalized slice, and mediastinal lymphadenopathy, the estimate for the right lung is significant and for the left lung it is not significant. 
+
+```{r, echo = F}
+
+ML_left_psill <- lmer(psill ~ BMI + Age + Gender + Height +
+                           Med_Lymphadenopathy + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(ML_left_psill,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,4)) %>%
+  kbl(caption = "Left Lung Psill - Mediastinal Lymphadenopathy LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+ML_right_psill <- lmer(psill ~ BMI + Age + Gender + Height +
+                           Med_Lymphadenopathy + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(ML_right_psill,conf.int = T) %>% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %>%
+  mutate(p.value = format.pval(p.value,digits=4)) %>%
+  kbl(caption = "Right Lung Psill - Mediastinal Lymphadenopathy LMM",
+      align = "cc",digits = 4,booktabs = T) %>%
+  kable_styling(latex_options = "HOLD_position")
+
+```
+\
+After controlling for demographic data, up to the cubic term for normalized slice, and mediastinal lymphadenopathy, the mediastinal lymphadenopathy estimate is significant for neither lung. 
+
 
 # Code
 ```{r, ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}

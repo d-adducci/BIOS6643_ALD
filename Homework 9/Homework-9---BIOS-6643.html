@@ -1354,47 +1354,207 @@ race as a covariate.</p>
                            I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
                          data = left_vario_data, REML = F)
 
-summary(left_psill_no_race)</code></pre>
-<pre><code>## Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite&#39;s
-##   method [lmerModLmerTest]
-## Formula: 
-## psill ~ BMI + Age + Gender + Height + Fibrosis + Med_Lymphadenopathy +  
-##     Traction_Bronchiectasis + POSTFEV1 + POSTFVC + POSTFEVFVC +  
-##     slice_normalized + I(slice_normalized^2) + I(slice_normalized^3) +  
-##     (1 | ID)
-##    Data: left_vario_data
-## 
-##       AIC       BIC    logLik  deviance  df.resid 
-##  318625.4  318748.1 -159296.7  318593.4     15784 
-## 
-## Scaled residuals: 
-##     Min      1Q  Median      3Q     Max 
-## -5.2411 -0.5271 -0.0880  0.4190  9.6457 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  ID       (Intercept) 28459351 5335    
-##  Residual             30993824 5567    
-## Number of obs: 15800, groups:  ID, 316
-## 
-## Fixed effects:
-##                             Estimate Std. Error        df t value Pr(&gt;|t|)    
-## (Intercept)                 -2647.58    9916.02    316.95  -0.267  0.78964    
-## BMI                           -20.55      49.82    316.00  -0.413  0.68020    
-## Age                          -141.43      34.93    316.00  -4.049 6.49e-05 ***
-## GenderMale                   2956.74     903.88    316.00   3.271  0.00119 ** 
-## Height                        331.88     115.50    316.00   2.874  0.00433 ** 
-## FibrosisYes                  1475.67    1105.25    316.00   1.335  0.18279    
-## Med_LymphadenopathyYes        194.29     625.34    316.00   0.311  0.75624    
-## Traction_BronchiectasisYes   4171.10     725.71    316.00   5.748 2.13e-08 ***
-## POSTFEV1                    -2306.67    2226.22    316.00  -1.036  0.30093    
-## POSTFVC                     -2365.42    1728.00    316.00  -1.369  0.17201    
-## POSTFEVFVC                  10293.41    8546.51    316.00   1.204  0.22934    
-## slice_normalized            61671.34    2973.56  15484.00  20.740  &lt; 2e-16 ***
-## I(slice_normalized^2)      -59878.28    6586.20  15484.00  -9.091  &lt; 2e-16 ***
-## I(slice_normalized^3)        -283.38    4350.01  15484.00  -0.065  0.94806    
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+broom.mixed::tidy(left_psill_no_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Right Lung Range - LMM Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Range - LMM Adjusted for Race
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+(Intercept)
+</td>
+<td style="text-align:center;">
+-2647.5807
+</td>
+<td style="text-align:center;">
+0.7896
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+BMI
+</td>
+<td style="text-align:center;">
+-20.5531
+</td>
+<td style="text-align:center;">
+0.6802
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Age
+</td>
+<td style="text-align:center;">
+-141.4312
+</td>
+<td style="text-align:center;">
+0.0001
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+GenderMale
+</td>
+<td style="text-align:center;">
+2956.7427
+</td>
+<td style="text-align:center;">
+0.0012
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Height
+</td>
+<td style="text-align:center;">
+331.8779
+</td>
+<td style="text-align:center;">
+0.0043
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+FibrosisYes
+</td>
+<td style="text-align:center;">
+1475.6718
+</td>
+<td style="text-align:center;">
+0.1828
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Med_LymphadenopathyYes
+</td>
+<td style="text-align:center;">
+194.2906
+</td>
+<td style="text-align:center;">
+0.7562
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Traction_BronchiectasisYes
+</td>
+<td style="text-align:center;">
+4171.0992
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEV1
+</td>
+<td style="text-align:center;">
+-2306.6727
+</td>
+<td style="text-align:center;">
+0.3009
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFVC
+</td>
+<td style="text-align:center;">
+-2365.4183
+</td>
+<td style="text-align:center;">
+0.1720
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEVFVC
+</td>
+<td style="text-align:center;">
+10293.4116
+</td>
+<td style="text-align:center;">
+0.2293
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+slice_normalized
+</td>
+<td style="text-align:center;">
+61671.3381
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^2)
+</td>
+<td style="text-align:center;">
+-59878.2837
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^3)
+</td>
+<td style="text-align:center;">
+-283.3772
+</td>
+<td style="text-align:center;">
+0.9481
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__(Intercept)
+</td>
+<td style="text-align:center;">
+5334.7306
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__Observation
+</td>
+<td style="text-align:center;">
+5567.2097
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
 <pre class="r"><code>left_psill_race &lt;- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
                            Med_Lymphadenopathy + Traction_Bronchiectasis +
                            POSTFEV1 + POSTFVC + POSTFEVFVC + slice_normalized +
@@ -1402,69 +1562,242 @@ summary(left_psill_no_race)</code></pre>
                           Race + (1|ID),
                          data = left_vario_data, REML = F)
 
-summary(left_psill_race)</code></pre>
-<pre><code>## Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite&#39;s
-##   method [lmerModLmerTest]
-## Formula: 
-## psill ~ BMI + Age + Gender + Height + Fibrosis + Med_Lymphadenopathy +  
-##     Traction_Bronchiectasis + POSTFEV1 + POSTFVC + POSTFEVFVC +  
-##     slice_normalized + I(slice_normalized^2) + I(slice_normalized^3) +  
-##     Race + (1 | ID)
-##    Data: left_vario_data
-## 
-##       AIC       BIC    logLik  deviance  df.resid 
-##  318630.2  318775.9 -159296.1  318592.2     15781 
-## 
-## Scaled residuals: 
-##     Min      1Q  Median      3Q     Max 
-## -5.2412 -0.5274 -0.0880  0.4186  9.6459 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  ID       (Intercept) 28350914 5325    
-##  Residual             30993824 5567    
-## Number of obs: 15800, groups:  ID, 316
-## 
-## Fixed effects:
-##                                Estimate Std. Error        df t value Pr(&gt;|t|)
-## (Intercept)                    -2600.25    9996.59    316.93  -0.260  0.79495
-## BMI                              -21.53      49.99    316.00  -0.431  0.66692
-## Age                             -139.23      35.55    316.00  -3.917  0.00011
-## GenderMale                      2949.70     907.53    316.00   3.250  0.00128
-## Height                           324.11     119.73    316.00   2.707  0.00716
-## FibrosisYes                     1594.63    1122.48    316.00   1.421  0.15641
-## Med_LymphadenopathyYes           195.64     628.58    316.00   0.311  0.75583
-## Traction_BronchiectasisYes      4176.22     727.99    316.00   5.737 2.26e-08
-## POSTFEV1                       -2239.79    2226.68    316.00  -1.006  0.31524
-## POSTFVC                        -2321.93    1726.20    316.00  -1.345  0.17955
-## POSTFEVFVC                     10144.15    8540.01    316.00   1.188  0.23579
-## slice_normalized               61671.33    2973.56  15484.00  20.740  &lt; 2e-16
-## I(slice_normalized^2)         -59878.28    6586.20  15483.99  -9.091  &lt; 2e-16
-## I(slice_normalized^3)           -283.37    4350.01  15484.00  -0.065  0.94806
-## RaceBlack or African American    520.76     792.78    316.00   0.657  0.51174
-## RaceAsian                        -78.16    3892.73    316.00  -0.020  0.98399
-## RaceUnknown                     3346.98    3871.93    316.00   0.864  0.38801
-##                                  
-## (Intercept)                      
-## BMI                              
-## Age                           ***
-## GenderMale                    ** 
-## Height                        ** 
-## FibrosisYes                      
-## Med_LymphadenopathyYes           
-## Traction_BronchiectasisYes    ***
-## POSTFEV1                         
-## POSTFVC                          
-## POSTFEVFVC                       
-## slice_normalized              ***
-## I(slice_normalized^2)         ***
-## I(slice_normalized^3)            
-## RaceBlack or African American    
-## RaceAsian                        
-## RaceUnknown                      
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>Between the two left lung psill models the LMM without race has a
+broom.mixed::tidy(left_psill_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Left Lung Psill - LMM Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Left Lung Psill - LMM Adjusted for Race
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+(Intercept)
+</td>
+<td style="text-align:center;">
+-2600.2467
+</td>
+<td style="text-align:center;">
+0.7949
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+BMI
+</td>
+<td style="text-align:center;">
+-21.5350
+</td>
+<td style="text-align:center;">
+0.6669
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Age
+</td>
+<td style="text-align:center;">
+-139.2252
+</td>
+<td style="text-align:center;">
+0.0001
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+GenderMale
+</td>
+<td style="text-align:center;">
+2949.6962
+</td>
+<td style="text-align:center;">
+0.0013
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Height
+</td>
+<td style="text-align:center;">
+324.1080
+</td>
+<td style="text-align:center;">
+0.0072
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+FibrosisYes
+</td>
+<td style="text-align:center;">
+1594.6310
+</td>
+<td style="text-align:center;">
+0.1564
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Med_LymphadenopathyYes
+</td>
+<td style="text-align:center;">
+195.6369
+</td>
+<td style="text-align:center;">
+0.7558
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Traction_BronchiectasisYes
+</td>
+<td style="text-align:center;">
+4176.2177
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEV1
+</td>
+<td style="text-align:center;">
+-2239.7916
+</td>
+<td style="text-align:center;">
+0.3152
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFVC
+</td>
+<td style="text-align:center;">
+-2321.9288
+</td>
+<td style="text-align:center;">
+0.1796
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEVFVC
+</td>
+<td style="text-align:center;">
+10144.1527
+</td>
+<td style="text-align:center;">
+0.2358
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+slice_normalized
+</td>
+<td style="text-align:center;">
+61671.3281
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^2)
+</td>
+<td style="text-align:center;">
+-59878.2757
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^3)
+</td>
+<td style="text-align:center;">
+-283.3747
+</td>
+<td style="text-align:center;">
+0.9481
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+RaceBlack or African American
+</td>
+<td style="text-align:center;">
+520.7577
+</td>
+<td style="text-align:center;">
+0.5117
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+RaceAsian
+</td>
+<td style="text-align:center;">
+-78.1587
+</td>
+<td style="text-align:center;">
+0.9840
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+RaceUnknown
+</td>
+<td style="text-align:center;">
+3346.9843
+</td>
+<td style="text-align:center;">
+0.3880
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__(Intercept)
+</td>
+<td style="text-align:center;">
+5324.5577
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__Observation
+</td>
+<td style="text-align:center;">
+5567.2097
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+Between the two left lung psill models the LMM without race has a
 slightly lower AIC. Additionally, none of the race factor levels are
 significant in the model which includes race.</p>
 </div>
@@ -1476,62 +1809,207 @@ significant in the model which includes race.</p>
                            I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
                          data = right_vario_data, REML = F)
 
-summary(right_psill_no_race)</code></pre>
-<pre><code>## Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite&#39;s
-##   method [lmerModLmerTest]
-## Formula: 
-## psill ~ BMI + Age + Gender + Height + Fibrosis + Med_Lymphadenopathy +  
-##     Traction_Bronchiectasis + POSTFEV1 + POSTFVC + POSTFEVFVC +  
-##     slice_normalized + I(slice_normalized^2) + I(slice_normalized^3) +  
-##     (1 | ID)
-##    Data: right_vario_data
-## 
-##       AIC       BIC    logLik  deviance  df.resid 
-##  320768.8  320891.6 -160368.4  320736.8     15834 
-## 
-## Scaled residuals: 
-##     Min      1Q  Median      3Q     Max 
-## -3.6278 -0.5450 -0.0637  0.4337 14.5474 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  ID       (Intercept) 20489223 4527    
-##  Residual             33560790 5793    
-## Number of obs: 15850, groups:  ID, 317
-## 
-## Fixed effects:
-##                              Estimate Std. Error         df t value Pr(&gt;|t|)
-## (Intercept)                -14175.439   8459.792    318.401  -1.676  0.09479
-## BMI                             7.024     42.301    317.000   0.166  0.86823
-## Age                           -89.442     29.739    317.000  -3.008  0.00284
-## GenderMale                   3447.666    771.050    317.000   4.471 1.08e-05
-## Height                        440.334     98.418    317.001   4.474 1.07e-05
-## FibrosisYes                  1114.333    942.822    317.000   1.182  0.23813
-## Med_LymphadenopathyYes        706.001    532.986    317.000   1.325  0.18625
-## Traction_BronchiectasisYes   4652.801    619.045    317.000   7.516 5.82e-13
-## POSTFEV1                    -2391.958   1898.369    317.000  -1.260  0.20859
-## POSTFVC                     -2300.250   1473.617    317.000  -1.561  0.11953
-## POSTFEVFVC                  15147.342   7288.661    317.000   2.078  0.03849
-## slice_normalized            27822.950   3087.038  15533.000   9.013  &lt; 2e-16
-## I(slice_normalized^2)       12346.644   6837.735  15533.000   1.806  0.07099
-## I(slice_normalized^3)      -42589.060   4516.080  15533.000  -9.431  &lt; 2e-16
-##                               
-## (Intercept)                .  
-## BMI                           
-## Age                        ** 
-## GenderMale                 ***
-## Height                     ***
-## FibrosisYes                   
-## Med_LymphadenopathyYes        
-## Traction_BronchiectasisYes ***
-## POSTFEV1                      
-## POSTFVC                       
-## POSTFEVFVC                 *  
-## slice_normalized           ***
-## I(slice_normalized^2)      .  
-## I(slice_normalized^3)      ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+broom.mixed::tidy(right_psill_no_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Right Lung Range - LMM Not Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Range - LMM Not Adjusted for Race
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+(Intercept)
+</td>
+<td style="text-align:center;">
+-14175.4385
+</td>
+<td style="text-align:center;">
+0.0948
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+BMI
+</td>
+<td style="text-align:center;">
+7.0238
+</td>
+<td style="text-align:center;">
+0.8682
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Age
+</td>
+<td style="text-align:center;">
+-89.4417
+</td>
+<td style="text-align:center;">
+0.0028
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+GenderMale
+</td>
+<td style="text-align:center;">
+3447.6656
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Height
+</td>
+<td style="text-align:center;">
+440.3336
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+FibrosisYes
+</td>
+<td style="text-align:center;">
+1114.3333
+</td>
+<td style="text-align:center;">
+0.2381
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Med_LymphadenopathyYes
+</td>
+<td style="text-align:center;">
+706.0009
+</td>
+<td style="text-align:center;">
+0.1863
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Traction_BronchiectasisYes
+</td>
+<td style="text-align:center;">
+4652.8014
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEV1
+</td>
+<td style="text-align:center;">
+-2391.9580
+</td>
+<td style="text-align:center;">
+0.2086
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFVC
+</td>
+<td style="text-align:center;">
+-2300.2505
+</td>
+<td style="text-align:center;">
+0.1195
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEVFVC
+</td>
+<td style="text-align:center;">
+15147.3419
+</td>
+<td style="text-align:center;">
+0.0385
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+slice_normalized
+</td>
+<td style="text-align:center;">
+27822.9499
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^2)
+</td>
+<td style="text-align:center;">
+12346.6439
+</td>
+<td style="text-align:center;">
+0.0710
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^3)
+</td>
+<td style="text-align:center;">
+-42589.0597
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__(Intercept)
+</td>
+<td style="text-align:center;">
+4526.5022
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__Observation
+</td>
+<td style="text-align:center;">
+5793.1675
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
 <pre class="r"><code>right_psill_race &lt;- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
                            Med_Lymphadenopathy + Traction_Bronchiectasis +
                            POSTFEV1 + POSTFVC + POSTFEVFVC + slice_normalized +
@@ -1539,69 +2017,242 @@ summary(right_psill_no_race)</code></pre>
                            Race + (1|ID),
                          data = right_vario_data, REML = F)
 
-summary(right_psill_race)</code></pre>
-<pre><code>## Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite&#39;s
-##   method [lmerModLmerTest]
-## Formula: 
-## psill ~ BMI + Age + Gender + Height + Fibrosis + Med_Lymphadenopathy +  
-##     Traction_Bronchiectasis + POSTFEV1 + POSTFVC + POSTFEVFVC +  
-##     slice_normalized + I(slice_normalized^2) + I(slice_normalized^3) +  
-##     Race + (1 | ID)
-##    Data: right_vario_data
-## 
-##       AIC       BIC    logLik  deviance  df.resid 
-##  320772.4  320918.2 -160367.2  320734.4     15831 
-## 
-## Scaled residuals: 
-##     Min      1Q  Median      3Q     Max 
-## -3.6272 -0.5448 -0.0642  0.4337 14.5478 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  ID       (Intercept) 20329695 4509    
-##  Residual             33560790 5793    
-## Number of obs: 15850, groups:  ID, 317
-## 
-## Fixed effects:
-##                                Estimate Std. Error        df t value Pr(&gt;|t|)
-## (Intercept)                   -14297.00    8511.02    318.38  -1.680  0.09397
-## BMI                               11.49      42.36    317.00   0.271  0.78634
-## Age                              -86.28      30.19    317.00  -2.858  0.00454
-## GenderMale                      3343.64     772.68    317.00   4.327 2.03e-05
-## Height                           435.60     101.78    317.00   4.280 2.48e-05
-## FibrosisYes                     1055.79     955.68    317.00   1.105  0.27011
-## Med_LymphadenopathyYes           647.25     534.64    317.00   1.211  0.22694
-## Traction_BronchiectasisYes      4691.37     619.81    317.00   7.569 4.13e-13
-## POSTFEV1                       -2352.75    1895.27    317.00  -1.241  0.21538
-## POSTFVC                        -2253.60    1469.21    317.00  -1.534  0.12605
-## POSTFEVFVC                     14924.71    7269.50    317.00   2.053  0.04089
-## slice_normalized               27822.93    3087.04  15533.01   9.013  &lt; 2e-16
-## I(slice_normalized^2)          12346.64    6837.73  15533.01   1.806  0.07099
-## I(slice_normalized^3)         -42589.04    4516.08  15533.01  -9.431  &lt; 2e-16
-## RaceBlack or African American    232.68     674.33    317.00   0.345  0.73028
-## RaceAsian                       4435.45    3314.28    317.00   1.338  0.18176
-## RaceUnknown                     2427.65    3296.45    317.00   0.736  0.46200
-##                                  
-## (Intercept)                   .  
-## BMI                              
-## Age                           ** 
-## GenderMale                    ***
-## Height                        ***
-## FibrosisYes                      
-## Med_LymphadenopathyYes           
-## Traction_BronchiectasisYes    ***
-## POSTFEV1                         
-## POSTFVC                          
-## POSTFEVFVC                    *  
-## slice_normalized              ***
-## I(slice_normalized^2)         .  
-## I(slice_normalized^3)         ***
-## RaceBlack or African American    
-## RaceAsian                        
-## RaceUnknown                      
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>As with the left lung, the right lung model where psill as the output
+broom.mixed::tidy(right_psill_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Right Lung Psill - LMM Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Psill - LMM Adjusted for Race
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+(Intercept)
+</td>
+<td style="text-align:center;">
+-14296.9998
+</td>
+<td style="text-align:center;">
+0.0940
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+BMI
+</td>
+<td style="text-align:center;">
+11.4917
+</td>
+<td style="text-align:center;">
+0.7863
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Age
+</td>
+<td style="text-align:center;">
+-86.2799
+</td>
+<td style="text-align:center;">
+0.0045
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+GenderMale
+</td>
+<td style="text-align:center;">
+3343.6442
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Height
+</td>
+<td style="text-align:center;">
+435.5996
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+FibrosisYes
+</td>
+<td style="text-align:center;">
+1055.7857
+</td>
+<td style="text-align:center;">
+0.2701
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Med_LymphadenopathyYes
+</td>
+<td style="text-align:center;">
+647.2547
+</td>
+<td style="text-align:center;">
+0.2269
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Traction_BronchiectasisYes
+</td>
+<td style="text-align:center;">
+4691.3678
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEV1
+</td>
+<td style="text-align:center;">
+-2352.7542
+</td>
+<td style="text-align:center;">
+0.2154
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFVC
+</td>
+<td style="text-align:center;">
+-2253.6023
+</td>
+<td style="text-align:center;">
+0.1261
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEVFVC
+</td>
+<td style="text-align:center;">
+14924.7133
+</td>
+<td style="text-align:center;">
+0.0409
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+slice_normalized
+</td>
+<td style="text-align:center;">
+27822.9339
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^2)
+</td>
+<td style="text-align:center;">
+12346.6438
+</td>
+<td style="text-align:center;">
+0.0710
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^3)
+</td>
+<td style="text-align:center;">
+-42589.0403
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+RaceBlack or African American
+</td>
+<td style="text-align:center;">
+232.6808
+</td>
+<td style="text-align:center;">
+0.7303
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+RaceAsian
+</td>
+<td style="text-align:center;">
+4435.4452
+</td>
+<td style="text-align:center;">
+0.1818
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+RaceUnknown
+</td>
+<td style="text-align:center;">
+2427.6536
+</td>
+<td style="text-align:center;">
+0.4620
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__(Intercept)
+</td>
+<td style="text-align:center;">
+4508.8463
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__Observation
+</td>
+<td style="text-align:center;">
+5793.1676
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+As with the left lung, the right lung model where psill as the output
 has a lower AIC when race is not included. Additionally, none of the
 race factors in the model that does include race are significant.</p>
 </div>
@@ -1613,62 +2264,207 @@ race factors in the model that does include race are significant.</p>
                            I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
                          data = left_vario_data, REML = F)
 
-summary(left_range_no_race)</code></pre>
-<pre><code>## Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite&#39;s
-##   method [lmerModLmerTest]
-## Formula: 
-## range ~ BMI + Age + Gender + Height + Fibrosis + Med_Lymphadenopathy +  
-##     Traction_Bronchiectasis + POSTFEV1 + POSTFVC + POSTFEVFVC +  
-##     slice_normalized + I(slice_normalized^2) + I(slice_normalized^3) +  
-##     (1 | ID)
-##    Data: left_vario_data
-## 
-##      AIC      BIC   logLik deviance df.resid 
-##  80409.9  80532.5 -40188.9  80377.9    15784 
-## 
-## Scaled residuals: 
-##     Min      1Q  Median      3Q     Max 
-##  -1.526  -0.182  -0.052   0.105 119.214 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  ID       (Intercept) 0.1569   0.396   
-##  Residual             9.3667   3.061   
-## Number of obs: 15800, groups:  ID, 316
-## 
-## Fixed effects:
-##                              Estimate Std. Error         df t value Pr(&gt;|t|)
-## (Intercept)                 2.449e+00  1.098e+00  3.405e+02   2.230  0.02639
-## BMI                        -8.292e-03  5.420e-03  3.160e+02  -1.530  0.12705
-## Age                        -3.429e-03  3.801e-03  3.160e+02  -0.902  0.36763
-## GenderMale                  2.335e-01  9.834e-02  3.160e+02   2.374  0.01818
-## Height                      1.004e-02  1.256e-02  3.160e+02   0.799  0.42488
-## FibrosisYes                 2.880e-01  1.202e-01  3.160e+02   2.395  0.01721
-## Med_LymphadenopathyYes      7.482e-02  6.803e-02  3.160e+02   1.100  0.27227
-## Traction_BronchiectasisYes  2.535e-01  7.895e-02  3.160e+02   3.211  0.00146
-## POSTFEV1                    8.753e-02  2.422e-01  3.160e+02   0.361  0.71804
-## POSTFVC                    -2.219e-01  1.880e-01  3.160e+02  -1.180  0.23879
-## POSTFEVFVC                 -1.147e+00  9.298e-01  3.160e+02  -1.234  0.21810
-## slice_normalized            9.771e+00  1.635e+00  1.548e+04   5.977 2.32e-09
-## I(slice_normalized^2)      -1.003e+01  3.621e+00  1.548e+04  -2.770  0.00561
-## I(slice_normalized^3)       7.161e-01  2.391e+00  1.548e+04   0.299  0.76458
-##                               
-## (Intercept)                *  
-## BMI                           
-## Age                           
-## GenderMale                 *  
-## Height                        
-## FibrosisYes                *  
-## Med_LymphadenopathyYes        
-## Traction_BronchiectasisYes ** 
-## POSTFEV1                      
-## POSTFVC                       
-## POSTFEVFVC                    
-## slice_normalized           ***
-## I(slice_normalized^2)      ** 
-## I(slice_normalized^3)         
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+broom.mixed::tidy(left_range_no_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Left Lung Range - LMM Not Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Left Lung Range - LMM Not Adjusted for Race
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+(Intercept)
+</td>
+<td style="text-align:center;">
+2.4494
+</td>
+<td style="text-align:center;">
+0.0264
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+BMI
+</td>
+<td style="text-align:center;">
+-0.0083
+</td>
+<td style="text-align:center;">
+0.1271
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Age
+</td>
+<td style="text-align:center;">
+-0.0034
+</td>
+<td style="text-align:center;">
+0.3676
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+GenderMale
+</td>
+<td style="text-align:center;">
+0.2335
+</td>
+<td style="text-align:center;">
+0.0182
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Height
+</td>
+<td style="text-align:center;">
+0.0100
+</td>
+<td style="text-align:center;">
+0.4249
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+FibrosisYes
+</td>
+<td style="text-align:center;">
+0.2880
+</td>
+<td style="text-align:center;">
+0.0172
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Med_LymphadenopathyYes
+</td>
+<td style="text-align:center;">
+0.0748
+</td>
+<td style="text-align:center;">
+0.2723
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Traction_BronchiectasisYes
+</td>
+<td style="text-align:center;">
+0.2535
+</td>
+<td style="text-align:center;">
+0.0015
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEV1
+</td>
+<td style="text-align:center;">
+0.0875
+</td>
+<td style="text-align:center;">
+0.7180
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFVC
+</td>
+<td style="text-align:center;">
+-0.2219
+</td>
+<td style="text-align:center;">
+0.2388
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEVFVC
+</td>
+<td style="text-align:center;">
+-1.1474
+</td>
+<td style="text-align:center;">
+0.2181
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+slice_normalized
+</td>
+<td style="text-align:center;">
+9.7709
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^2)
+</td>
+<td style="text-align:center;">
+-10.0303
+</td>
+<td style="text-align:center;">
+0.0056
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^3)
+</td>
+<td style="text-align:center;">
+0.7161
+</td>
+<td style="text-align:center;">
+0.7646
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__(Intercept)
+</td>
+<td style="text-align:center;">
+0.3960
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__Observation
+</td>
+<td style="text-align:center;">
+3.0605
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
 <pre class="r"><code>left_range_race &lt;- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
                            Med_Lymphadenopathy + Traction_Bronchiectasis +
                            POSTFEV1 + POSTFVC + POSTFEVFVC + slice_normalized +
@@ -1676,69 +2472,242 @@ summary(left_range_no_race)</code></pre>
                              Race + (1|ID),
                          data = left_vario_data, REML = F)
 
-summary(left_range_race)</code></pre>
-<pre><code>## Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite&#39;s
-##   method [lmerModLmerTest]
-## Formula: 
-## range ~ BMI + Age + Gender + Height + Fibrosis + Med_Lymphadenopathy +  
-##     Traction_Bronchiectasis + POSTFEV1 + POSTFVC + POSTFEVFVC +  
-##     slice_normalized + I(slice_normalized^2) + I(slice_normalized^3) +  
-##     Race + (1 | ID)
-##    Data: left_vario_data
-## 
-##      AIC      BIC   logLik deviance df.resid 
-##  80414.4  80560.0 -40188.2  80376.4    15781 
-## 
-## Scaled residuals: 
-##     Min      1Q  Median      3Q     Max 
-##  -1.527  -0.182  -0.052   0.106 119.213 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  ID       (Intercept) 0.1552   0.394   
-##  Residual             9.3667   3.061   
-## Number of obs: 15800, groups:  ID, 316
-## 
-## Fixed effects:
-##                                 Estimate Std. Error         df t value Pr(&gt;|t|)
-## (Intercept)                    2.298e+00  1.106e+00  3.401e+02   2.077  0.03855
-## BMI                           -7.884e-03  5.436e-03  3.160e+02  -1.450  0.14794
-## Age                           -4.245e-03  3.865e-03  3.160e+02  -1.098  0.27295
-## GenderMale                     2.281e-01  9.868e-02  3.160e+02   2.311  0.02148
-## Height                         1.392e-02  1.302e-02  3.160e+02   1.069  0.28569
-## FibrosisYes                    2.633e-01  1.221e-01  3.160e+02   2.157  0.03176
-## Med_LymphadenopathyYes         6.846e-02  6.835e-02  3.160e+02   1.002  0.31730
-## Traction_BronchiectasisYes     2.604e-01  7.916e-02  3.160e+02   3.289  0.00112
-## POSTFEV1                       6.896e-02  2.421e-01  3.160e+02   0.285  0.77599
-## POSTFVC                       -2.306e-01  1.877e-01  3.160e+02  -1.229  0.22007
-## POSTFEVFVC                    -1.100e+00  9.286e-01  3.160e+02  -1.184  0.23711
-## slice_normalized               9.771e+00  1.635e+00  1.548e+04   5.977 2.32e-09
-## I(slice_normalized^2)         -1.003e+01  3.621e+00  1.548e+04  -2.770  0.00561
-## I(slice_normalized^3)          7.162e-01  2.391e+00  1.548e+04   0.299  0.76458
-## RaceBlack or African American -1.057e-01  8.621e-02  3.160e+02  -1.227  0.22090
-## RaceAsian                     -1.221e-02  4.233e-01  3.160e+02  -0.029  0.97701
-## RaceUnknown                   -5.012e-03  4.210e-01  3.160e+02  -0.012  0.99051
-##                                  
-## (Intercept)                   *  
-## BMI                              
-## Age                              
-## GenderMale                    *  
-## Height                           
-## FibrosisYes                   *  
-## Med_LymphadenopathyYes           
-## Traction_BronchiectasisYes    ** 
-## POSTFEV1                         
-## POSTFVC                          
-## POSTFEVFVC                       
-## slice_normalized              ***
-## I(slice_normalized^2)         ** 
-## I(slice_normalized^3)            
-## RaceBlack or African American    
-## RaceAsian                        
-## RaceUnknown                      
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>The model without race has a lower AIC, and none of the factored race
+broom.mixed::tidy(left_range_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Left Lung Range - LMM Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Left Lung Range - LMM Adjusted for Race
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+(Intercept)
+</td>
+<td style="text-align:center;">
+2.2980
+</td>
+<td style="text-align:center;">
+0.0386
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+BMI
+</td>
+<td style="text-align:center;">
+-0.0079
+</td>
+<td style="text-align:center;">
+0.1479
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Age
+</td>
+<td style="text-align:center;">
+-0.0042
+</td>
+<td style="text-align:center;">
+0.2730
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+GenderMale
+</td>
+<td style="text-align:center;">
+0.2281
+</td>
+<td style="text-align:center;">
+0.0215
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Height
+</td>
+<td style="text-align:center;">
+0.0139
+</td>
+<td style="text-align:center;">
+0.2857
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+FibrosisYes
+</td>
+<td style="text-align:center;">
+0.2633
+</td>
+<td style="text-align:center;">
+0.0318
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Med_LymphadenopathyYes
+</td>
+<td style="text-align:center;">
+0.0685
+</td>
+<td style="text-align:center;">
+0.3173
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Traction_BronchiectasisYes
+</td>
+<td style="text-align:center;">
+0.2604
+</td>
+<td style="text-align:center;">
+0.0011
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEV1
+</td>
+<td style="text-align:center;">
+0.0690
+</td>
+<td style="text-align:center;">
+0.7760
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFVC
+</td>
+<td style="text-align:center;">
+-0.2306
+</td>
+<td style="text-align:center;">
+0.2201
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEVFVC
+</td>
+<td style="text-align:center;">
+-1.0999
+</td>
+<td style="text-align:center;">
+0.2371
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+slice_normalized
+</td>
+<td style="text-align:center;">
+9.7709
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^2)
+</td>
+<td style="text-align:center;">
+-10.0304
+</td>
+<td style="text-align:center;">
+0.0056
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^3)
+</td>
+<td style="text-align:center;">
+0.7162
+</td>
+<td style="text-align:center;">
+0.7646
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+RaceBlack or African American
+</td>
+<td style="text-align:center;">
+-0.1057
+</td>
+<td style="text-align:center;">
+0.2209
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+RaceAsian
+</td>
+<td style="text-align:center;">
+-0.0122
+</td>
+<td style="text-align:center;">
+0.9770
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+RaceUnknown
+</td>
+<td style="text-align:center;">
+-0.0050
+</td>
+<td style="text-align:center;">
+0.9905
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__(Intercept)
+</td>
+<td style="text-align:center;">
+0.3940
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__Observation
+</td>
+<td style="text-align:center;">
+3.0605
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+The model without race has a lower AIC, and none of the factored race
 terms in the model with race are significant.</p>
 <pre class="r"><code>right_range_no_race &lt;- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
                            Med_Lymphadenopathy + Traction_Bronchiectasis +
@@ -1746,62 +2715,207 @@ terms in the model with race are significant.</p>
                            I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
                          data = right_vario_data, REML = F)
 
-summary(right_range_no_race)</code></pre>
-<pre><code>## Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite&#39;s
-##   method [lmerModLmerTest]
-## Formula: 
-## range ~ BMI + Age + Gender + Height + Fibrosis + Med_Lymphadenopathy +  
-##     Traction_Bronchiectasis + POSTFEV1 + POSTFVC + POSTFEVFVC +  
-##     slice_normalized + I(slice_normalized^2) + I(slice_normalized^3) +  
-##     (1 | ID)
-##    Data: right_vario_data
-## 
-##      AIC      BIC   logLik deviance df.resid 
-##  40671.4  40794.1 -20319.7  40639.4    15834 
-## 
-## Scaled residuals: 
-##     Min      1Q  Median      3Q     Max 
-## -3.7419 -0.6025 -0.1260  0.4428 10.3764 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  ID       (Intercept) 0.1696   0.4119  
-##  Residual             0.7227   0.8501  
-## Number of obs: 15850, groups:  ID, 317
-## 
-## Fixed effects:
-##                              Estimate Std. Error         df t value Pr(&gt;|t|)
-## (Intercept)                 2.491e+00  7.903e-01  3.205e+02   3.152 0.001775
-## BMI                        -7.167e-03  3.945e-03  3.170e+02  -1.816 0.070240
-## Age                        -2.763e-03  2.774e-03  3.170e+02  -0.996 0.319954
-## GenderMale                  2.030e-01  7.192e-02  3.170e+02   2.823 0.005065
-## Height                      9.438e-03  9.179e-03  3.170e+02   1.028 0.304626
-## FibrosisYes                 3.584e-01  8.794e-02  3.170e+02   4.075 5.81e-05
-## Med_LymphadenopathyYes      1.107e-01  4.971e-02  3.170e+02   2.226 0.026721
-## Traction_BronchiectasisYes  2.213e-01  5.774e-02  3.170e+02   3.833 0.000153
-## POSTFEV1                    1.977e-01  1.771e-01  3.170e+02   1.117 0.265000
-## POSTFVC                    -3.179e-01  1.374e-01  3.170e+02  -2.313 0.021375
-## POSTFEVFVC                 -1.175e+00  6.798e-01  3.170e+02  -1.729 0.084851
-## slice_normalized            9.081e+00  4.530e-01  1.553e+04  20.046  &lt; 2e-16
-## I(slice_normalized^2)      -7.871e+00  1.003e+00  1.553e+04  -7.844 4.63e-15
-## I(slice_normalized^3)      -8.721e-01  6.627e-01  1.553e+04  -1.316 0.188197
-##                               
-## (Intercept)                ** 
-## BMI                        .  
-## Age                           
-## GenderMale                 ** 
-## Height                        
-## FibrosisYes                ***
-## Med_LymphadenopathyYes     *  
-## Traction_BronchiectasisYes ***
-## POSTFEV1                      
-## POSTFVC                    *  
-## POSTFEVFVC                 .  
-## slice_normalized           ***
-## I(slice_normalized^2)      ***
-## I(slice_normalized^3)         
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+broom.mixed::tidy(right_range_no_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Right Lung Range - LMM Not Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Range - LMM Not Adjusted for Race
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+(Intercept)
+</td>
+<td style="text-align:center;">
+2.4910
+</td>
+<td style="text-align:center;">
+0.0018
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+BMI
+</td>
+<td style="text-align:center;">
+-0.0072
+</td>
+<td style="text-align:center;">
+0.0702
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Age
+</td>
+<td style="text-align:center;">
+-0.0028
+</td>
+<td style="text-align:center;">
+0.3200
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+GenderMale
+</td>
+<td style="text-align:center;">
+0.2030
+</td>
+<td style="text-align:center;">
+0.0051
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Height
+</td>
+<td style="text-align:center;">
+0.0094
+</td>
+<td style="text-align:center;">
+0.3046
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+FibrosisYes
+</td>
+<td style="text-align:center;">
+0.3584
+</td>
+<td style="text-align:center;">
+0.0001
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Med_LymphadenopathyYes
+</td>
+<td style="text-align:center;">
+0.1107
+</td>
+<td style="text-align:center;">
+0.0267
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Traction_BronchiectasisYes
+</td>
+<td style="text-align:center;">
+0.2213
+</td>
+<td style="text-align:center;">
+0.0002
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEV1
+</td>
+<td style="text-align:center;">
+0.1977
+</td>
+<td style="text-align:center;">
+0.2650
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFVC
+</td>
+<td style="text-align:center;">
+-0.3179
+</td>
+<td style="text-align:center;">
+0.0214
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEVFVC
+</td>
+<td style="text-align:center;">
+-1.1751
+</td>
+<td style="text-align:center;">
+0.0849
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+slice_normalized
+</td>
+<td style="text-align:center;">
+9.0808
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^2)
+</td>
+<td style="text-align:center;">
+-7.8710
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^3)
+</td>
+<td style="text-align:center;">
+-0.8721
+</td>
+<td style="text-align:center;">
+0.1882
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__(Intercept)
+</td>
+<td style="text-align:center;">
+0.4119
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__Observation
+</td>
+<td style="text-align:center;">
+0.8501
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
 <pre class="r"><code>right_range_race &lt;- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
                            Med_Lymphadenopathy + Traction_Bronchiectasis +
                            POSTFEV1 + POSTFVC + POSTFEVFVC + slice_normalized +
@@ -1809,71 +2923,1362 @@ summary(right_range_no_race)</code></pre>
                            Race + (1|ID),
                          data = right_vario_data, REML = F)
 
-summary(right_range_race)</code></pre>
-<pre><code>## Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite&#39;s
-##   method [lmerModLmerTest]
-## Formula: 
-## range ~ BMI + Age + Gender + Height + Fibrosis + Med_Lymphadenopathy +  
-##     Traction_Bronchiectasis + POSTFEV1 + POSTFVC + POSTFEVFVC +  
-##     slice_normalized + I(slice_normalized^2) + I(slice_normalized^3) +  
-##     Race + (1 | ID)
-##    Data: right_vario_data
-## 
-##      AIC      BIC   logLik deviance df.resid 
-##  40676.4  40822.2 -20319.2  40638.4    15831 
-## 
-## Scaled residuals: 
-##     Min      1Q  Median      3Q     Max 
-## -3.7432 -0.6010 -0.1257  0.4431 10.3794 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  ID       (Intercept) 0.1691   0.4112  
-##  Residual             0.7227   0.8501  
-## Number of obs: 15850, groups:  ID, 317
-## 
-## Fixed effects:
-##                                 Estimate Std. Error         df t value Pr(&gt;|t|)
-## (Intercept)                    2.445e+00  7.969e-01  3.204e+02   3.068 0.002342
-## BMI                           -7.127e-03  3.960e-03  3.170e+02  -1.800 0.072805
-## Age                           -3.146e-03  2.822e-03  3.170e+02  -1.115 0.265792
-## GenderMale                     2.038e-01  7.223e-02  3.170e+02   2.822 0.005076
-## Height                         1.097e-02  9.514e-03  3.170e+02   1.153 0.249797
-## FibrosisYes                    3.490e-01  8.934e-02  3.170e+02   3.906 0.000115
-## Med_LymphadenopathyYes         1.100e-01  4.998e-02  3.170e+02   2.201 0.028460
-## Traction_BronchiectasisYes     2.225e-01  5.794e-02  3.170e+02   3.840 0.000149
-## POSTFEV1                       1.891e-01  1.772e-01  3.170e+02   1.067 0.286638
-## POSTFVC                       -3.227e-01  1.373e-01  3.170e+02  -2.350 0.019405
-## POSTFEVFVC                    -1.151e+00  6.796e-01  3.170e+02  -1.693 0.091383
-## slice_normalized               9.081e+00  4.530e-01  1.553e+04  20.046  &lt; 2e-16
-## I(slice_normalized^2)         -7.871e+00  1.003e+00  1.553e+04  -7.844 4.63e-15
-## I(slice_normalized^3)         -8.721e-01  6.627e-01  1.553e+04  -1.316 0.188191
-## RaceBlack or African American -5.172e-02  6.304e-02  3.170e+02  -0.821 0.412536
-## RaceAsian                     -1.052e-01  3.098e-01  3.170e+02  -0.339 0.734502
-## RaceUnknown                   -1.369e-01  3.082e-01  3.170e+02  -0.444 0.657263
-##                                  
-## (Intercept)                   ** 
-## BMI                           .  
-## Age                              
-## GenderMale                    ** 
-## Height                           
-## FibrosisYes                   ***
-## Med_LymphadenopathyYes        *  
-## Traction_BronchiectasisYes    ***
-## POSTFEV1                         
-## POSTFVC                       *  
-## POSTFEVFVC                    .  
-## slice_normalized              ***
-## I(slice_normalized^2)         ***
-## I(slice_normalized^3)            
-## RaceBlack or African American    
-## RaceAsian                        
-## RaceUnknown                      
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>As with the left lung, the right lung range LMM has a lower AIC for
-the model without race. Additionally none of the factored race terms are
+broom.mixed::tidy(right_range_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Right Lung Range - LMM Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Range - LMM Adjusted for Race
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+(Intercept)
+</td>
+<td style="text-align:center;">
+2.4445
+</td>
+<td style="text-align:center;">
+0.0023
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+BMI
+</td>
+<td style="text-align:center;">
+-0.0071
+</td>
+<td style="text-align:center;">
+0.0728
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Age
+</td>
+<td style="text-align:center;">
+-0.0031
+</td>
+<td style="text-align:center;">
+0.2658
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+GenderMale
+</td>
+<td style="text-align:center;">
+0.2038
+</td>
+<td style="text-align:center;">
+0.0051
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Height
+</td>
+<td style="text-align:center;">
+0.0110
+</td>
+<td style="text-align:center;">
+0.2498
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+FibrosisYes
+</td>
+<td style="text-align:center;">
+0.3490
+</td>
+<td style="text-align:center;">
+0.0001
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Med_LymphadenopathyYes
+</td>
+<td style="text-align:center;">
+0.1100
+</td>
+<td style="text-align:center;">
+0.0285
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+Traction_BronchiectasisYes
+</td>
+<td style="text-align:center;">
+0.2225
+</td>
+<td style="text-align:center;">
+0.0001
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEV1
+</td>
+<td style="text-align:center;">
+0.1891
+</td>
+<td style="text-align:center;">
+0.2866
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFVC
+</td>
+<td style="text-align:center;">
+-0.3227
+</td>
+<td style="text-align:center;">
+0.0194
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+POSTFEVFVC
+</td>
+<td style="text-align:center;">
+-1.1507
+</td>
+<td style="text-align:center;">
+0.0914
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+slice_normalized
+</td>
+<td style="text-align:center;">
+9.0808
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^2)
+</td>
+<td style="text-align:center;">
+-7.8710
+</td>
+<td style="text-align:center;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+I(slice_normalized^3)
+</td>
+<td style="text-align:center;">
+-0.8721
+</td>
+<td style="text-align:center;">
+0.1882
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+RaceBlack or African American
+</td>
+<td style="text-align:center;">
+-0.0517
+</td>
+<td style="text-align:center;">
+0.4125
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+RaceAsian
+</td>
+<td style="text-align:center;">
+-0.1052
+</td>
+<td style="text-align:center;">
+0.7345
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+RaceUnknown
+</td>
+<td style="text-align:center;">
+-0.1369
+</td>
+<td style="text-align:center;">
+0.6573
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__(Intercept)
+</td>
+<td style="text-align:center;">
+0.4112
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+sd__Observation
+</td>
+<td style="text-align:center;">
+0.8501
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+As with the left lung, the right lung range LMM has a lower AIC for the
+model without race. Additionally none of the factored race terms are
 significant.</p>
+</div>
+<div id="modeling-individual-vas-and-pft-measurements" class="section level1">
+<h1>Modeling Individual VAS and PFT Measurements</h1>
+<p>The purpose of this section is to see how the clinical measurements
+(VAS and PFT) associate with the outcomes after adjusting for
+demographics.</p>
+<div id="fev1" class="section level2">
+<h2>FEV1</h2>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Left Lung Range - FEV1 LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+POSTFEV1
+</td>
+<td style="text-align:center;">
+-0.3259
+</td>
+<td style="text-align:center;">
+-0.4228
+</td>
+<td style="text-align:center;">
+-0.2289
+</td>
+<td style="text-align:center;">
+1.578e-10
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Range - FEV1 LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+POSTFEV1
+</td>
+<td style="text-align:center;">
+-0.3021
+</td>
+<td style="text-align:center;">
+-0.3761
+</td>
+<td style="text-align:center;">
+-0.2282
+</td>
+<td style="text-align:center;">
+1.831e-14
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+After controlling for demographic data, up to the cubic term for
+normalized slice, and FEV1, the FEV1 value is significant for both the
+left and right lung when the outcome is range. The estimate between the
+left and right lung is relativly close.</p>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Left Lung Psill - FEV1 LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+POSTFEV1
+</td>
+<td style="text-align:center;">
+-4819.771
+</td>
+<td style="text-align:center;">
+-5766.456
+</td>
+<td style="text-align:center;">
+-3873.085
+</td>
+<td style="text-align:center;">
+&lt; 2.2e-16
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Psill - FEV1 LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+POSTFEV1
+</td>
+<td style="text-align:center;">
+-4493.515
+</td>
+<td style="text-align:center;">
+-5361.447
+</td>
+<td style="text-align:center;">
+-3625.582
+</td>
+<td style="text-align:center;">
+&lt; 2.2e-16
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+After controlling for demographic data, up to the cubic term for
+normalized slice, and FEV1, the FEV1 value is significant for both the
+left and right lung when the outcome is psill. The estimate for the
+right lung is noticeably higher, but the estimate for both lungs have
+the same magnitude.</p>
+</div>
+<div id="fvc" class="section level2">
+<h2>FVC</h2>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Left Lung Range - FVC LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+POSTFVC
+</td>
+<td style="text-align:center;">
+-0.2407
+</td>
+<td style="text-align:center;">
+-0.3348
+</td>
+<td style="text-align:center;">
+-0.1465
+</td>
+<td style="text-align:center;">
+8.239e-07
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Range - FVC LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+POSTFVC
+</td>
+<td style="text-align:center;">
+-0.2528
+</td>
+<td style="text-align:center;">
+-0.3243
+</td>
+<td style="text-align:center;">
+-0.1813
+</td>
+<td style="text-align:center;">
+2.041e-11
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+After controlling for demographic data, up to the cubic term for
+normalized slice, and FVC, the FVC value is significant for both the
+left and right lung when the outcome is range. The estimates for both
+lungs are close to each other.</p>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Left Lung Psill - FVC LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+POSTFVC
+</td>
+<td style="text-align:center;">
+-5053.215
+</td>
+<td style="text-align:center;">
+-5916.099
+</td>
+<td style="text-align:center;">
+-4190.331
+</td>
+<td style="text-align:center;">
+&lt; 2.2e-16
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Psill - FVC LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+POSTFVC
+</td>
+<td style="text-align:center;">
+-5090.924
+</td>
+<td style="text-align:center;">
+-5851.897
+</td>
+<td style="text-align:center;">
+-4329.951
+</td>
+<td style="text-align:center;">
+&lt; 2.2e-16
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+After controlling for demographic data, up to the cubic term for
+normalized slice, and FVC, the FVC value is significant for both the
+left and right lung when the outcome is psill. The estimates for both
+lungs are very close to each other.</p>
+</div>
+<div id="fev1fvc" class="section level2">
+<h2>FEV1/FVC</h2>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Left Lung Range - FEV/FVC LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+POSTFEVFVC
+</td>
+<td style="text-align:center;">
+-1.523
+</td>
+<td style="text-align:center;">
+-2.1597
+</td>
+<td style="text-align:center;">
+-0.8863
+</td>
+<td style="text-align:center;">
+3.774e-06
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Range - FEV/FVC LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+POSTFEVFVC
+</td>
+<td style="text-align:center;">
+-1.1846
+</td>
+<td style="text-align:center;">
+-1.6846
+</td>
+<td style="text-align:center;">
+-0.6846
+</td>
+<td style="text-align:center;">
+4.638e-06
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+After controlling for demographic data, up to the cubic term for
+normalized slice, and FEV1/FVC, the FEV1/FVC value is significant for
+both the left and right lung when the outcome is range. The estimates
+for both lungs are close to each other.</p>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Left Lung Psill - FEV/FVC LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+POSTFEVFVC
+</td>
+<td style="text-align:center;">
+-6458.364
+</td>
+<td style="text-align:center;">
+-13342.86
+</td>
+<td style="text-align:center;">
+426.1316
+</td>
+<td style="text-align:center;">
+0.06587
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Psill - FEV/FVC LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+POSTFEVFVC
+</td>
+<td style="text-align:center;">
+-2237.789
+</td>
+<td style="text-align:center;">
+-8602.977
+</td>
+<td style="text-align:center;">
+4127.398
+</td>
+<td style="text-align:center;">
+0.4896
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+After controlling for demographic data, up to the cubic term for
+normalized slice, and FEV1/FVC, the FEV1/FVC estimate is significent in
+neither the left or right lung. The estimates are signficantly different
+from each other, with the right lung performing much worse.</p>
+</div>
+</div>
+<div id="fibrosis" class="section level1">
+<h1>Fibrosis</h1>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Left Lung Range - Fibrosis LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+FibrosisYes
+</td>
+<td style="text-align:center;">
+0.6195
+</td>
+<td style="text-align:center;">
+0.3954
+</td>
+<td style="text-align:center;">
+0.8437
+</td>
+<td style="text-align:center;">
+1.079e-07
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Range - Fibrosis LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+FibrosisYes
+</td>
+<td style="text-align:center;">
+0.6437
+</td>
+<td style="text-align:center;">
+0.474
+</td>
+<td style="text-align:center;">
+0.8133
+</td>
+<td style="text-align:center;">
+8.107e-13
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+After controlling for demographic data, up to the cubic term for
+normalized slice, and fibrosis, the fibrosis value is significant for
+both the left and right lung when the outcome is range. The estimates
+for both lungs are relatively close to each other.</p>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Left Lung Psill - Fibrosis LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+FibrosisYes
+</td>
+<td style="text-align:center;">
+5578.701
+</td>
+<td style="text-align:center;">
+3194.024
+</td>
+<td style="text-align:center;">
+7963.379
+</td>
+<td style="text-align:center;">
+6.047e-06
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Psill - Fibrosis LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+FibrosisYes
+</td>
+<td style="text-align:center;">
+4953.866
+</td>
+<td style="text-align:center;">
+2753.852
+</td>
+<td style="text-align:center;">
+7153.881
+</td>
+<td style="text-align:center;">
+1.298e-05
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+After controlling for demographic data, up to the cubic term for
+normalized slice, and fibrosis, the fibrosis value is significant for
+both the left and right lung when the outcome is psill. The estimates
+for both lungs are noticaebly different from each other, but they are
+the same magnitude.</p>
+</div>
+<div id="traction-bronchiectasis" class="section level1">
+<h1>Traction Bronchiectasis</h1>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Left Lung Range - Traction Bronchiectasis LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+Traction_BronchiectasisYes
+</td>
+<td style="text-align:center;">
+0.4633
+</td>
+<td style="text-align:center;">
+0.3216
+</td>
+<td style="text-align:center;">
+0.605
+</td>
+<td style="text-align:center;">
+4.64e-10
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Range - Traction Bronchiectasis LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+Traction_BronchiectasisYes
+</td>
+<td style="text-align:center;">
+0.4296
+</td>
+<td style="text-align:center;">
+0.3213
+</td>
+<td style="text-align:center;">
+0.538
+</td>
+<td style="text-align:center;">
+8.823e-14
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+After controlling for demographic data, up to the cubic term for
+normalized slice, and traction bronchiectasis, the traction
+bronchiectasis value is significant for both the left and right lung
+when the outcome is range. The estimates for both lungs are relatively
+close to each other.</p>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Left Lung Psill - Traction Bronchiectasis LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+Traction_BronchiectasisYes
+</td>
+<td style="text-align:center;">
+6283.746
+</td>
+<td style="text-align:center;">
+4860.77
+</td>
+<td style="text-align:center;">
+7706.722
+</td>
+<td style="text-align:center;">
+&lt; 2.2e-16
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Psill - Traction Bronchiectasis LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+Traction_BronchiectasisYes
+</td>
+<td style="text-align:center;">
+6369.793
+</td>
+<td style="text-align:center;">
+5093.449
+</td>
+<td style="text-align:center;">
+7646.136
+</td>
+<td style="text-align:center;">
+&lt; 2.2e-16
+</td>
+</tr>
+</tbody>
+</table>
+<p>After controlling for demographic data, up to the cubic term for
+normalized slice, and traction bronchiectasis, the traction
+bronchiectasis value is significant for both the left and right lung
+when the outcome is psill. The estimates for both lungs are relatively
+close to each other.</p>
+</div>
+<div id="mediastinal-lymphadenopathy" class="section level1">
+<h1>Mediastinal Lymphadenopathy</h1>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Left Lung Range - Mediastinal Lymphadenopathy LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+Med_LymphadenopathyYes
+</td>
+<td style="text-align:center;">
+0.0959
+</td>
+<td style="text-align:center;">
+-0.0517
+</td>
+<td style="text-align:center;">
+0.2435
+</td>
+<td style="text-align:center;">
+0.2021
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Range - Mediastinal Lymphadenopathy LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+Med_LymphadenopathyYes
+</td>
+<td style="text-align:center;">
+0.1305
+</td>
+<td style="text-align:center;">
+0.0154
+</td>
+<td style="text-align:center;">
+0.2456
+</td>
+<td style="text-align:center;">
+0.02642
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+After controlling for demographic data, up to the cubic term for
+normalized slice, and mediastinal lymphadenopathy, the estimate for the
+right lung is significant and for the left lung it is not
+significant.</p>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Left Lung Psill - Mediastinal Lymphadenopathy LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+Med_LymphadenopathyYes
+</td>
+<td style="text-align:center;">
+612.8653
+</td>
+<td style="text-align:center;">
+-940.7713
+</td>
+<td style="text-align:center;">
+2166.502
+</td>
+<td style="text-align:center;">
+0.4383
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Right Lung Psill - Mediastinal Lymphadenopathy LMM
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+term
+</th>
+<th style="text-align:center;">
+estimate
+</th>
+<th style="text-align:center;">
+conf.low
+</th>
+<th style="text-align:center;">
+conf.high
+</th>
+<th style="text-align:center;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+Med_LymphadenopathyYes
+</td>
+<td style="text-align:center;">
+1167.195
+</td>
+<td style="text-align:center;">
+-256.8373
+</td>
+<td style="text-align:center;">
+2591.227
+</td>
+<td style="text-align:center;">
+0.1078
+</td>
+</tr>
+</tbody>
+</table>
+<p><br />
+After controlling for demographic data, up to the cubic term for
+normalized slice, and mediastinal lymphadenopathy, the mediastinal
+lymphadenopathy estimate is significant for neither lung.</p>
 </div>
 <div id="code" class="section level1">
 <h1>Code</h1>
@@ -2056,7 +4461,11 @@ left_psill_no_race &lt;- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
                            I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
                          data = left_vario_data, REML = F)
 
-summary(left_psill_no_race)
+broom.mixed::tidy(left_psill_no_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Right Lung Range - LMM Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
 
 left_psill_race &lt;- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
                            Med_Lymphadenopathy + Traction_Bronchiectasis +
@@ -2065,7 +4474,11 @@ left_psill_race &lt;- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
                           Race + (1|ID),
                          data = left_vario_data, REML = F)
 
-summary(left_psill_race)
+broom.mixed::tidy(left_psill_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Left Lung Psill - LMM Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
 
 
 right_psill_no_race &lt;- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
@@ -2074,7 +4487,11 @@ right_psill_no_race &lt;- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
                            I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
                          data = right_vario_data, REML = F)
 
-summary(right_psill_no_race)
+broom.mixed::tidy(right_psill_no_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Right Lung Range - LMM Not Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
 
 right_psill_race &lt;- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
                            Med_Lymphadenopathy + Traction_Bronchiectasis +
@@ -2083,7 +4500,11 @@ right_psill_race &lt;- lmer(psill ~ BMI + Age + Gender + Height + Fibrosis +
                            Race + (1|ID),
                          data = right_vario_data, REML = F)
 
-summary(right_psill_race)
+broom.mixed::tidy(right_psill_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Right Lung Psill - LMM Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
 
 
 left_range_no_race &lt;- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
@@ -2092,7 +4513,11 @@ left_range_no_race &lt;- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
                            I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
                          data = left_vario_data, REML = F)
 
-summary(left_range_no_race)
+broom.mixed::tidy(left_range_no_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Left Lung Range - LMM Not Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
 
 left_range_race &lt;- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
                            Med_Lymphadenopathy + Traction_Bronchiectasis +
@@ -2101,7 +4526,11 @@ left_range_race &lt;- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
                              Race + (1|ID),
                          data = left_vario_data, REML = F)
 
-summary(left_range_race)
+broom.mixed::tidy(left_range_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Left Lung Range - LMM Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
 
 
 
@@ -2111,7 +4540,11 @@ right_range_no_race &lt;- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
                            I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
                          data = right_vario_data, REML = F)
 
-summary(right_range_no_race)
+broom.mixed::tidy(right_range_no_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Right Lung Range - LMM Not Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
 
 right_range_race &lt;- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
                            Med_Lymphadenopathy + Traction_Bronchiectasis +
@@ -2120,7 +4553,311 @@ right_range_race &lt;- lmer(range ~ BMI + Age + Gender + Height + Fibrosis +
                            Race + (1|ID),
                          data = right_vario_data, REML = F)
 
-summary(right_range_race)</code></pre>
+broom.mixed::tidy(right_range_race) %&gt;% 
+  select(term,estimate,p.value) %&gt;%
+  kbl(caption = &quot;Right Lung Range - LMM Adjusted for Race&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+
+fev1_left_range &lt;- lmer(range ~ BMI + Age + Gender + Height +
+                           POSTFEV1 + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fev1_left_range,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,4)) %&gt;%
+  kbl(caption = &quot;Left Lung Range - FEV1 LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+fev1_right_range &lt;- lmer(range ~ BMI + Age + Gender + Height +
+                           POSTFEV1 + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fev1_right_range,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,digits=4)) %&gt;%
+  kbl(caption = &quot;Right Lung Range - FEV1 LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+
+fev1_left_psill &lt;- lmer(psill ~ BMI + Age + Gender + Height +
+                           POSTFEV1 + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fev1_left_psill,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,4)) %&gt;%
+  kbl(caption = &quot;Left Lung Psill - FEV1 LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+fev1_right_psill &lt;- lmer(psill ~ BMI + Age + Gender + Height +
+                           POSTFEV1 + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fev1_right_psill,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,digits=4)) %&gt;%
+  kbl(caption = &quot;Right Lung Psill - FEV1 LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+
+fvc_left_range &lt;- lmer(range ~ BMI + Age + Gender + Height +
+                           POSTFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fvc_left_range,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,4)) %&gt;%
+  kbl(caption = &quot;Left Lung Range - FVC LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+fvc_right_range &lt;- lmer(range ~ BMI + Age + Gender + Height +
+                           POSTFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fvc_right_range,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,digits=4)) %&gt;%
+  kbl(caption = &quot;Right Lung Range - FVC LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+
+fvc_left_psill &lt;- lmer(psill ~ BMI + Age + Gender + Height +
+                           POSTFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fvc_left_psill,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,4)) %&gt;%
+  kbl(caption = &quot;Left Lung Psill - FVC LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+fvc_right_psill &lt;- lmer(psill ~ BMI + Age + Gender + Height +
+                           POSTFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fvc_right_psill,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,digits=4)) %&gt;%
+  kbl(caption = &quot;Right Lung Psill - FVC LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+
+fevfvc_left_range &lt;- lmer(range ~ BMI + Age + Gender + Height +
+                           POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fevfvc_left_range,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,4)) %&gt;%
+  kbl(caption = &quot;Left Lung Range - FEV/FVC LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+fevfvc_right_range &lt;- lmer(range ~ BMI + Age + Gender + Height +
+                           POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fevfvc_right_range,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,digits=4)) %&gt;%
+  kbl(caption = &quot;Right Lung Range - FEV/FVC LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+
+fevfvc_left_psill &lt;- lmer(psill ~ BMI + Age + Gender + Height +
+                           POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fevfvc_left_psill,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,4)) %&gt;%
+  kbl(caption = &quot;Left Lung Psill - FEV/FVC LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+fevfvc_right_psill &lt;- lmer(psill ~ BMI + Age + Gender + Height +
+                           POSTFEVFVC + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fevfvc_right_psill,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,digits=4)) %&gt;%
+  kbl(caption = &quot;Right Lung Psill - FEV/FVC LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+
+fibrosis_left_range &lt;- lmer(range ~ BMI + Age + Gender + Height +
+                           Fibrosis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fibrosis_left_range,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,4)) %&gt;%
+  kbl(caption = &quot;Left Lung Range - Fibrosis LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+fibrosis_right_range &lt;- lmer(range ~ BMI + Age + Gender + Height +
+                           Fibrosis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fibrosis_right_range,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,digits=4)) %&gt;%
+  kbl(caption = &quot;Right Lung Range - Fibrosis LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+
+fibrosis_left_psill &lt;- lmer(psill ~ BMI + Age + Gender + Height +
+                           Fibrosis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(fibrosis_left_psill,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,4)) %&gt;%
+  kbl(caption = &quot;Left Lung Psill - Fibrosis LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+fibrosis_right_psill &lt;- lmer(psill ~ BMI + Age + Gender + Height +
+                           Fibrosis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(fibrosis_right_psill,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,digits=4)) %&gt;%
+  kbl(caption = &quot;Right Lung Psill - Fibrosis LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+
+TB_left_range &lt;- lmer(range ~ BMI + Age + Gender + Height +
+                           Traction_Bronchiectasis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(TB_left_range,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,4)) %&gt;%
+  kbl(caption = &quot;Left Lung Range - Traction Bronchiectasis LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+TB_right_range &lt;- lmer(range ~ BMI + Age + Gender + Height +
+                           Traction_Bronchiectasis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(TB_right_range,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,digits=4)) %&gt;%
+  kbl(caption = &quot;Right Lung Range - Traction Bronchiectasis LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+
+TB_left_psill &lt;- lmer(psill ~ BMI + Age + Gender + Height +
+                           Traction_Bronchiectasis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(TB_left_psill,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,4)) %&gt;%
+  kbl(caption = &quot;Left Lung Psill - Traction Bronchiectasis LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+TB_right_psill &lt;- lmer(psill ~ BMI + Age + Gender + Height +
+                           Traction_Bronchiectasis + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(TB_right_psill,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,digits=4)) %&gt;%
+  kbl(caption = &quot;Right Lung Psill - Traction Bronchiectasis LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+
+ML_left_range &lt;- lmer(range ~ BMI + Age + Gender + Height +
+                           Med_Lymphadenopathy + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(ML_left_range,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,4)) %&gt;%
+  kbl(caption = &quot;Left Lung Range - Mediastinal Lymphadenopathy LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+ML_right_range &lt;- lmer(range ~ BMI + Age + Gender + Height +
+                           Med_Lymphadenopathy + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(ML_right_range,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,digits=4)) %&gt;%
+  kbl(caption = &quot;Right Lung Range - Mediastinal Lymphadenopathy LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+
+ML_left_psill &lt;- lmer(psill ~ BMI + Age + Gender + Height +
+                           Med_Lymphadenopathy + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = left_vario_data, REML = F)
+
+(broom.mixed::tidy(ML_left_psill,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,4)) %&gt;%
+  kbl(caption = &quot;Left Lung Psill - Mediastinal Lymphadenopathy LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)
+
+ML_right_psill &lt;- lmer(psill ~ BMI + Age + Gender + Height +
+                           Med_Lymphadenopathy + slice_normalized +
+                           I(slice_normalized^2) + I(slice_normalized^3) + (1|ID),
+                         data = right_vario_data, REML = F)
+
+(broom.mixed::tidy(ML_right_psill,conf.int = T) %&gt;% 
+  select(term,estimate,conf.low,conf.high,p.value))[6,] %&gt;%
+  mutate(p.value = format.pval(p.value,digits=4)) %&gt;%
+  kbl(caption = &quot;Right Lung Psill - Mediastinal Lymphadenopathy LMM&quot;,
+      align = &quot;cc&quot;,digits = 4,booktabs = T) %&gt;%
+  kable_styling(latex_options = &quot;HOLD_position&quot;)</code></pre>
 </div>
 
 

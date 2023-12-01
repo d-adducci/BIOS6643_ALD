@@ -118,9 +118,6 @@ clinical_data <- clinical_data_raw %>%
          Interlobular_Septal_Thick = factor(Interlobular_Septal_Thick),
          Mosaic_Attenuation = factor(Mosaic_Attenuation),
          Med_Lymphadenopathy = factor(Med_Lymphadenopathy),
-         Race = factor(Race, levels = c("White","Black or African American",
-                                        "Asian","Unknown","American Indian or Alaskan Native",
-                                        "Multi_racial or No Primary Race")),
          Gender = factor(Gender, levels = c("Female","Male"))) %>%
   mutate(Traction_Bronchiectasis = fct_collapse(Traction_Bronchiectasis,
                                                 No = 0,
@@ -134,13 +131,17 @@ clinical_data <- clinical_data_raw %>%
 project2_data <- merge(variogram_data,clinical_data,
                        by = "ID", sort = FALSE) %>% arrange(ID,lung) %>%
   drop_na(POSTFEV1,POSTFVC,POSTFEVFVC,Fibrosis,Med_Lymphadenopathy,
-          Traction_Bronchiectasis,Race)
+          Traction_Bronchiectasis,Race) %>%
+  mutate(Race = factor(Race,levels = c("White","Black or African American",
+                                       "Asian","American Indian or Alaska Native",
+                                       "Multi-racial or No Primary Race",
+                                       "Unknown")))
 
 # Writing the data frame to a csv file. 
-#write.csv(project2_data,"C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/ProcessedData/project2_data.csv",row.names = FALSE)
+#write.csv(project2_data,"C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/RawData/project2_data.csv",row.names = FALSE)
 
 # Writing the data to a RDS file. 
-#saveRDS(project2_data,"C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/ProcessedData/project2_data.rds")
+#saveRDS(project2_data,"C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/RawData/project2_data.rds")
 
 ```
 

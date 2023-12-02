@@ -135,7 +135,8 @@ project2_data <- merge(variogram_data,clinical_data,
   mutate(Race = factor(Race,levels = c("White","Black or African American",
                                        "Asian","American Indian or Alaska Native",
                                        "Multi-racial or No Primary Race",
-                                       "Unknown")))
+                                       "Unknown"))) %>%
+  subset(range < 100)
 
 # Writing the data frame to a csv file. 
 #write.csv(project2_data,"C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/RawData/project2_data.csv",row.names = FALSE)

@@ -1,0 +1,279 @@
+---
+title: "Final Project - BIOS 6643"
+author: "Dominic Adducci"
+date: "2023-12-01"
+output: html_document
+---
+
+```{r, echo = F}
+
+library(tidyverse)
+library(mgcv)
+
+```
+
+```{r, echo = F}
+
+project2_data <- readRDS("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/ProcessedData/project2_data.rds")
+
+left_lung_data <- project2_data %>% filter(lung == "Left")
+right_lung_data <- project2_data %>% filter(lung == "Right")
+
+```
+
+# Left Lung Models Including Race
+
+### Psill Results
+
+```{r, echo = F}
+
+# Making a model for the left lung psill when including race. 
+left_psill_race_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                             BMI + Age + Gender + Height + Fibrosis + 
+                             Med_Lymphadenopathy + Traction_Bronchiectasis +
+                             POSTFEV1 + POSTFVC + POSTFEVFVC + Race, 
+                           data = left_lung_data, family = gaussian, method = "ML")
+
+left_psill_race_mod_fitted <- fitted(left_psill_race_mod)
+left_psill_race_mod_fitted <- cbind(left_lung_data$slice_normalized,
+                                    left_psill_race_mod_fitted)
+left_psill_race_mod_fitted <- data.frame(left_psill_race_mod_fitted[order(left_psill_race_mod_fitted[,1]),])
+
+summary(left_psill_race_mod)
+
+```
+
+```{r, echo = F}
+
+# Plotting the non-linear normalized slice for left lung psill when 
+# including race. 
+plot(left_lung_data$slice_normalized,left_lung_data$psill,type = "p",
+     xlab = "Normalized Slice", ylab = "Psill",
+     main = "Left Lung Psill Including Race")
+lines(left_psill_race_mod_fitted$V1,left_psill_race_mod_fitted$left_psill_race_mod_fitted,lwd=4)
+
+```
+
+### Range Results 
+
+```{r, echo = F}
+
+# Making a model for left lung range when including race. 
+left_range_race_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                             BMI + Age + Gender + Height + Fibrosis + 
+                             Med_Lymphadenopathy + Traction_Bronchiectasis +
+                             POSTFEV1 + POSTFVC + POSTFEVFVC + Race,
+                           data = left_lung_data, family = gaussian)
+
+left_range_race_mod_fitted <- fitted(left_range_race_mod)
+left_range_race_mod_fitted <- cbind(left_lung_data$slice_normalized,
+                                    left_range_race_mod_fitted)
+left_range_race_mod_fitted <- data.frame(left_range_race_mod_fitted[order(left_range_race_mod_fitted[,1]),])
+
+summary(left_range_race_mod)
+
+```
+
+```{r, echo = F}
+
+# Plotting the non-linear normalized slice for left lung psill when 
+# including race. 
+plot(left_lung_data$slice_normalized,left_lung_data$range,type = "p",
+     xlab = "Normalized Slice", ylab = "Range",
+     main = "Left Lung Range Including Race")
+lines(left_range_race_mod_fitted$V1,left_range_race_mod_fitted$left_range_race_mod_fitted,lwd=4)
+
+```
+
+# Left Lung Model Not Including Race
+
+### Psill Results
+
+```{r, echo = F}
+
+# Making a model for the left lung psill when including race. 
+left_psill_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                             BMI + Age + Gender + Height + Fibrosis + 
+                             Med_Lymphadenopathy + Traction_Bronchiectasis +
+                             POSTFEV1 + POSTFVC + POSTFEVFVC, 
+                           data = left_lung_data, family = gaussian)
+
+left_psill_mod_fitted <- fitted(left_psill_mod)
+left_psill_mod_fitted <- cbind(left_lung_data$slice_normalized,
+                                    left_psill_mod_fitted)
+left_psill_mod_fitted <- data.frame(left_psill_mod_fitted[order(left_psill_mod_fitted[,1]),])
+
+summary(left_psill_mod)
+
+```
+
+```{r, echo = F}
+
+# Plotting the non-linear normalized slice for left lung psill when 
+# including race. 
+plot(left_lung_data$slice_normalized,left_lung_data$psill,type = "p",
+     xlab = "Normalized Slice", ylab = "Psill",
+     main = "Left Lung Psill Not Including Race")
+lines(left_psill_mod_fitted$V1,left_psill_mod_fitted$left_psill_mod_fitted,lwd=4)
+
+```
+
+### Range Results 
+
+```{r, echo = F}
+
+# Making a model for left lung range when including race. 
+left_range_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                             BMI + Age + Gender + Height + Fibrosis + 
+                             Med_Lymphadenopathy + Traction_Bronchiectasis +
+                             POSTFEV1 + POSTFVC + POSTFEVFVC,
+                           data = left_lung_data, family = gaussian)
+
+left_range_mod_fitted <- fitted(left_range_mod)
+left_range_mod_fitted <- cbind(left_lung_data$slice_normalized,
+                                    left_range_mod_fitted)
+left_range_mod_fitted <- data.frame(left_range_mod_fitted[order(left_range_mod_fitted[,1]),])
+
+summary(left_range_mod)
+
+```
+
+```{r, echo = F}
+
+# Plotting the non-linear normalized slice for left lung psill when 
+# including race. 
+plot(left_lung_data$slice_normalized,left_lung_data$range,type = "p",
+     xlab = "Normalized Slice", ylab = "Range",
+     main = "Left Lung Range Not Including Race")
+lines(left_range_mod_fitted$V1,left_range_mod_fitted$left_range_mod_fitted,lwd=4)
+
+```
+
+# Right Lung Models Including Race
+
+### Psill
+
+```{r, echo = F}
+
+# Making a model for the left lung psill when including race. 
+right_psill_race_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                             BMI + Age + Gender + Height + Fibrosis + 
+                             Med_Lymphadenopathy + Traction_Bronchiectasis +
+                             POSTFEV1 + POSTFVC + POSTFEVFVC + Race, 
+                           data = right_lung_data, family = gaussian)
+
+right_psill_race_mod_fitted <- fitted(right_psill_race_mod)
+right_psill_race_mod_fitted <- cbind(right_lung_data$slice_normalized,
+                                    right_psill_race_mod_fitted)
+right_psill_race_mod_fitted <- data.frame(right_psill_race_mod_fitted[order(right_psill_race_mod_fitted[,1]),])
+
+summary(right_psill_race_mod)
+
+```
+
+```{r, echo = F}
+
+# Plotting the non-linear normalized slice for left lung psill when 
+# including race. 
+plot(right_lung_data$slice_normalized,right_lung_data$psill,type = "p",
+     xlab = "Normalized Slice", ylab = "Psill",
+     main = "Right Lung Psill Including Race")
+lines(right_psill_race_mod_fitted$V1,right_psill_race_mod_fitted$right_psill_race_mod_fitted,lwd=4)
+
+```
+
+### Range Results 
+
+```{r, echo = F}
+
+# Making a model for left lung range when including race. 
+right_range_race_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                             BMI + Age + Gender + Height + Fibrosis + 
+                             Med_Lymphadenopathy + Traction_Bronchiectasis +
+                             POSTFEV1 + POSTFVC + POSTFEVFVC + Race,
+                           data = right_lung_data, family = gaussian)
+
+right_range_race_mod_fitted <- fitted(right_range_race_mod)
+right_range_race_mod_fitted <- cbind(right_lung_data$slice_normalized,
+                                    right_range_race_mod_fitted)
+right_range_race_mod_fitted <- data.frame(right_range_race_mod_fitted[order(right_range_race_mod_fitted[,1]),])
+
+summary(right_range_race_mod)
+
+```
+
+```{r, echo = F}
+
+# Plotting the non-linear normalized slice for right lung psill when 
+# including race. 
+plot(right_lung_data$slice_normalized,right_lung_data$range,type = "p",
+     xlab = "Normalized Slice", ylab = "Range",
+     main = "Right Lung Range Including Race")
+lines(right_range_race_mod_fitted$V1,right_range_race_mod_fitted$right_range_race_mod_fitted,lwd=4)
+
+```
+
+# Right Lung Models Not Including Race
+
+### Psill
+
+```{r, echo = F}
+
+# Making a model for the left lung psill when including race. 
+right_psill_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                             BMI + Age + Gender + Height + Fibrosis + 
+                             Med_Lymphadenopathy + Traction_Bronchiectasis +
+                             POSTFEV1 + POSTFVC + POSTFEVFVC, 
+                           data = right_lung_data, family = gaussian)
+
+right_psill_mod_fitted <- fitted(right_psill_mod)
+right_psill_mod_fitted <- cbind(right_lung_data$slice_normalized,
+                                    right_psill_mod_fitted)
+right_psill_mod_fitted <- data.frame(right_psill_mod_fitted[order(right_psill_mod_fitted[,1]),])
+
+summary(right_psill_mod)
+
+```
+
+```{r, echo = F}
+
+# Plotting the non-linear normalized slice for left lung psill when 
+# not including race. 
+plot(right_lung_data$slice_normalized,right_lung_data$psill,type = "p",
+     xlab = "Normalized Slice", ylab = "Psill",
+     main = "Right Lung Psill Not Including Race")
+lines(right_psill_mod_fitted$V1,right_psill_mod_fitted$right_psill_mod_fitted,lwd=4)
+
+```
+
+### Range Results 
+
+```{r, echo = F}
+
+# Making a model for left lung range when including race. 
+right_range_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                             BMI + Age + Gender + Height + Fibrosis + 
+                             Med_Lymphadenopathy + Traction_Bronchiectasis +
+                             POSTFEV1 + POSTFVC + POSTFEVFVC,
+                           data = right_lung_data, family = gaussian)
+
+right_range_mod_fitted <- fitted(right_range_mod)
+right_range_mod_fitted <- cbind(right_lung_data$slice_normalized,
+                                    right_range_mod_fitted)
+right_range_mod_fitted <- data.frame(right_range_mod_fitted[order(right_range_mod_fitted[,1]),])
+
+summary(right_range_mod)
+
+```
+
+```{r, echo = F}
+
+# Plotting the non-linear normalized slice for right lung psill when 
+# not including race. 
+plot(right_lung_data$slice_normalized,right_lung_data$range,type = "p",
+     xlab = "Normalized Slice", ylab = "Range",
+     main = "Right Lung Range Not Including Race")
+lines(right_range_mod_fitted$V1,right_range_mod_fitted$right_range_mod_fitted,lwd=4)
+
+```
+

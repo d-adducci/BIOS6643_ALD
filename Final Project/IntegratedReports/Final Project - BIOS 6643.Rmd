@@ -54,7 +54,7 @@ lp_med_race_mod_sum <- tidy(lp_med_race_mod, parametric = T) %>%
 # Model where Traction Bronchiectasis is the primary predictor. 
 lp_tra_race_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
                         BMI + Age + Gender + Height + Traction_Bronchiectasis +
-                        Race s(ID,bs = "re"), data = left_lung_data, 
+                        Race + s(ID,bs = "re"), data = left_lung_data, 
                        family = gaussian, method = "ML")
 
 lp_tra_race_mod_sum <- tidy(lp_tra_race_mod, parametric = T) %>%
@@ -660,7 +660,7 @@ rr_med_mod_sum <- tidy(rr_med_mod, parametric = T) %>%
 # Model where Traction Bronchiectasis is the primary predictor. 
 rr_tra_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
                    BMI + Age + Gender + Height + Traction_Bronchiectasis +
-                   r(ID,bs = "re"), data = right_lung_data, family = gaussian,
+                   s(ID,bs = "re"), data = right_lung_data, family = gaussian,
                   method = "ML")
 
 rr_tra_mod_sum <- tidy(rr_tra_mod, parametric = T) %>%

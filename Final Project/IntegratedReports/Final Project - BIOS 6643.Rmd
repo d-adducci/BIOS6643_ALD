@@ -531,7 +531,7 @@ rp_fvc_mod_sum <- tidy(rp_fvc_mod, parametric = T) %>%
 # Model where FEV1/FVC is the primary predictor. 
 rp_fev1_fvc_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
                          BMI + Age + Gender + Height + s(ID,bs = "re") + 
-                         s(slice_normalize,by = POSTFEVFVC,bs = "ps"), 
+                         s(slice_normalized,by = POSTFEVFVC,bs = "ps"), 
                        data = right_lung_data, family = gaussian, method = "ML") 
 
 rp_fev1_fvc_mod_sum <- tidy(rp_fev1_fvc_mod, parametric = T) %>%

@@ -17,75 +17,84 @@ library(mgcv)
 
 project2_data_raw <- readRDS("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/ProcessedData/project2_data.rds")
 
+# Turning the ID column in to a factor, and logging psill and range. 
 project2_data <- project2_data_raw %>% 
-  mutate(ID = factor(ID))
+  mutate(ID = factor(ID),
+         log_psill = log(psill),
+         log_range = log(range)) %>%
+  mutate(Fibrosis = recode(Fibrosis,
+                           No = 0,Yes = 1),
+         Traction_Bronchiectasis = recode(Traction_Bronchiectasis,
+                                          No = 0,Yes = 1),
+         Med_Lymphadenopathy = recode(Med_Lymphadenopathy,
+                                      No = 0, Yes = 1))
 
 left_lung_data <- project2_data %>% filter(lung == "Left")
 right_lung_data <- project2_data %>% filter(lung == "Right")
 
 ```
 
-# Left Lung Psill 
+# Left Lung log(Psill) 
 
 ```{r, echo = F}
 
-# Left Lung Psill models including race. 
+# Left Lung log(Psill) models including race. 
 
 # Model where Fibrosis is the primary predictor.
-lp_fib_race_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + Fibrosis + Race + 
-                        s(ID,bs = "re"),data = left_lung_data, 
-                       family = gaussian, method = "ML")
+lp_fib_race_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = Fibrosis,bs = "ps"),
+                       data = left_lung_data, family = gaussian, method = "ML")
 
 lp_fib_race_mod_sum <- tidy(lp_fib_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Mediastinal Lymphadenopathy is the primary predictor.
-lp_med_race_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + Med_Lymphadenopathy + 
-                        Race + s(ID,bs = "re"), data = left_lung_data, 
-                       family = gaussian, method = "ML")
+lp_med_race_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = Med_Lymphadenopathy,bs = "ps"), 
+                       data = left_lung_data, family = gaussian, method = "ML")
 
 lp_med_race_mod_sum <- tidy(lp_med_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Traction Bronchiectasis is the primary predictor. 
-lp_tra_race_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + Traction_Bronchiectasis +
-                        Race + s(ID,bs = "re"), data = left_lung_data, 
-                       family = gaussian, method = "ML")
+lp_tra_race_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = Traction_Bronchiectasis,bs = "ps"),
+                       data = left_lung_data, family = gaussian, method = "ML")
 
 lp_tra_race_mod_sum <- tidy(lp_tra_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1 is the primary predictor. 
-lp_fev1_race_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
-                         BMI + Age + Gender + Height + POSTFEV1 + Race + 
-                         s(ID,bs = "re"), data = left_lung_data, 
-                        family = gaussian, method = "ML")
+lp_fev1_race_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                          BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                          s(slice_normalized,by = POSTFEV1,bs = "ps"), 
+                        data = left_lung_data, family = gaussian, method = "ML")
 
 lp_fev1_race_mod_sum <- tidy(lp_fev1_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FVC is the primary predictor. 
-lp_fvc_race_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + POSTFVC + Race +
-                        s(ID,bs = "re"),data = left_lung_data, 
-                       family = gaussian, method = "ML") 
+lp_fvc_race_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = POSTFVC,bs = "ps"),
+                       data = left_lung_data, family = gaussian, method = "ML") 
 
 lp_fvc_race_mod_sum <- tidy(lp_fvc_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1/FVC is the primary predictor. 
-lp_fev1_fvc_race_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                             BMI + Age + Gender + Height + POSTFEVFVC + Race + 
-                             s(ID,bs = "re"), data = left_lung_data, 
-                            family = gaussian, method = "ML") 
+lp_fev1_fvc_race_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                              BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                              s(slice_normalized,by = POSTFEVFVC,bs = "ps"), 
+                            data = left_lung_data, family = gaussian, method = "ML") 
 
 lp_fev1_fvc_race_mod_sum <- tidy(lp_fev1_fvc_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
@@ -102,22 +111,23 @@ lp_race_mods_table <- kbl(lp_race_mods_df,
                                         "Std. Error","P-Value"),
                           booktabs = T, align = "cc", longtable = T) %>%
   kable_styling(latex_options = c("HOLD_position","repeat_header")) %>%
-  group_rows("Fibrosis",1,8) %>%
-  group_rows("Mediastinal Lymphadenopathy",9,16) %>%
-  group_rows("Traction Bronchiectasis",17,24) %>%
-  group_rows("FEV1",25,32) %>%
-  group_rows("FVC",33,40) %>%
-  group_rows("FEV1/FVC",41,48)
+  group_rows("Fibrosis",1,7) %>%
+  group_rows("Mediastinal Lymphadenopathy",8,14) %>%
+  group_rows("Traction Bronchiectasis",15,21) %>%
+  group_rows("FEV1",22,28) %>%
+  group_rows("FVC",29,35) %>%
+  group_rows("FEV1/FVC",36,42)
 
 ```
 
 ```{r, echo = F}
 
-# Left lung psill models not including race. 
+# Left lung log(psill) models not including race. 
 
 # Model where Fibrosis is the primary predictor.
-lp_fib_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + Fibrosis + s(ID,bs = "re"),
+lp_fib_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") +
+                    s(slice_normalized,by = Fibrosis,bs = "ps"),
                   data = left_lung_data, family = gaussian, method = "ML")
 
 lp_fib_mod_sum <- tidy(lp_fib_mod, parametric = T) %>%
@@ -125,28 +135,29 @@ lp_fib_mod_sum <- tidy(lp_fib_mod, parametric = T) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Mediastinal Lymphadenopathy is the primary predictor.
-lp_med_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + Med_Lymphadenopathy +
-                   s(ID,bs = "re"), data = left_lung_data, 
-                  family = gaussian, method = "ML")
+lp_med_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") + 
+                    s(slice_normalized,by = Med_Lymphadenopathy,bs = "ps"), 
+                  data = left_lung_data, family = gaussian, method = "ML")
 
 lp_med_mod_sum <- tidy(lp_med_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Traction Bronchiectasis is the primary predictor. 
-lp_tra_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + Traction_Bronchiectasis +
-                   s(ID,bs = "re"),data = left_lung_data, family = gaussian,
-                  method = "ML")
+lp_tra_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") + 
+                    s(slice_normalized,by = Traction_Bronchiectasis,bs = "ps"),
+                  data = left_lung_data, family = gaussian, method = "ML")
 
 lp_tra_mod_sum <- tidy(lp_tra_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1 is the primary predictor. 
-lp_fev1_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
-                    BMI + Age + Gender + Height + POSTFEV1 + s(ID,bs = "re"),
+lp_fev1_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                     BMI + Age + Gender + Height + s(ID,bs = "re") +
+                     s(slice_normalized,by = POSTFEV1,bs = "ps"),
                    data = left_lung_data, family = gaussian, method = "ML")
 
 lp_fev1_mod_sum <- tidy(lp_fev1_mod, parametric = T) %>%
@@ -154,8 +165,9 @@ lp_fev1_mod_sum <- tidy(lp_fev1_mod, parametric = T) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FVC is the primary predictor. 
-lp_fvc_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + POSTFVC + s(ID,bs = "re"),
+lp_fvc_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") +
+                    s(slice_normalized,by = POSTFVC,bs = "bs"),
                   data = left_lung_data, family = gaussian, method = "ML") 
 
 lp_fvc_mod_sum <- tidy(lp_fvc_mod, parametric = T) %>%
@@ -163,10 +175,10 @@ lp_fvc_mod_sum <- tidy(lp_fvc_mod, parametric = T) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1/FVC is the primary predictor. 
-lp_fev1_fvc_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + POSTFEVFVC + 
-                        s(ID,bs = "re"), data = left_lung_data, 
-                       family = gaussian, method = "ML") 
+lp_fev1_fvc_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + s(ID,bs = "re") + 
+                         s(slice_normalized,by = POSTFEVFVC,bs = "ps"), 
+                       data = left_lung_data, family = gaussian, method = "ML") 
 
 lp_fev1_fvc_mod_sum <- tidy(lp_fev1_fvc_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
@@ -182,12 +194,12 @@ lp_mods_table <- kbl(lp_mods_df,
                                    "Std. Error","P-Value"),
                      booktabs = T, align = "cc", longtable = T) %>%
   kable_styling(latex_options = c("HOLD_position","repeat_header")) %>%
-  group_rows("Fibrosis",1,6) %>%
-  group_rows("Mediastinal Lymphadenopathy",7,12) %>%
-  group_rows("Traction Bronchiectasis",13,18) %>%
-  group_rows("FEV1",19,24) %>%
-  group_rows("FVC",25,30) %>%
-  group_rows("FEV1/FVC",31,36)
+  group_rows("Fibrosis",1,5) %>%
+  group_rows("Mediastinal Lymphadenopathy",6,10) %>%
+  group_rows("Traction Bronchiectasis",11,15) %>%
+  group_rows("FEV1",16,20) %>%
+  group_rows("FVC",21,25) %>%
+  group_rows("FEV1/FVC",26,30)
 
 ```
 
@@ -199,67 +211,67 @@ lp_mods_table
 
 ```
 
-# Left Lung Range
+# Left Lung log(Range)
 
 ```{r, echo = F}
 
-# Left Lung Range models including race. 
+# Left Lung log(Range) models including race. 
 
 # Model where Fibrosis is the primary predictor.
-lr_fib_race_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + Fibrosis + Race + 
-                        s(ID,bs = "re"),data = left_lung_data, 
-                       family = gaussian, method = "ML")
+lr_fib_race_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = Fibrosis,bs = "ps"),
+                       data = left_lung_data, family = gaussian, method = "ML")
 
 lr_fib_race_mod_sum <- tidy(lr_fib_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Mediastinal Lymphadenopathy is the primary predictor.
-lr_med_race_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + Med_Lymphadenopathy + 
-                        Race + s(ID,bs = "re"), data = left_lung_data, 
-                       family = gaussian, method = "ML")
+lr_med_race_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = Med_Lymphadenopathy,bs = "ps"), 
+                       data = left_lung_data, family = gaussian, method = "ML")
 
 lr_med_race_mod_sum <- tidy(lr_med_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Traction Bronchiectasis is the primary predictor. 
-lr_tra_race_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + Traction_Bronchiectasis +
-                        Race + s(ID,bs = "re"), data = left_lung_data, 
-                       family = gaussian, method = "ML")
+lr_tra_race_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = Traction_Bronchiectasis,bs = "ps"), 
+                       data = left_lung_data, family = gaussian, method = "ML")
 
 lr_tra_race_mod_sum <- tidy(lr_tra_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1 is the primary predictor. 
-lr_fev1_race_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
-                         BMI + Age + Gender + Height + POSTFEV1 + Race +
-                         s(ID,bs = "re"), data = left_lung_data, 
-                        family = gaussian, method = "ML")
+lr_fev1_race_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                          BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                          s(slice_normalized,by = POSTFEV1,bs = "ps"), 
+                        data = left_lung_data, family = gaussian, method = "ML")
 
 lr_fev1_race_mod_sum <- tidy(lr_fev1_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FVC is the primary predictor. 
-lr_fvc_race_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + POSTFVC + Race +
-                        s(ID,bs = "re"), data = left_lung_data, 
-                       family = gaussian, method = "ML") 
+lr_fvc_race_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = POSTFVC,bs = "ps"), 
+                       data = left_lung_data, family = gaussian, method = "ML") 
 
 lr_fvc_race_mod_sum <- tidy(lr_fvc_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1/FVC is the primary predictor. 
-lr_fev1_fvc_race_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                             BMI + Age + Gender + Height + POSTFEVFVC + Race +
-                             s(ID,bs = "re"), data = left_lung_data, 
-                            family = gaussian, method = "ML") 
+lr_fev1_fvc_race_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                              BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                              s(slice_normalized,by = POSTFEVFVC,bs = "ps"), 
+                            data = left_lung_data, family = gaussian, method = "ML") 
 
 lr_fev1_fvc_race_mod_sum <- tidy(lr_fev1_fvc_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
@@ -276,52 +288,53 @@ lr_race_mods_table <- kbl(lr_race_mods_df,
                                         "Std. Error","P-Value"),
                           booktabs = T, align = "cc", longtable = T) %>%
   kable_styling(latex_options = c("HOLD_position","repeat_header")) %>%
-  group_rows("Fibrosis",1,8) %>%
-  group_rows("Mediastinal Lymphadenopathy",9,16) %>%
-  group_rows("Traction Bronchiectasis",17,24) %>%
-  group_rows("FEV1",25,32) %>%
-  group_rows("FVC",33,40) %>%
-  group_rows("FEV1/FVC",41,48)
+  group_rows("Fibrosis",1,7) %>%
+  group_rows("Mediastinal Lymphadenopathy",8,14) %>%
+  group_rows("Traction Bronchiectasis",15,21) %>%
+  group_rows("FEV1",22,28) %>%
+  group_rows("FVC",29,35) %>%
+  group_rows("FEV1/FVC",36,42)
 
 ```
 
 ```{r, echo = F}
 
-# Left lung Range models not including race. 
+# Left lung log(Range) models not including race. 
 
 # Model where Fibrosis is the primary predictor.
-lr_fib_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + Fibrosis + 
-                   s(ID,bs = "re"), data = left_lung_data, 
-                  family = gaussian, method = "ML")
+lr_fib_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") + 
+                    s(slice_normalized,by = Fibrosis,bs = "ps"), 
+                  data = left_lung_data, family = gaussian, method = "ML")
 
 lr_fib_mod_sum <- tidy(lr_fib_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Mediastinal Lymphadenopathy is the primary predictor.
-lr_med_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + Med_Lymphadenopathy +
-                   s(ID,bs = "re"), data = left_lung_data, family = gaussian,
-                   method = "ML")
+lr_med_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") + 
+                    s(slice_normalized,by = Med_Lymphadenopathy,bs = "ps"), 
+                  data = left_lung_data, family = gaussian, method = "ML")
 
 lr_med_mod_sum <- tidy(lr_med_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Traction Bronchiectasis is the primary predictor. 
-lr_tra_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + Traction_Bronchiectasis +
-                   s(ID,bs = "re"), data = left_lung_data, family = gaussian,
-                  method = "ML")
+lr_tra_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") + 
+                    s(slice_normalized,by = Traction_Bronchiectasis,bs = "ps"), 
+                  data = left_lung_data, family = gaussian, method = "ML")
 
 lr_tra_mod_sum <- tidy(lr_tra_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1 is the primary predictor. 
-lr_fev1_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
-                    BMI + Age + Gender + Height + POSTFEV1 + s(ID,bs = "re"),
+lr_fev1_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                     BMI + Age + Gender + Height + s(ID,bs = "re") +
+                     s(slice_normalized,by = POSTFEV1,bs = "ps"),
                    data = left_lung_data, family = gaussian, method = "ML")
 
 lr_fev1_mod_sum <- tidy(lr_fev1_mod, parametric = T) %>%
@@ -329,8 +342,9 @@ lr_fev1_mod_sum <- tidy(lr_fev1_mod, parametric = T) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FVC is the primary predictor. 
-lr_fvc_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + POSTFVC + s(ID,bs = "re"),
+lr_fvc_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") +
+                    s(slice_normalized,by = POSTFVC,bs = "ps"),
                   data = left_lung_data, family = gaussian, method = "ML") 
 
 lr_fvc_mod_sum <- tidy(lr_fvc_mod, parametric = T) %>%
@@ -338,10 +352,10 @@ lr_fvc_mod_sum <- tidy(lr_fvc_mod, parametric = T) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1/FVC is the primary predictor. 
-lr_fev1_fvc_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + POSTFEVFVC + 
-                        s(ID,bs = "re"), data = left_lung_data, 
-                       family = gaussian, method = "ML") 
+lr_fev1_fvc_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + s(ID,bs = "re") + 
+                         s(slice_normalized,by = POSTFEVFVC,bs = "ps"), 
+                       data = left_lung_data, family = gaussian, method = "ML") 
 
 lr_fev1_fvc_mod_sum <- tidy(lr_fev1_fvc_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
@@ -357,12 +371,12 @@ lr_mods_table <- kbl(lr_mods_df,
                                    "Std. Error","P-Value"),
                      booktabs = T, align = "cc", longtable = T) %>%
   kable_styling(latex_options = c("HOLD_position","repeat_header")) %>%
-  group_rows("Fibrosis",1,6) %>%
-  group_rows("Mediastinal Lymphadenopathy",7,12) %>%
-  group_rows("Traction Bronchiectasis",13,18) %>%
-  group_rows("FEV1",19,24) %>%
-  group_rows("FVC",25,30) %>%
-  group_rows("FEV1/FVC",31,36)
+  group_rows("Fibrosis",1,5) %>%
+  group_rows("Mediastinal Lymphadenopathy",6,10) %>%
+  group_rows("Traction Bronchiectasis",11,15) %>%
+  group_rows("FEV1",16,20) %>%
+  group_rows("FVC",21,25) %>%
+  group_rows("FEV1/FVC",26,30)
 
 ```
 
@@ -374,67 +388,67 @@ lr_mods_table
 
 ```
 
-# Right Lung Psill 
+# Right Lung log(Psill) 
 
 ```{r, echo = F}
 
-# Right Lung Psill models including race. 
+# Right Lung log(Psill) models including race. 
 
 # Model where Fibrosis is the primary predictor.
-rp_fib_race_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + Fibrosis + Race + 
-                        s(ID,bs = "re"), data = right_lung_data, 
-                       family = gaussian, method = "ML")
+rp_fib_race_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = Fibrosis,bs = "ps"), 
+                       data = right_lung_data, family = gaussian, method = "ML")
 
 rp_fib_race_mod_sum <- tidy(rp_fib_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Mediastinal Lymphadenopathy is the primary predictor.
-rp_med_race_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + Med_Lymphadenopathy + 
-                        Race + s(ID,bs = "re"), data = right_lung_data, 
-                       family = gaussian, method = "ML")
+rp_med_race_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = Med_Lymphadenopathy,bs = "ps"), 
+                       data = right_lung_data, family = gaussian, method = "ML")
 
 rp_med_race_mod_sum <- tidy(rp_med_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Traction Bronchiectasis is the primary predictor. 
-rp_tra_race_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + Traction_Bronchiectasis +
-                        Race + s(ID,bs = "re"), data = right_lung_data, 
-                       family = gaussian, method = "ML")
+rp_tra_race_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = Traction_Bronchiectasis,bs = "ps"), 
+                       data = right_lung_data, family = gaussian, method = "ML")
 
 rp_tra_race_mod_sum <- tidy(rp_tra_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1 is the primary predictor. 
-rp_fev1_race_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
-                         BMI + Age + Gender + Height + POSTFEV1 + Race +
-                         s(ID,bs = "re"), data = right_lung_data, 
-                        family = gaussian, method = "ML")
+rp_fev1_race_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                          BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                          s(slice_normalized,by = POSTFEV1,bs = "ps"), 
+                        data = right_lung_data, family = gaussian, method = "ML")
 
 rp_fev1_race_mod_sum <- tidy(rp_fev1_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FVC is the primary predictor. 
-rp_fvc_race_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + POSTFVC + Race +
-                        s(ID,bs = "re"), data = right_lung_data, 
-                       family = gaussian, method = "ML") 
+rp_fvc_race_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = POSTFVC,bs = "ps"), 
+                       data = right_lung_data, family = gaussian, method = "ML") 
 
 rp_fvc_race_mod_sum <- tidy(rp_fvc_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1/FVC is the primary predictor. 
-rp_fev1_fvc_race_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                             BMI + Age + Gender + Height + POSTFEVFVC + Race +
-                             s(ID,bs = "re"), data = right_lung_data, 
-                            family = gaussian, method = "ML") 
+rp_fev1_fvc_race_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                              BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                              s(slice_normalized,by = POSTFEVFVC,bs = "ps"), 
+                            data = right_lung_data, family = gaussian, method = "ML") 
 
 rp_fev1_fvc_race_mod_sum <- tidy(rp_fev1_fvc_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
@@ -451,22 +465,23 @@ rp_race_mods_table <- kbl(rp_race_mods_df,
                                         "Std. Error","P-Value"),
                           booktabs = T, align = "cc", longtable = T) %>%
   kable_styling(latex_options = c("HOLD_position","repeat_header")) %>%
-  group_rows("Fibrosis",1,8) %>%
-  group_rows("Mediastinal Lymphadenopathy",9,16) %>%
-  group_rows("Traction Bronchiectasis",17,24) %>%
-  group_rows("FEV1",25,32) %>%
-  group_rows("FVC",33,40) %>%
-  group_rows("FEV1/FVC",41,48)
+  group_rows("Fibrosis",1,7) %>%
+  group_rows("Mediastinal Lymphadenopathy",8,14) %>%
+  group_rows("Traction Bronchiectasis",15,21) %>%
+  group_rows("FEV1",22,28) %>%
+  group_rows("FVC",29,35) %>%
+  group_rows("FEV1/FVC",36,42)
 
 ```
 
 ```{r, echo = F}
 
-# Right lung psill models not including race. 
+# Right lung log(psill) models not including race. 
 
 # Model where Fibrosis is the primary predictor.
-rp_fib_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + Fibrosis + s(ID,bs = "re"),
+rp_fib_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") +
+                    s(slice_normalized,by = Fibrosis,bs = "ps"),
                   data = right_lung_data, family = gaussian, method = "ML")
 
 rp_fib_mod_sum <- tidy(rp_fib_mod, parametric = T) %>%
@@ -474,28 +489,29 @@ rp_fib_mod_sum <- tidy(rp_fib_mod, parametric = T) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Mediastinal Lymphadenopathy is the primary predictor.
-rp_med_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + Med_Lymphadenopathy + 
-                   s(ID,bs = "re"), data = right_lung_data, family = gaussian,
-                  method = "ML")
+rp_med_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") + 
+                    s(slice_normalized,by = Med_Lymphadenopathy,bs = "ps"), 
+                  data = right_lung_data, family = gaussian, method = "ML")
 
 rp_med_mod_sum <- tidy(rp_med_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Traction Bronchiectasis is the primary predictor. 
-rp_tra_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + Traction_Bronchiectasis + 
-                   s(ID,bs = "re"), data = right_lung_data, family = gaussian,
-                  method = "ML")
+rp_tra_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") + 
+                    s(slice_normalized,by = Traction_Bronchiectasis,bs = "ps"), 
+                  data = right_lung_data, family = gaussian, method = "ML")
 
 rp_tra_mod_sum <- tidy(rp_tra_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1 is the primary predictor. 
-rp_fev1_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
-                    BMI + Age + Gender + Height + POSTFEV1 + s(ID,bs = "re"),
+rp_fev1_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                     BMI + Age + Gender + Height + s(ID,bs = "re") +
+                     s(slice_normalized,by = POSTFEV1,bs = "ps"),
                    data = right_lung_data, family = gaussian, method = "ML")
 
 rp_fev1_mod_sum <- tidy(rp_fev1_mod, parametric = T) %>%
@@ -503,8 +519,9 @@ rp_fev1_mod_sum <- tidy(rp_fev1_mod, parametric = T) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FVC is the primary predictor. 
-rp_fvc_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + POSTFVC + s(ID,bs = "re"),
+rp_fvc_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") +
+                    s(slice_normalized,by = POSTFVC,bs = "ps"),
                   data = right_lung_data, family = gaussian, method = "ML") 
 
 rp_fvc_mod_sum <- tidy(rp_fvc_mod, parametric = T) %>%
@@ -512,10 +529,10 @@ rp_fvc_mod_sum <- tidy(rp_fvc_mod, parametric = T) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1/FVC is the primary predictor. 
-rp_fev1_fvc_mod <- gam(psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + POSTFEVFVC + 
-                        s(ID,bs = "re"), data = right_lung_data, 
-                       family = gaussian, method = "ML") 
+rp_fev1_fvc_mod <- gam(log_psill ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + s(ID,bs = "re") + 
+                         s(slice_normalize,by = POSTFEVFVC,bs = "ps"), 
+                       data = right_lung_data, family = gaussian, method = "ML") 
 
 rp_fev1_fvc_mod_sum <- tidy(rp_fev1_fvc_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
@@ -531,12 +548,12 @@ rp_mods_table <- kbl(rp_mods_df,
                                    "Std. Error","P-Value"),
                      booktabs = T, align = "cc", longtable = T) %>%
   kable_styling(latex_options = c("HOLD_position","repeat_header")) %>%
-  group_rows("Fibrosis",1,6) %>%
-  group_rows("Mediastinal Lymphadenopathy",7,12) %>%
-  group_rows("Traction Bronchiectasis",13,18) %>%
-  group_rows("FEV1",19,24) %>%
-  group_rows("FVC",25,30) %>%
-  group_rows("FEV1/FVC",31,36)
+  group_rows("Fibrosis",1,5) %>%
+  group_rows("Mediastinal Lymphadenopathy",6,10) %>%
+  group_rows("Traction Bronchiectasis",11,15) %>%
+  group_rows("FEV1",16,20) %>%
+  group_rows("FVC",21,25) %>%
+  group_rows("FEV1/FVC",26,30)
 
 ```
 
@@ -548,67 +565,67 @@ rp_mods_table
 
 ```
 
-# Right Lung Range
+# Right Lung log(Range)
 
 ```{r, echo = F}
 
-# Right Lung Range models including race. 
+# Right Lung log(Range) models including race. 
 
 # Model where Fibrosis is the primary predictor.
-rr_fib_race_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + Fibrosis + Race +
-                        s(ID,bs = "re"), data = right_lung_data, 
-                       family = gaussian, method = "ML")
+rr_fib_race_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = Fibrosis,bs = "ps"), 
+                       data = right_lung_data, family = gaussian, method = "ML")
 
 rr_fib_race_mod_sum <- tidy(rr_fib_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Mediastinal Lymphadenopathy is the primary predictor.
-rr_med_race_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + Med_Lymphadenopathy + 
-                        Race + s(ID,bs = "re"), data = right_lung_data, 
-                       family = gaussian, method = "ML")
+rr_med_race_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = Med_Lymphadenopathy,bs = "ps"), 
+                       data = right_lung_data, family = gaussian, method = "ML")
 
 rr_med_race_mod_sum <- tidy(rr_med_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Traction Bronchiectasis is the primary predictor. 
-rr_tra_race_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + Traction_Bronchiectasis +
-                        Race + s(ID,bs = "re"), data = right_lung_data, 
-                       family = gaussian, method = "ML")
+rr_tra_race_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = Traction_Bronchiectasis,bs = "ps"), 
+                       data = right_lung_data, family = gaussian, method = "ML")
 
 rr_tra_race_mod_sum <- tidy(rr_tra_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1 is the primary predictor. 
-rr_fev1_race_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
-                         BMI + Age + Gender + Height + POSTFEV1 + Race +
-                         s(ID,bs = "re"), data = right_lung_data, 
-                        family = gaussian, method = "ML")
+rr_fev1_race_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                          BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                          s(slice_normalized,by = POSTFEV1,bs = "ps"), 
+                        data = right_lung_data, family = gaussian, method = "ML")
 
 rr_fev1_race_mod_sum <- tidy(rr_fev1_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FVC is the primary predictor. 
-rr_fvc_race_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + POSTFVC + Race +
-                        s(ID,bs = "re"), data = right_lung_data, 
-                       family = gaussian, method = "ML") 
+rr_fvc_race_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                         s(slice_normalized,by = POSTFVC,bs = "ps"), 
+                       data = right_lung_data, family = gaussian, method = "ML") 
 
 rr_fvc_race_mod_sum <- tidy(rr_fvc_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1/FVC is the primary predictor. 
-rr_fev1_fvc_race_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                             BMI + Age + Gender + Height + POSTFEVFVC + Race +
-                             s(ID,bs = "re"), data = right_lung_data, 
-                            family = gaussian, method = "ML") 
+rr_fev1_fvc_race_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                              BMI + Age + Gender + Height + Race + s(ID,bs = "re") + 
+                              s(slice_normalized,by = POSTFEVFVC,bs = "ps"), 
+                            data = right_lung_data, family = gaussian, method = "ML") 
 
 rr_fev1_fvc_race_mod_sum <- tidy(rr_fev1_fvc_race_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
@@ -625,22 +642,23 @@ rr_race_mods_table <- kbl(rr_race_mods_df,
                                         "Std. Error","P-Value"),
                           booktabs = T, align = "cc", longtable = T) %>%
   kable_styling(latex_options = c("HOLD_position","repeat_header")) %>%
-  group_rows("Fibrosis",1,8) %>%
-  group_rows("Mediastinal Lymphadenopathy",9,16) %>%
-  group_rows("Traction Bronchiectasis",17,24) %>%
-  group_rows("FEV1",25,32) %>%
-  group_rows("FVC",33,40) %>%
-  group_rows("FEV1/FVC",41,48)
+  group_rows("Fibrosis",1,7) %>%
+  group_rows("Mediastinal Lymphadenopathy",8,14) %>%
+  group_rows("Traction Bronchiectasis",15,21) %>%
+  group_rows("FEV1",22,28) %>%
+  group_rows("FVC",29,35) %>%
+  group_rows("FEV1/FVC",36,42)
 
 ```
 
 ```{r, echo = F}
 
-# Right lung Range models not including race. 
+# Right lung log(Range) models not including race. 
 
 # Model where Fibrosis is the primary predictor.
-rr_fib_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + Fibrosis + s(ID,bs = "re"),
+rr_fib_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") +
+                    s(slice_normalized,by = Fibrosis,bs = "ps"),
                   data = right_lung_data, family = gaussian, method = "ML")
 
 rr_fib_mod_sum <- tidy(rr_fib_mod, parametric = T) %>%
@@ -648,28 +666,29 @@ rr_fib_mod_sum <- tidy(rr_fib_mod, parametric = T) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Mediastinal Lymphadenopathy is the primary predictor.
-rr_med_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + Med_Lymphadenopathy +
-                   s(ID,bs = "re"), data = right_lung_data, family = gaussian,
-                  method = "ML")
+rr_med_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") + 
+                    s(slice_normalized,by = Med_Lymphadenopathy,bs = "ps"), 
+                  data = right_lung_data, family = gaussian, method = "ML")
 
 rr_med_mod_sum <- tidy(rr_med_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where Traction Bronchiectasis is the primary predictor. 
-rr_tra_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + Traction_Bronchiectasis +
-                   s(ID,bs = "re"), data = right_lung_data, family = gaussian,
-                  method = "ML")
+rr_tra_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") + 
+                    s(slice_normalized,by = Traction_Bronchiectasis,bs = "ps"), 
+                  data = right_lung_data, family = gaussian, method = "ML")
 
 rr_tra_mod_sum <- tidy(rr_tra_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1 is the primary predictor. 
-rr_fev1_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
-                    BMI + Age + Gender + Height + POSTFEV1 + s(ID,bs = "re"),
+rr_fev1_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) + 
+                     BMI + Age + Gender + Height + s(ID,bs = "re") +
+                     s(slice_normalized,by = POSTFEV1,bs = "ps"),
                    data = right_lung_data, family = gaussian, method = "ML")
 
 rr_fev1_mod_sum <- tidy(rr_fev1_mod, parametric = T) %>%
@@ -677,8 +696,9 @@ rr_fev1_mod_sum <- tidy(rr_fev1_mod, parametric = T) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FVC is the primary predictor. 
-rr_fvc_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                   BMI + Age + Gender + Height + POSTFVC + s(ID,bs = "re"),
+rr_fvc_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                    BMI + Age + Gender + Height + s(ID,bs = "re") +
+                    s(slice_normalized,by = POSTFVC,bs = "ps"),
                   data = right_lung_data, family = gaussian, method = "ML") 
 
 rr_fvc_mod_sum <- tidy(rr_fvc_mod, parametric = T) %>%
@@ -686,10 +706,10 @@ rr_fvc_mod_sum <- tidy(rr_fvc_mod, parametric = T) %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
 # Model where FEV1/FVC is the primary predictor. 
-rr_fev1_fvc_mod <- gam(range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
-                        BMI + Age + Gender + Height + POSTFEVFVC +
-                        s(ID,bs = "re"), data = right_lung_data, 
-                       family = gaussian, method = "ML") 
+rr_fev1_fvc_mod <- gam(log_range ~ s(slice_normalized,bs = "ps",m = c(2,2)) +
+                         BMI + Age + Gender + Height + s(ID,bs = "re") + 
+                         s(slice_normalized,by = POSTFEVFVC,bs = "ps"), 
+                       data = right_lung_data, family = gaussian, method = "ML") 
 
 rr_fev1_fvc_mod_sum <- tidy(rr_fev1_fvc_mod, parametric = T) %>%
   select(term, estimate, std.error, p.value) %>%
@@ -705,12 +725,12 @@ rr_mods_table <- kbl(rr_mods_df,
                                    "Std. Error","P-Value"),
                      booktabs = T, align = "cc", longtable = T) %>%
   kable_styling(latex_options = c("HOLD_position","repeat_header")) %>%
-  group_rows("Fibrosis",1,6) %>%
-  group_rows("Mediastinal Lymphadenopathy",7,12) %>%
-  group_rows("Traction Bronchiectasis",13,18) %>%
-  group_rows("FEV1",19,24) %>%
-  group_rows("FVC",25,30) %>%
-  group_rows("FEV1/FVC",31,36)
+  group_rows("Fibrosis",1,5) %>%
+  group_rows("Mediastinal Lymphadenopathy",6,10) %>%
+  group_rows("Traction Bronchiectasis",11,15) %>%
+  group_rows("FEV1",16,20) %>%
+  group_rows("FVC",21,25) %>%
+  group_rows("FEV1/FVC",26,30)
 
 ```
 

@@ -23,11 +23,14 @@ project2_data <- project2_data_raw %>%
          log_psill = log(psill),
          log_range = log(range)) %>%
   mutate(Fibrosis = recode(Fibrosis,
-                           No = 0,Yes = 1),
+                           No = 0, Yes = 1),
          Traction_Bronchiectasis = recode(Traction_Bronchiectasis,
                                           No = 0,Yes = 1),
          Med_Lymphadenopathy = recode(Med_Lymphadenopathy,
-                                      No = 0, Yes = 1))
+                                      No = 0, Yes = 1)) %>% 
+  select(ID,lung,psill,range,slice_normalized,BMI,Age,Gender,Height,
+         Race,Traction_Bronchiectasis,Fibrosis,Med_Lymphadenopathy,
+         POSTFEV1,POSTFVC,POSTFEVFVC,log_psill,log_range)
 
 left_lung_data <- project2_data %>% filter(lung == "Left")
 right_lung_data <- project2_data %>% filter(lung == "Right")
@@ -742,6 +745,49 @@ rr_mods_table
 
 ```
 
+```{r,echo = F}
 
+
+gam_models <- list(lp_fib_race_mod,lp_med_race_mod,lp_tra_race_mod,lp_fev1_race_mod,
+                   lp_fvc_race_mod,lp_fev1_fvc_race_mod,lp_fib_mod,lp_med_mod,
+                   lp_tra_mod,lp_fev1_mod,lp_fvc_mod,lp_fev1_fvc_mod,lr_fib_race_mod,
+                   lr_med_race_mod,lr_tra_race_mod,lr_fev1_race_mod,lr_fvc_race_mod,
+                   lr_fev1_fvc_race_mod,lr_fib_mod,lr_med_mod,lr_tra_mod,lr_fev1_mod,
+                   lr_fvc_mod,lr_fev1_fvc_mod,rp_fib_race_mod,rp_med_race_mod,rp_tra_race_mod,
+                   rp_fev1_race_mod,rp_fvc_race_mod,rp_fev1_fvc_race_mod,rp_fib_mod,
+                   rp_med_mod,rp_tra_mod,rp_fev1_mod,rp_fvc_mod,rp_fev1_fvc_mod,
+                   rr_fib_race_mod,rr_med_race_mod,rr_tra_race_mod,rr_fev1_race_mod,
+                   rr_fvc_race_mod,rr_fev1_fvc_race_mod,rr_fib_mod,rr_med_mod,rr_tra_mod,
+                   rr_fev1_mod,rr_fvc_mod,rr_fev1_fvc_mod)
+
+names(gam_models) <- c("left_psill_fibrosis_race_mod","left_psill_mediastinal_lymphadenopathy_race_mod",
+                       "left_psill_traction_bronchiectasis_race_mod","left_psill_postfev1_race_mod",
+                   "left_psill_postfvc_race_mod","left_psill_postfev1fvc_race_mod",
+                   "left_psill_fibrosis_no_race_mod","left_psill_mediastinal_lymphadenopathy_no_race_mod",
+                   "left_psill_traction_bronchiectasis_no_race_mod","left_psill_postfev1_no_race_mod",
+                   "left_psill_postfvc_no_race_mod","left_psill_postfev1fvc_no_race_mod",
+                   "left_range_fibrosis_race_mod","left_range_mediastinal_lymphadenopathy_race_mod",
+                   "left_range_traction_bronchiectasis_race_mod","left_range_postfev1_race_mod",
+                   "left_range_postfvc_race_mod","left_range_postfev1fvc_race_mod","left_range_fibrosis_no_race_mod",
+                   "left_range_mediastinal_lymphadenopathy_no_race_mod","left_range_traction_bronchiectasis_no_race_mod",
+                   "left_range_postfev1_no_race_mod","left_range_postfvc_no_race_mod",
+                   "left_range_postfev1fvc_no_race_mod","right_psill_fibrosis_race_mod",
+                   "right_psill_mediastinal_lymphadenopathy_race_mod","right_psill_traction_bronchiectasis_race_mod",
+                   "right_psill_postfev1_race_mod","right_psill_postfvc_race_mod",
+                   "right_psill_postfev1fvc_race_mod","right_psill_fibrosis_no_race_mod",
+                   "right_psill_mediastinal_lymphadenopathy_no_race_mod",
+                   "right_psill_traction_bronchiectasis_no_race_mod","right_psill_postfev1_no_race_mod",
+                   "right_psill_postfvc_no_race_mod","right_psill_postfev1fvc_no_race_mod",
+                   "right_range_fibrosis_race_mod","right_range_mediastinal_lymphadenopathy_race_mod",
+                   "right_range_traction_bronchiectasis_race_mod","right_range_postfev1_race_mod",
+                   "right_range_postfvc_race_mod","right_range_postfev1fvc_race_mod",
+                   "right_range_fibrosis_no_race_mod","right_range_mediastinal_lymphadenopathy_no_race_mod",
+                   "right_range_traction_bronchiectasis_no_race_mod","right_range_postfev1_no_race_mod",
+                   "right_range_postfvc_no_race_mod","right_range_postfev1fvc_no_race_mod")
+
+
+save(gam_models,file = "C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/ProcessedData/saved_gam_models.RData")
+
+```
 
 

@@ -1,0 +1,1733 @@
+---
+title: "Final Project - BIOS 6643"
+author: "Dominic Adducci"
+date: "2023-12-09"
+output: html_document
+---
+
+```{r, echo = F, message = F, warning = F}
+
+library(tidyverse)
+library(kableExtra)
+library(mgcv)
+library(patchwork)
+
+```
+
+```{r, echo = F}
+
+# Loading in the data from previously run gam models. 
+
+load("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/ProcessedData/saved_gam_models.RData")
+
+# Loading in the project2 data.
+project2_data <- readRDS("C:/Users/domin/Documents/Biostatistics Masters Program/Fall 2023/BIOS 6643 - ADL/BIOS6643_ALD/Final Project/ProcessedData/project2_data.rds")
+
+```
+
+```{r, echo = F}
+
+# Setting up parameters for making plots. 
+fev1_quantiles <- quantile(project2_data$POSTFEV1,
+                           probs = c(0.25,0.50,0.75)) 
+
+fvc_quantiles <- quantile(project2_data$POSTFVC,
+                          probs = c(0.25,0.50,0.75))
+
+fev1fvc_quantiles <- quantile(project2_data$POSTFEVFVC,
+                              probs = c(0.25,0.50,0.75))
+
+bmi_mean <- mean(project2_data$BMI)
+
+age_mean <- mean(project2_data$Age)
+
+height_mean <- mean(project2_data$Height)
+
+gender_select <- "Female"
+
+race_select <- "Black or African American"
+
+slice_normalized_vec <- seq(0.1,0.9,by = 0.001)
+
+ID_pred <- "01S001"
+
+```
+
+```{r, echo = F}
+
+# Plotting left lung psill fibrosis model with race.
+pl_fibrosis_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Fibrosis = c(0,1),ID = ID_pred)
+
+pl_fibrosis_race_pred <- predict(gam_models$left_psill_fibrosis_race_mod,
+                                 newdata = pl_fibrosis_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pl_fibrosis_race_df <- data.frame(pl_fibrosis_race_pred_df,
+                                  "Yhat" = pl_fibrosis_race_pred$fit,
+                                  "LB" = pl_fibrosis_race_pred$fit -
+                                    qnorm(0.975)*pl_fibrosis_race_pred$se.fit,
+                                  "UB" = pl_fibrosis_race_pred$fit +
+                                    qnorm(0.975)*pl_fibrosis_race_pred$se.fit)
+
+pl_fibrosis_race_plot <- ggplot(pl_fibrosis_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Fibrosis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Left Lung Psill Fibrosis - With Race") +
+  scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank()) 
+
+# Plotting right lung psill fibrosis model with race. 
+pr_fibrosis_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Fibrosis = c(0,1),ID = ID_pred)
+
+pr_fibrosis_race_pred <- predict(gam_models$right_psill_fibrosis_race_mod,
+                                 newdata = pr_fibrosis_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pr_fibrosis_race_df <- data.frame(pr_fibrosis_race_pred_df,
+                                  "Yhat" = pr_fibrosis_race_pred$fit,
+                                  "LB" = pr_fibrosis_race_pred$fit -
+                                    qnorm(0.975)*pr_fibrosis_race_pred$se.fit,
+                                  "UB" = pr_fibrosis_race_pred$fit +
+                                    qnorm(0.975)*pr_fibrosis_race_pred$se.fit)
+
+pr_fibrosis_race_plot <- ggplot(pr_fibrosis_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Fibrosis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(x = "",y = "",
+    title = "Right Lung Psill Fibrosis - With Race") +
+  scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank()) 
+
+# Plotting left lung psill fibrosis with no race.
+pl_fibrosis_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                           Height = height_mean, 
+                                           Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Fibrosis = c(0,1),ID = ID_pred)
+
+pl_fibrosis_no_race_pred <- predict(gam_models$left_psill_fibrosis_no_race_mod,
+                                 newdata = pl_fibrosis_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pl_fibrosis_no_race_df <- data.frame(pl_fibrosis_no_race_pred_df,
+                                  "Yhat" = pl_fibrosis_no_race_pred$fit,
+                                  "LB" = pl_fibrosis_no_race_pred$fit -
+                                    qnorm(0.975)*pl_fibrosis_no_race_pred$se.fit,
+                                  "UB" = pl_fibrosis_no_race_pred$fit +
+                                    qnorm(0.975)*pl_fibrosis_no_race_pred$se.fit)
+
+pl_fibrosis_no_race_plot <- ggplot(pl_fibrosis_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Fibrosis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Left Lung Psill Fibrosis - No Race") +
+  scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting right lung psill fibrosis with no race.
+pr_fibrosis_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                           Height = height_mean, 
+                                           Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Fibrosis = c(0,1),ID = ID_pred)
+
+pr_fibrosis_no_race_pred <- predict(gam_models$right_psill_fibrosis_no_race_mod,
+                                 newdata = pr_fibrosis_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pr_fibrosis_no_race_df <- data.frame(pr_fibrosis_no_race_pred_df,
+                                  "Yhat" = pr_fibrosis_no_race_pred$fit,
+                                  "LB" = pr_fibrosis_no_race_pred$fit -
+                                    qnorm(0.975)*pr_fibrosis_no_race_pred$se.fit,
+                                  "UB" = pr_fibrosis_no_race_pred$fit +
+                                    qnorm(0.975)*pr_fibrosis_no_race_pred$se.fit)
+
+pr_fibrosis_no_race_plot <- ggplot(pr_fibrosis_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Fibrosis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(x = "",y = "",
+    title = "Right Lung Psill Fibrosis - No Race") +
+  scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting left lung range fibrosis model with race.
+rl_fibrosis_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Fibrosis = c(0,1),ID = ID_pred)
+
+rl_fibrosis_race_pred <- predict(gam_models$left_range_fibrosis_race_mod,
+                                 newdata = rl_fibrosis_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rl_fibrosis_race_df <- data.frame(rl_fibrosis_race_pred_df,
+                                  "Yhat" = rl_fibrosis_race_pred$fit,
+                                  "LB" = rl_fibrosis_race_pred$fit -
+                                    qnorm(0.975)*rl_fibrosis_race_pred$se.fit,
+                                  "UB" = rl_fibrosis_race_pred$fit +
+                                    qnorm(0.975)*rl_fibrosis_race_pred$se.fit)
+
+rl_fibrosis_race_plot <- ggplot(rl_fibrosis_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Fibrosis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)", x = "",
+       title = "Left Lung Range Fibrosis - With Race") +
+  scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank()) 
+
+# Plotting right lung range fibrosis model with race.
+rr_fibrosis_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Fibrosis = c(0,1),ID = ID_pred)
+
+rr_fibrosis_race_pred <- predict(gam_models$right_range_fibrosis_race_mod,
+                                 newdata = rr_fibrosis_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rr_fibrosis_race_df <- data.frame(rr_fibrosis_race_pred_df,
+                                  "Yhat" = rr_fibrosis_race_pred$fit,
+                                  "LB" = rr_fibrosis_race_pred$fit -
+                                    qnorm(0.975)*rr_fibrosis_race_pred$se.fit,
+                                  "UB" = rr_fibrosis_race_pred$fit +
+                                    qnorm(0.975)*rr_fibrosis_race_pred$se.fit)
+
+rr_fibrosis_race_plot <- ggplot(rr_fibrosis_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Fibrosis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(x = "",y = "",
+    title = "Right Lung Range Fibrosis - With Race") +
+  scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank()) 
+
+# Plotting left lung range fibrosis model with no race.
+rl_fibrosis_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Fibrosis = c(0,1),ID = ID_pred)
+
+rl_fibrosis_no_race_pred <- predict(gam_models$left_range_fibrosis_no_race_mod,
+                                 newdata = rl_fibrosis_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rl_fibrosis_no_race_df <- data.frame(rl_fibrosis_no_race_pred_df,
+                                  "Yhat" = rl_fibrosis_no_race_pred$fit,
+                                  "LB" = rl_fibrosis_no_race_pred$fit -
+                                    qnorm(0.975)*rl_fibrosis_no_race_pred$se.fit,
+                                  "UB" = rl_fibrosis_no_race_pred$fit +
+                                    qnorm(0.975)*rl_fibrosis_no_race_pred$se.fit)
+
+rl_fibrosis_no_race_plot <- ggplot(rl_fibrosis_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Fibrosis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(x = "Normalized Slice",y = "Predicted log(Range)",
+       title = "Left Lung Range Fibrosis - No Race") +
+  scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw()
+
+# Plotting right lung range fibrosis model with no race.
+rr_fibrosis_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Fibrosis = c(0,1),ID = ID_pred)
+
+rr_fibrosis_no_race_pred <- predict(gam_models$right_range_fibrosis_no_race_mod,
+                                 newdata = rr_fibrosis_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rr_fibrosis_no_race_df <- data.frame(rr_fibrosis_no_race_pred_df,
+                                  "Yhat" = rr_fibrosis_no_race_pred$fit,
+                                  "LB" = rr_fibrosis_no_race_pred$fit -
+                                    qnorm(0.975)*rr_fibrosis_no_race_pred$se.fit,
+                                  "UB" = rr_fibrosis_no_race_pred$fit +
+                                    qnorm(0.975)*rr_fibrosis_no_race_pred$se.fit)
+
+rr_fibrosis_no_race_plot <- ggplot(rr_fibrosis_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Fibrosis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(x = "Normalized Slice", y = "",
+       title = "Right Lung Range Fibrosis - No Race") +
+  scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() 
+
+```
+
+```{r, echo = F,fig.height = 8}
+
+# Formatting plots for fibrosis. 
+(pl_fibrosis_race_plot + pr_fibrosis_race_plot)/(pl_fibrosis_no_race_plot + pr_fibrosis_no_race_plot) /
+  (rl_fibrosis_race_plot + rr_fibrosis_race_plot)/(rl_fibrosis_no_race_plot + rr_fibrosis_no_race_plot)
+
+```
+
+
+```{r, echo = F}
+
+# Plotting left lung psill Mediastinal Lymphadenopathy model with race.
+pl_med_lym_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Med_Lymphadenopathy = c(0,1),ID = ID_pred)
+
+pl_med_lym_race_pred <- predict(gam_models$left_psill_mediastinal_lymphadenopathy_race_mod,
+                                 newdata = pl_med_lym_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pl_med_lym_race_df <- data.frame(pl_med_lym_race_pred_df,
+                                  "Yhat" = pl_med_lym_race_pred$fit,
+                                  "LB" = pl_med_lym_race_pred$fit -
+                                    qnorm(0.975)*pl_med_lym_race_pred$se.fit,
+                                  "UB" = pl_med_lym_race_pred$fit +
+                                    qnorm(0.975)*pl_med_lym_race_pred$se.fit)
+
+pl_med_lym_race_plot <- ggplot(pl_med_lym_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Med_Lymphadenopathy))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Left Lung Psill Mediastinal Lymphadenopathy - With Race") +
+  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank()) 
+
+# Plotting right lung psill Mediastinal Lymphadenopathy model with race.
+pr_med_lym_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Med_Lymphadenopathy = c(0,1),ID = ID_pred)
+
+pr_med_lym_race_pred <- predict(gam_models$right_psill_mediastinal_lymphadenopathy_race_mod,
+                                 newdata = pr_med_lym_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pr_med_lym_race_df <- data.frame(pr_med_lym_race_pred_df,
+                                  "Yhat" = pr_med_lym_race_pred$fit,
+                                  "LB" = pr_med_lym_race_pred$fit -
+                                    qnorm(0.975)*pr_med_lym_race_pred$se.fit,
+                                  "UB" = pr_med_lym_race_pred$fit +
+                                    qnorm(0.975)*pr_med_lym_race_pred$se.fit)
+
+pr_med_lym_race_plot <- ggplot(pr_med_lym_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Med_Lymphadenopathy))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Right Lung Psill Mediastinal Lymphadenopathy - With Race") +
+  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting left lung psill Mediastinal Lymphadenopathy model with no race.
+pl_med_lym_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Med_Lymphadenopathy = c(0,1),ID = ID_pred)
+
+pl_med_lym_no_race_pred <- predict(gam_models$left_psill_mediastinal_lymphadenopathy_no_race_mod,
+                                 newdata = pl_med_lym_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pl_med_lym_no_race_df <- data.frame(pl_med_lym_no_race_pred_df,
+                                  "Yhat" = pl_med_lym_no_race_pred$fit,
+                                  "LB" = pl_med_lym_no_race_pred$fit -
+                                    qnorm(0.975)*pl_med_lym_no_race_pred$se.fit,
+                                  "UB" = pl_med_lym_no_race_pred$fit +
+                                    qnorm(0.975)*pl_med_lym_no_race_pred$se.fit)
+
+pl_med_lym_no_race_plot <- ggplot(pl_med_lym_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Med_Lymphadenopathy))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Left Lung Psill Mediastinal Lymphadenopathy - No Race") +
+  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank()) 
+
+# Plotting right lung psill Mediastinal Lymphadenopathy model with no race.
+pr_med_lym_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Med_Lymphadenopathy = c(0,1),ID = ID_pred)
+
+pr_med_lym_no_race_pred <- predict(gam_models$right_psill_mediastinal_lymphadenopathy_no_race_mod,
+                                 newdata = pr_med_lym_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pr_med_lym_no_race_df <- data.frame(pr_med_lym_no_race_pred_df,
+                                  "Yhat" = pr_med_lym_no_race_pred$fit,
+                                  "LB" = pr_med_lym_no_race_pred$fit -
+                                    qnorm(0.975)*pr_med_lym_no_race_pred$se.fit,
+                                  "UB" = pr_med_lym_no_race_pred$fit +
+                                    qnorm(0.975)*pr_med_lym_no_race_pred$se.fit)
+
+pr_med_lym_no_race_plot <- ggplot(pr_med_lym_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Med_Lymphadenopathy))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "RightLung Psill Mediastinal Lymphadenopathy - No Race") +
+  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank()) 
+
+# Plotting left lung range Mediastinal Lymphadenopathy model with race.
+rl_med_lym_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Med_Lymphadenopathy = c(0,1),ID = ID_pred)
+
+rl_med_lym_race_pred <- predict(gam_models$left_range_mediastinal_lymphadenopathy_race_mod,
+                                 newdata = rl_med_lym_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rl_med_lym_race_df <- data.frame(rl_med_lym_race_pred_df,
+                                  "Yhat" = rl_med_lym_race_pred$fit,
+                                  "LB" = rl_med_lym_race_pred$fit -
+                                    qnorm(0.975)*rl_med_lym_race_pred$se.fit,
+                                  "UB" = rl_med_lym_race_pred$fit +
+                                    qnorm(0.975)*rl_med_lym_race_pred$se.fit)
+
+rl_med_lym_race_plot <- ggplot(rl_med_lym_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Med_Lymphadenopathy))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "",
+       title = "Left Lung Range Mediastinal Lymphadenopathy - With Race") +
+  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank()) 
+
+# Plotting right lung range Mediastinal Lymphadenopathy model with race.
+rr_med_lym_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Med_Lymphadenopathy = c(0,1),ID = ID_pred)
+
+rr_med_lym_race_pred <- predict(gam_models$right_range_mediastinal_lymphadenopathy_race_mod,
+                                 newdata = rr_med_lym_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rr_med_lym_race_df <- data.frame(rr_med_lym_race_pred_df,
+                                  "Yhat" = rr_med_lym_race_pred$fit,
+                                  "LB" = rr_med_lym_race_pred$fit -
+                                    qnorm(0.975)*rr_med_lym_race_pred$se.fit,
+                                  "UB" = rr_med_lym_race_pred$fit +
+                                    qnorm(0.975)*rr_med_lym_race_pred$se.fit)
+
+rr_med_lym_race_plot <- ggplot(rr_med_lym_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Med_Lymphadenopathy))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "",
+       title = "Right Lung Range Mediastinal Lymphadenopathy - With Race") +
+  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting left lung range Mediastinal Lymphadenopathy model with no race.
+rl_med_lym_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Med_Lymphadenopathy = c(0,1),ID = ID_pred)
+
+rl_med_lym_no_race_pred <- predict(gam_models$left_range_mediastinal_lymphadenopathy_no_race_mod,
+                                 newdata = rl_med_lym_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rl_med_lym_no_race_df <- data.frame(rl_med_lym_no_race_pred_df,
+                                  "Yhat" = rl_med_lym_no_race_pred$fit,
+                                  "LB" = rl_med_lym_no_race_pred$fit -
+                                    qnorm(0.975)*rl_med_lym_no_race_pred$se.fit,
+                                  "UB" = rl_med_lym_no_race_pred$fit +
+                                    qnorm(0.975)*rl_med_lym_no_race_pred$se.fit)
+
+rl_med_lym_no_race_plot <- ggplot(rl_med_lym_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Med_Lymphadenopathy))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "Normalized Slice",
+       title = "Left Lung Range Mediastinal Lymphadenopathy - No Race") +
+  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw()
+
+# Plotting right lung range Mediastinal Lymphadenopathy model with no race.
+rr_med_lym_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Med_Lymphadenopathy = c(0,1),ID = ID_pred)
+
+rr_med_lym_no_race_pred <- predict(gam_models$right_range_mediastinal_lymphadenopathy_no_race_mod,
+                                 newdata = rr_med_lym_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rr_med_lym_no_race_df <- data.frame(rr_med_lym_no_race_pred_df,
+                                  "Yhat" = rr_med_lym_no_race_pred$fit,
+                                  "LB" = rr_med_lym_no_race_pred$fit -
+                                    qnorm(0.975)*rr_med_lym_no_race_pred$se.fit,
+                                  "UB" = rr_med_lym_no_race_pred$fit +
+                                    qnorm(0.975)*rr_med_lym_no_race_pred$se.fit)
+
+rr_med_lym_no_race_plot <- ggplot(rr_med_lym_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Med_Lymphadenopathy))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "Normalized Slice",
+       title = "Right Lung Range Mediastinal Lymphadenopathy - No Race") +
+  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() 
+
+
+```
+
+```{r, echo = F,fig.height = 8}
+
+# Formatting plots for mediastinal lymphadenopathy.
+(pl_med_lym_race_plot + pr_med_lym_race_plot)/(pl_med_lym_no_race_plot + pr_med_lym_no_race_plot)/
+  (rl_med_lym_race_plot + rr_med_lym_race_plot)/(rl_med_lym_no_race_plot + rr_med_lym_no_race_plot)
+
+```
+
+```{r, echo = F}
+
+# Plotting left lung psill Traction Bronchiectasis model with race.
+pl_trac_bronch_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Traction_Bronchiectasis = c(0,1),ID = ID_pred)
+
+pl_trac_bronch_race_pred <- predict(gam_models$left_psill_traction_bronchiectasis_race_mod,
+                                 newdata = pl_trac_bronch_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pl_trac_bronch_race_df <- data.frame(pl_trac_bronch_race_pred_df,
+                                  "Yhat" = pl_trac_bronch_race_pred$fit,
+                                  "LB" = pl_trac_bronch_race_pred$fit -
+                                    qnorm(0.975)*pl_trac_bronch_race_pred$se.fit,
+                                  "UB" = pl_trac_bronch_race_pred$fit +
+                                    qnorm(0.975)*pl_trac_bronch_race_pred$se.fit)
+
+pl_trac_bronch_race_plot <- ggplot(pl_trac_bronch_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Traction_Bronchiectasis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Left Lung Psill Traction Bronchiectasis - With Race") +
+  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting right lung psill Traction Bronchiectasis model with race.
+pr_trac_bronch_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Traction_Bronchiectasis = c(0,1),ID = ID_pred)
+
+pr_trac_bronch_race_pred <- predict(gam_models$right_psill_traction_bronchiectasis_race_mod,
+                                 newdata = pr_trac_bronch_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pr_trac_bronch_race_df <- data.frame(pr_trac_bronch_race_pred_df,
+                                  "Yhat" = pr_trac_bronch_race_pred$fit,
+                                  "LB" = pr_trac_bronch_race_pred$fit -
+                                    qnorm(0.975)*pr_trac_bronch_race_pred$se.fit,
+                                  "UB" = pr_trac_bronch_race_pred$fit +
+                                    qnorm(0.975)*pr_trac_bronch_race_pred$se.fit)
+
+pr_trac_bronch_race_plot <- ggplot(pr_trac_bronch_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Traction_Bronchiectasis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Right Lung Psill Traction Bronchiectasis - With Race") +
+  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting left lung psill Traction Bronchiectasis model no race.
+pl_trac_bronch_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Traction_Bronchiectasis = c(0,1),ID = ID_pred)
+
+pl_trac_bronch_no_race_pred <- predict(gam_models$left_psill_traction_bronchiectasis_no_race_mod,
+                                 newdata = pl_trac_bronch_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pl_trac_bronch_no_race_df <- data.frame(pl_trac_bronch_no_race_pred_df,
+                                  "Yhat" = pl_trac_bronch_no_race_pred$fit,
+                                  "LB" = pl_trac_bronch_no_race_pred$fit -
+                                    qnorm(0.975)*pl_trac_bronch_no_race_pred$se.fit,
+                                  "UB" = pl_trac_bronch_no_race_pred$fit +
+                                    qnorm(0.975)*pl_trac_bronch_no_race_pred$se.fit)
+
+pl_trac_bronch_no_race_plot <- ggplot(pl_trac_bronch_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Traction_Bronchiectasis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Left Lung Psill Traction Bronchiectasis - No Race") +
+  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting right lung psill Traction Bronchiectasis model no race.
+pr_trac_bronch_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Traction_Bronchiectasis = c(0,1),ID = ID_pred)
+
+pr_trac_bronch_no_race_pred <- predict(gam_models$right_psill_traction_bronchiectasis_no_race_mod,
+                                 newdata = pr_trac_bronch_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pr_trac_bronch_no_race_df <- data.frame(pr_trac_bronch_no_race_pred_df,
+                                  "Yhat" = pr_trac_bronch_no_race_pred$fit,
+                                  "LB" = pr_trac_bronch_no_race_pred$fit -
+                                    qnorm(0.975)*pr_trac_bronch_no_race_pred$se.fit,
+                                  "UB" = pr_trac_bronch_no_race_pred$fit +
+                                    qnorm(0.975)*pr_trac_bronch_no_race_pred$se.fit)
+
+pr_trac_bronch_no_race_plot <- ggplot(pr_trac_bronch_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Traction_Bronchiectasis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Right Lung Psill Traction Bronchiectasis - No Race") +
+  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting left lung range Traction Bronchiectasis model with race.
+rl_trac_bronch_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Traction_Bronchiectasis = c(0,1),ID = ID_pred)
+
+rl_trac_bronch_race_pred <- predict(gam_models$left_range_traction_bronchiectasis_race_mod,
+                                 newdata = rl_trac_bronch_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rl_trac_bronch_race_df <- data.frame(rl_trac_bronch_race_pred_df,
+                                  "Yhat" = rl_trac_bronch_race_pred$fit,
+                                  "LB" = rl_trac_bronch_race_pred$fit -
+                                    qnorm(0.975)*rl_trac_bronch_race_pred$se.fit,
+                                  "UB" = rl_trac_bronch_race_pred$fit +
+                                    qnorm(0.975)*rl_trac_bronch_race_pred$se.fit)
+
+rl_trac_bronch_race_plot <- ggplot(rl_trac_bronch_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Traction_Bronchiectasis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "",
+       title = "Left Lung Range Traction Bronchiectasis - With Race") +
+  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting right lung range Traction Bronchiectasis model with race.
+rr_trac_bronch_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Traction_Bronchiectasis = c(0,1),ID = ID_pred)
+
+rr_trac_bronch_race_pred <- predict(gam_models$right_range_traction_bronchiectasis_race_mod,
+                                 newdata = rr_trac_bronch_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rr_trac_bronch_race_df <- data.frame(rr_trac_bronch_race_pred_df,
+                                  "Yhat" = rr_trac_bronch_race_pred$fit,
+                                  "LB" = rr_trac_bronch_race_pred$fit -
+                                    qnorm(0.975)*rr_trac_bronch_race_pred$se.fit,
+                                  "UB" = rr_trac_bronch_race_pred$fit +
+                                    qnorm(0.975)*rr_trac_bronch_race_pred$se.fit)
+
+rr_trac_bronch_race_plot <- ggplot(rr_trac_bronch_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Traction_Bronchiectasis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "",
+       title = "Right Lung Range Traction Bronchiectasis - With Race") +
+  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting left lung range Traction Bronchiectasis model no race.
+rl_trac_bronch_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Traction_Bronchiectasis = c(0,1),ID = ID_pred)
+
+rl_trac_bronch_no_race_pred <- predict(gam_models$left_range_traction_bronchiectasis_no_race_mod,
+                                 newdata = rl_trac_bronch_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rl_trac_bronch_no_race_df <- data.frame(rl_trac_bronch_no_race_pred_df,
+                                  "Yhat" = rl_trac_bronch_no_race_pred$fit,
+                                  "LB" = rl_trac_bronch_no_race_pred$fit -
+                                    qnorm(0.975)*rl_trac_bronch_no_race_pred$se.fit,
+                                  "UB" = rl_trac_bronch_no_race_pred$fit +
+                                    qnorm(0.975)*rl_trac_bronch_no_race_pred$se.fit)
+
+rl_trac_bronch_no_race_plot <- ggplot(rl_trac_bronch_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Traction_Bronchiectasis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "Normalized Slice",
+       title = "Left Lung Range Traction Bronchiectasis - No Race") +
+  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw()
+
+# Plotting right lung range Traction Bronchiectasis model no race.
+rr_trac_bronch_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        Traction_Bronchiectasis = c(0,1),ID = ID_pred)
+
+rr_trac_bronch_no_race_pred <- predict(gam_models$right_range_traction_bronchiectasis_no_race_mod,
+                                 newdata = rr_trac_bronch_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rr_trac_bronch_no_race_df <- data.frame(rr_trac_bronch_no_race_pred_df,
+                                  "Yhat" = rr_trac_bronch_no_race_pred$fit,
+                                  "LB" = rr_trac_bronch_no_race_pred$fit -
+                                    qnorm(0.975)*rr_trac_bronch_no_race_pred$se.fit,
+                                  "UB" = rr_trac_bronch_no_race_pred$fit +
+                                    qnorm(0.975)*rr_trac_bronch_no_race_pred$se.fit)
+
+rr_trac_bronch_no_race_plot <- ggplot(rr_trac_bronch_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(Traction_Bronchiectasis))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "Normalized Slice",
+       title = "Right Lung Range Traction Bronchiectasis - No Race") +
+  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+  guides(color = F) +
+  theme_bw()
+
+```
+
+```{r, echo = F,fig.height= 8}
+
+# Formation plots for Traction Bronchiectasis.
+(pl_trac_bronch_race_plot + pr_trac_bronch_race_plot)/(pl_trac_bronch_no_race_plot + pr_trac_bronch_no_race_plot)/
+  (rl_trac_bronch_race_plot + rr_trac_bronch_race_plot)/(rl_trac_bronch_no_race_plot + rr_trac_bronch_no_race_plot)
+
+```
+
+```{r, echo = F}
+
+# Plotting left lung psill fev1 model with race.
+pl_fev1_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEV1 = fev1_quantiles,ID = ID_pred)
+
+pl_fev1_race_pred <- predict(gam_models$left_psill_postfev1_race_mod,
+                                 newdata = pl_fev1_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pl_fev1_race_df <- data.frame(pl_fev1_race_pred_df,
+                                  "Yhat" = pl_fev1_race_pred$fit,
+                                  "LB" = pl_fev1_race_pred$fit -
+                                    qnorm(0.975)*pl_fev1_race_pred$se.fit,
+                                  "UB" = pl_fev1_race_pred$fit +
+                                    qnorm(0.975)*pl_fev1_race_pred$se.fit)
+
+pl_fev1_race_plot <- ggplot(pl_fev1_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEV1))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Left Lung Psill FEV1 - With Race") +
+  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting right lung psill fev1 model with race.
+pr_fev1_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEV1 = fev1_quantiles,ID = ID_pred)
+
+pr_fev1_race_pred <- predict(gam_models$right_psill_postfev1_race_mod,
+                                 newdata = pr_fev1_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pr_fev1_race_df <- data.frame(pr_fev1_race_pred_df,
+                                  "Yhat" = pr_fev1_race_pred$fit,
+                                  "LB" = pr_fev1_race_pred$fit -
+                                    qnorm(0.975)*pr_fev1_race_pred$se.fit,
+                                  "UB" = pr_fev1_race_pred$fit +
+                                    qnorm(0.975)*pr_fev1_race_pred$se.fit)
+
+pr_fev1_race_plot <- ggplot(pr_fev1_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEV1))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Right Lung Psill FEV1 - With Race") +
+  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting left lung psill fev1 model no race.
+pl_fev1_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEV1 = fev1_quantiles,ID = ID_pred)
+
+pl_fev1_no_race_pred <- predict(gam_models$left_psill_postfev1_no_race_mod,
+                                 newdata = pl_fev1_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pl_fev1_no_race_df <- data.frame(pl_fev1_no_race_pred_df,
+                                  "Yhat" = pl_fev1_no_race_pred$fit,
+                                  "LB" = pl_fev1_no_race_pred$fit -
+                                    qnorm(0.975)*pl_fev1_no_race_pred$se.fit,
+                                  "UB" = pl_fev1_no_race_pred$fit +
+                                    qnorm(0.975)*pl_fev1_no_race_pred$se.fit)
+
+pl_fev1_no_race_plot <- ggplot(pl_fev1_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEV1))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Left Lung Psill FEV1 - No Race") +
+  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting right lung psill fev1 model no race.
+pr_fev1_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEV1 = fev1_quantiles,ID = ID_pred)
+
+pr_fev1_no_race_pred <- predict(gam_models$right_psill_postfev1_no_race_mod,
+                                 newdata = pr_fev1_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pr_fev1_no_race_df <- data.frame(pr_fev1_no_race_pred_df,
+                                  "Yhat" = pr_fev1_no_race_pred$fit,
+                                  "LB" = pr_fev1_no_race_pred$fit -
+                                    qnorm(0.975)*pr_fev1_no_race_pred$se.fit,
+                                  "UB" = pr_fev1_no_race_pred$fit +
+                                    qnorm(0.975)*pr_fev1_no_race_pred$se.fit)
+
+pr_fev1_no_race_plot <- ggplot(pr_fev1_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEV1))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Right Lung Psill FEV1 - No Race") +
+  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting left lung range fev1 model with race.
+rl_fev1_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEV1 = fev1_quantiles,ID = ID_pred)
+
+rl_fev1_race_pred <- predict(gam_models$left_range_postfev1_race_mod,
+                                 newdata = rl_fev1_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rl_fev1_race_df <- data.frame(rl_fev1_race_pred_df,
+                                  "Yhat" = rl_fev1_race_pred$fit,
+                                  "LB" = rl_fev1_race_pred$fit -
+                                    qnorm(0.975)*rl_fev1_race_pred$se.fit,
+                                  "UB" = rl_fev1_race_pred$fit +
+                                    qnorm(0.975)*rl_fev1_race_pred$se.fit)
+
+rl_fev1_race_plot <- ggplot(rl_fev1_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEV1))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "",
+       title = "Left Lung Range FEV1 - With Race") +
+  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting right lung range fev1 model with race.
+rr_fev1_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEV1 = fev1_quantiles,ID = ID_pred)
+
+rr_fev1_race_pred <- predict(gam_models$right_range_postfev1_race_mod,
+                                 newdata = rr_fev1_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rr_fev1_race_df <- data.frame(rr_fev1_race_pred_df,
+                                  "Yhat" = rr_fev1_race_pred$fit,
+                                  "LB" = rr_fev1_race_pred$fit -
+                                    qnorm(0.975)*rr_fev1_race_pred$se.fit,
+                                  "UB" = rr_fev1_race_pred$fit +
+                                    qnorm(0.975)*rr_fev1_race_pred$se.fit)
+
+rr_fev1_race_plot <- ggplot(rr_fev1_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEV1))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "",
+       title = "Right Lung Range FEV1 - With Race") +
+  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting left lung range fev1 model no race.
+rl_fev1_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEV1 = fev1_quantiles,ID = ID_pred)
+
+rl_fev1_no_race_pred <- predict(gam_models$left_range_postfev1_no_race_mod,
+                                 newdata = rl_fev1_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rl_fev1_no_race_df <- data.frame(rl_fev1_no_race_pred_df,
+                                  "Yhat" = rl_fev1_no_race_pred$fit,
+                                  "LB" = rl_fev1_no_race_pred$fit -
+                                    qnorm(0.975)*rl_fev1_no_race_pred$se.fit,
+                                  "UB" = rl_fev1_no_race_pred$fit +
+                                    qnorm(0.975)*rl_fev1_no_race_pred$se.fit)
+
+rl_fev1_no_race_plot <- ggplot(rl_fev1_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEV1))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "Normalized Slice",
+       title = "Left Lung Range FEV1 - No Race") +
+  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("o.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw()
+
+# Plotting right lung range fev1 model no race.
+rr_fev1_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEV1 = fev1_quantiles,ID = ID_pred)
+
+rr_fev1_no_race_pred <- predict(gam_models$right_range_postfev1_no_race_mod,
+                                 newdata = rr_fev1_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rr_fev1_no_race_df <- data.frame(rr_fev1_no_race_pred_df,
+                                  "Yhat" = rr_fev1_no_race_pred$fit,
+                                  "LB" = rr_fev1_no_race_pred$fit -
+                                    qnorm(0.975)*rr_fev1_no_race_pred$se.fit,
+                                  "UB" = rr_fev1_no_race_pred$fit +
+                                    qnorm(0.975)*rr_fev1_no_race_pred$se.fit)
+
+rr_fev1_no_race_plot <- ggplot(rr_fev1_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEV1))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "Normalized Slice",
+       title = "Right Lung Range FEV1 - No Race") +
+  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw()
+
+
+```
+
+```{r, echo = F,fig.height = 8}
+
+# Formatting plots for FEV1.
+(pl_fev1_race_plot + pr_fev1_race_plot)/(pl_fev1_no_race_plot + pr_fev1_no_race_plot)/
+  (rl_fev1_race_plot + rr_fev1_race_plot)/(rl_fev1_no_race_plot + rr_fev1_no_race_plot)
+
+```
+
+```{r, echo = F}
+
+# Plotting left lung psill fvc model with race.
+pl_fvc_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFVC = fvc_quantiles,ID = ID_pred)
+
+pl_fvc_race_pred <- predict(gam_models$left_psill_postfvc_race_mod,
+                                 newdata = pl_fvc_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pl_fvc_race_df <- data.frame(pl_fvc_race_pred_df,
+                                  "Yhat" = pl_fvc_race_pred$fit,
+                                  "LB" = pl_fvc_race_pred$fit -
+                                    qnorm(0.975)*pl_fvc_race_pred$se.fit,
+                                  "UB" = pl_fvc_race_pred$fit +
+                                    qnorm(0.975)*pl_fvc_race_pred$se.fit)
+
+pl_fvc_race_plot <- ggplot(pl_fvc_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Left Lung Psill FVC - With Race") +
+  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting right lung psill fvc model with race.
+pr_fvc_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFVC = fvc_quantiles,ID = ID_pred)
+
+pr_fvc_race_pred <- predict(gam_models$right_psill_postfvc_race_mod,
+                                 newdata = pr_fvc_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pr_fvc_race_df <- data.frame(pr_fvc_race_pred_df,
+                                  "Yhat" = pr_fvc_race_pred$fit,
+                                  "LB" = pr_fvc_race_pred$fit -
+                                    qnorm(0.975)*pr_fvc_race_pred$se.fit,
+                                  "UB" = pr_fvc_race_pred$fit +
+                                    qnorm(0.975)*pr_fvc_race_pred$se.fit)
+
+pr_fvc_race_plot <- ggplot(pr_fvc_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Right Lung Psill FVC - With Race") +
+  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting left lung psill fvc model no race.
+pl_fvc_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFVC = fvc_quantiles,ID = ID_pred)
+
+pl_fvc_no_race_pred <- predict(gam_models$left_psill_postfvc_no_race_mod,
+                                 newdata = pl_fvc_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pl_fvc_no_race_df <- data.frame(pl_fvc_no_race_pred_df,
+                                  "Yhat" = pl_fvc_no_race_pred$fit,
+                                  "LB" = pl_fvc_no_race_pred$fit -
+                                    qnorm(0.975)*pl_fvc_no_race_pred$se.fit,
+                                  "UB" = pl_fvc_no_race_pred$fit +
+                                    qnorm(0.975)*pl_fvc_no_race_pred$se.fit)
+
+pl_fvc_no_race_plot <- ggplot(pl_fvc_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Left Lung Psill FVC - No Race") +
+  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank()) 
+
+# Plotting right lung psill fvc model no race.
+pr_fvc_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFVC = fvc_quantiles,ID = ID_pred)
+
+pr_fvc_no_race_pred <- predict(gam_models$right_psill_postfvc_no_race_mod,
+                                 newdata = pr_fvc_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pr_fvc_no_race_df <- data.frame(pr_fvc_no_race_pred_df,
+                                  "Yhat" = pr_fvc_no_race_pred$fit,
+                                  "LB" = pr_fvc_no_race_pred$fit -
+                                    qnorm(0.975)*pr_fvc_no_race_pred$se.fit,
+                                  "UB" = pr_fvc_no_race_pred$fit +
+                                    qnorm(0.975)*pr_fvc_no_race_pred$se.fit)
+
+pr_fvc_no_race_plot <- ggplot(pr_fvc_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Right Lung Psill FVC - No Race") +
+  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting left lung range fvc model with race.
+rl_fvc_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFVC = fvc_quantiles,ID = ID_pred)
+
+rl_fvc_race_pred <- predict(gam_models$left_range_postfvc_race_mod,
+                                 newdata = rl_fvc_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rl_fvc_race_df <- data.frame(rl_fvc_race_pred_df,
+                                  "Yhat" = rl_fvc_race_pred$fit,
+                                  "LB" = rl_fvc_race_pred$fit -
+                                    qnorm(0.975)*rl_fvc_race_pred$se.fit,
+                                  "UB" = rl_fvc_race_pred$fit +
+                                    qnorm(0.975)*rl_fvc_race_pred$se.fit)
+
+rl_fvc_race_plot <- ggplot(rl_fvc_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "",
+       title = "Left Lung Range FVC - With Race") +
+  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting right lung range fvc model with race.
+rr_fvc_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFVC = fvc_quantiles,ID = ID_pred)
+
+rr_fvc_race_pred <- predict(gam_models$right_range_postfvc_race_mod,
+                                 newdata = rr_fvc_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rr_fvc_race_df <- data.frame(rr_fvc_race_pred_df,
+                                  "Yhat" = rr_fvc_race_pred$fit,
+                                  "LB" = rr_fvc_race_pred$fit -
+                                    qnorm(0.975)*rr_fvc_race_pred$se.fit,
+                                  "UB" = rr_fvc_race_pred$fit +
+                                    qnorm(0.975)*rr_fvc_race_pred$se.fit)
+
+rr_fvc_race_plot <- ggplot(rr_fvc_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "",
+       title = "Right Lung Range FVC - With Race") +
+  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting left lung range fvc model no race.
+rl_fvc_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFVC = fvc_quantiles,ID = ID_pred)
+
+rl_fvc_no_race_pred <- predict(gam_models$left_range_postfvc_no_race_mod,
+                                 newdata = rl_fvc_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rl_fvc_no_race_df <- data.frame(rl_fvc_no_race_pred_df,
+                                  "Yhat" = rl_fvc_no_race_pred$fit,
+                                  "LB" = rl_fvc_no_race_pred$fit -
+                                    qnorm(0.975)*rl_fvc_no_race_pred$se.fit,
+                                  "UB" = rl_fvc_no_race_pred$fit +
+                                    qnorm(0.975)*rl_fvc_no_race_pred$se.fit)
+
+rl_fvc_no_race_plot <- ggplot(rl_fvc_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "",
+       title = "Left Lung Range FVC - No Race") +
+  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() 
+
+# Plotting right lung range fvc model no race.
+rr_fvc_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFVC = fvc_quantiles,ID = ID_pred)
+
+rr_fvc_no_race_pred <- predict(gam_models$right_range_postfvc_no_race_mod,
+                                 newdata = rr_fvc_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rr_fvc_no_race_df <- data.frame(rr_fvc_no_race_pred_df,
+                                  "Yhat" = rr_fvc_no_race_pred$fit,
+                                  "LB" = rr_fvc_no_race_pred$fit -
+                                    qnorm(0.975)*rr_fvc_no_race_pred$se.fit,
+                                  "UB" = rr_fvc_no_race_pred$fit +
+                                    qnorm(0.975)*rr_fvc_no_race_pred$se.fit)
+
+rr_fvc_no_race_plot <- ggplot(rr_fvc_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "",
+       title = "Right Lung Range FVC - No Race") +
+  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() 
+
+```
+
+```{r, echo = F,fig.height = 8}
+
+# Formatting plots for FVC. 
+(pl_fvc_race_plot + pr_fvc_race_plot)/(pl_fvc_no_race_plot + pr_fvc_no_race_plot)/
+  (rl_fvc_race_plot + rr_fvc_race_plot)/(rl_fvc_no_race_plot + rr_fvc_no_race_plot)
+
+```
+
+```{r, echo = F}
+
+# Plotting left lung psill fev1/fvc model with race.
+pl_fev1_fvc_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEVFVC = fev1fvc_quantiles,ID = ID_pred)
+
+pl_fev1_fvc_race_pred <- predict(gam_models$left_psill_postfev1fvc_race_mod,
+                                 newdata = pl_fev1_fvc_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pl_fev1_fvc_race_df <- data.frame(pl_fev1_fvc_race_pred_df,
+                                  "Yhat" = pl_fev1_fvc_race_pred$fit,
+                                  "LB" = pl_fev1_fvc_race_pred$fit -
+                                    qnorm(0.975)*pl_fev1_fvc_race_pred$se.fit,
+                                  "UB" = pl_fev1_fvc_race_pred$fit +
+                                    qnorm(0.975)*pl_fev1_fvc_race_pred$se.fit)
+
+pl_fev1_fvc_race_plot <- ggplot(pl_fev1_fvc_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEVFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Left Lung Psill FEV1/FVC - With Race") +
+  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting right lung psill fev1/fvc model with race.
+pr_fev1_fvc_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEVFVC = fev1fvc_quantiles,ID = ID_pred)
+
+pr_fev1_fvc_race_pred <- predict(gam_models$right_psill_postfev1fvc_race_mod,
+                                 newdata = pr_fev1_fvc_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pr_fev1_fvc_race_df <- data.frame(pr_fev1_fvc_race_pred_df,
+                                  "Yhat" = pr_fev1_fvc_race_pred$fit,
+                                  "LB" = pr_fev1_fvc_race_pred$fit -
+                                    qnorm(0.975)*pr_fev1_fvc_race_pred$se.fit,
+                                  "UB" = pr_fev1_fvc_race_pred$fit +
+                                    qnorm(0.975)*pr_fev1_fvc_race_pred$se.fit)
+
+pr_fev1_fvc_race_plot <- ggplot(pr_fev1_fvc_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEVFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Right Lung Psill FEV1/FVC - With Race") +
+  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting left lung psill fev1/fvc model no race.
+pl_fev1_fvc_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEVFVC = fev1fvc_quantiles,ID = ID_pred)
+
+pl_fev1_fvc_no_race_pred <- predict(gam_models$left_psill_postfev1fvc_no_race_mod,
+                                 newdata = pl_fev1_fvc_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pl_fev1_fvc_no_race_df <- data.frame(pl_fev1_fvc_no_race_pred_df,
+                                  "Yhat" = pl_fev1_fvc_no_race_pred$fit,
+                                  "LB" = pl_fev1_fvc_no_race_pred$fit -
+                                    qnorm(0.975)*pl_fev1_fvc_no_race_pred$se.fit,
+                                  "UB" = pl_fev1_fvc_no_race_pred$fit +
+                                    qnorm(0.975)*pl_fev1_fvc_no_race_pred$se.fit)
+
+pl_fev1_fvc_no_race_plot <- ggplot(pl_fev1_fvc_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEVFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Left Lung Psill FEV1/FVC - No Race") +
+  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting right lung psill fev1/fvc model no race.
+pr_fev1_fvc_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEVFVC = fev1fvc_quantiles,ID = ID_pred)
+
+pr_fev1_fvc_no_race_pred <- predict(gam_models$right_psill_postfev1fvc_no_race_mod,
+                                 newdata = pr_fev1_fvc_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+pr_fev1_fvc_no_race_df <- data.frame(pr_fev1_fvc_no_race_pred_df,
+                                  "Yhat" = pr_fev1_fvc_no_race_pred$fit,
+                                  "LB" = pr_fev1_fvc_no_race_pred$fit -
+                                    qnorm(0.975)*pr_fev1_fvc_no_race_pred$se.fit,
+                                  "UB" = pr_fev1_fvc_no_race_pred$fit +
+                                    qnorm(0.975)*pr_fev1_fvc_no_race_pred$se.fit)
+
+pr_fev1_fvc_no_race_plot <- ggplot(pr_fev1_fvc_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEVFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Psill)",x = "",
+       title = "Right Lung Psill FEV1/FVC - No Race") +
+  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting left lung range fev1/fvc model with race.
+rl_fev1_fvc_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEVFVC = fev1fvc_quantiles,ID = ID_pred)
+
+rl_fev1_fvc_race_pred <- predict(gam_models$left_range_postfev1fvc_race_mod,
+                                 newdata = rl_fev1_fvc_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rl_fev1_fvc_race_df <- data.frame(rl_fev1_fvc_race_pred_df,
+                                  "Yhat" = rl_fev1_fvc_race_pred$fit,
+                                  "LB" = rl_fev1_fvc_race_pred$fit -
+                                    qnorm(0.975)*rl_fev1_fvc_race_pred$se.fit,
+                                  "UB" = rl_fev1_fvc_race_pred$fit +
+                                    qnorm(0.975)*rl_fev1_fvc_race_pred$se.fit)
+
+rl_fev1_fvc_race_plot <- ggplot(rl_fev1_fvc_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEVFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "",
+       title = "Left Lung Range FEV1/FVC - With Race") +
+  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting right lung range fev1/fvc model with race.
+rr_fev1_fvc_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEVFVC = fev1fvc_quantiles,ID = ID_pred)
+
+rr_fev1_fvc_race_pred <- predict(gam_models$right_range_postfev1fvc_race_mod,
+                                 newdata = rr_fev1_fvc_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rr_fev1_fvc_race_df <- data.frame(rr_fev1_fvc_race_pred_df,
+                                  "Yhat" = rr_fev1_fvc_race_pred$fit,
+                                  "LB" = rr_fev1_fvc_race_pred$fit -
+                                    qnorm(0.975)*rr_fev1_fvc_race_pred$se.fit,
+                                  "UB" = rr_fev1_fvc_race_pred$fit +
+                                    qnorm(0.975)*rr_fev1_fvc_race_pred$se.fit)
+
+rr_fev1_fvc_race_plot <- ggplot(rr_fev1_fvc_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEVFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "",
+       title = "Right Lung Range FEV1/FVC - With Race") +
+  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
+
+# Plotting left lung range fev1/fvc model no race.
+rl_fev1_fvc_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEVFVC = fev1fvc_quantiles,ID = ID_pred)
+
+rl_fev1_fvc_no_race_pred <- predict(gam_models$left_range_postfev1fvc_no_race_mod,
+                                 newdata = rl_fev1_fvc_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rl_fev1_fvc_no_race_df <- data.frame(rl_fev1_fvc_no_race_pred_df,
+                                  "Yhat" = rl_fev1_fvc_no_race_pred$fit,
+                                  "LB" = rl_fev1_fvc_no_race_pred$fit -
+                                    qnorm(0.975)*rl_fev1_fvc_no_race_pred$se.fit,
+                                  "UB" = rl_fev1_fvc_no_race_pred$fit +
+                                    qnorm(0.975)*rl_fev1_fvc_no_race_pred$se.fit)
+
+rl_fev1_fvc_no_race_plot <- ggplot(rl_fev1_fvc_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEVFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "Normalized Slice",
+       title = "Left Lung Range FEV1/FVC - No Race") +
+  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw() 
+
+# Plotting right lung range fev1/fvc model no race.
+rr_fev1_fvc_no_race_pred_df <- expand.grid(BMI = bmi_mean,Age = age_mean,
+                                        Height = height_mean, 
+                                        Gender = gender_select,
+                                        Race = race_select,
+                                        slice_normalized = slice_normalized_vec,
+                                        POSTFEVFVC = fev1fvc_quantiles,ID = ID_pred)
+
+rr_fev1_fvc_no_race_pred <- predict(gam_models$right_range_postfev1fvc_no_race_mod,
+                                 newdata = rr_fev1_fvc_no_race_pred_df,
+                                 type = "response", exclude = "s(ID)",
+                                 se.fit = TRUE)
+
+rr_fev1_fvc_no_race_df <- data.frame(rr_fev1_fvc_no_race_pred_df,
+                                  "Yhat" = rr_fev1_fvc_no_race_pred$fit,
+                                  "LB" = rr_fev1_fvc_no_race_pred$fit -
+                                    qnorm(0.975)*rr_fev1_fvc_no_race_pred$se.fit,
+                                  "UB" = rr_fev1_fvc_no_race_pred$fit +
+                                    qnorm(0.975)*rr_fev1_fvc_no_race_pred$se.fit)
+
+rr_fev1_fvc_no_race_plot <- ggplot(rr_fev1_fvc_no_race_df, 
+                                aes(x = slice_normalized,
+                                    y = Yhat,
+                                    color = factor(POSTFEVFVC))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
+              linetype = "dotted") +
+  labs(y = "Predicted log(Range)",x = "Normalized Slice",
+       title = "RightLung Range FEV1/FVC - No Race") +
+  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+  guides(color = F) +
+  theme_bw()
+
+```
+
+```{r, echo = F, fig.height = 8}
+
+# Formatting plots for FEV1/FVC. 
+(pl_fev1_fvc_race_plot + pr_fev1_fvc_race_plot)/(pl_fev1_fvc_no_race_plot + pr_fev1_fvc_no_race_plot)/
+  (rl_fev1_fvc_race_plot + rr_fev1_fvc_race_plot)/(rl_fev1_fvc_no_race_plot + rr_fev1_fvc_no_race_plot)
+
+```
+
+
+
+
+
+

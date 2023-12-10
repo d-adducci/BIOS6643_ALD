@@ -11,6 +11,7 @@ library(tidyverse)
 library(kableExtra)
 library(mgcv)
 library(patchwork)
+library(plyr)
 
 ```
 
@@ -50,6 +51,98 @@ race_select <- "Black or African American"
 slice_normalized_vec <- seq(0.1,0.9,by = 0.001)
 
 ID_pred <- "01S001"
+
+```
+
+### Fibrosis
+
+```{r, echo = F}
+
+# Making tables for fibrosis results. 
+
+terms_with_race <- c("Intercept","BMI","Age","Male","Height","Other Races",
+                     "Non-Hispanic White","s(Slice)","s(ID)")
+
+terms_without_race <- c("Intercept","BMI","Age","Male","Height",
+                        "s(Slice)","s(ID)")
+
+pl_fibrosis_race_tbl_df <- rbind.fill(broom::tidy(gam_models$left_psill_fibrosis_race_mod,
+                                       parametric = T),broom::tidy(gam_models$left_psill_fibrosis_race_mod,
+                                                                   parametric = F)) %>%
+  select(term,estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1),
+         term = c(terms_with_race,"s(Slice):Fibrosis"))
+
+pr_fibrosis_race_tbl_df <- rbind.fill(broom::tidy(gam_models$right_psill_fibrosis_race_mod,
+                                                  parametric = T),broom::tidy(gam_models$right_psill_fibrosis_race_mod,
+                                                                              parametric = F)) %>%
+  select(estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1))
+
+pl_fibrosis_no_race_tbl_df <- rbind.fill(broom::tidy(gam_models$left_psill_fibrosis_no_race_mod,
+                                                     parametric = T),broom::tidy(gam_models$left_psill_fibrosis_no_race_mod,
+                                                                               parametric = F)) %>%
+  select(term,estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1),
+         term = c(terms_without_race,"s(Slice):Fibrosis"))
+
+pr_fibrosis_no_race_tbl_df <- rbind.fill(broom::tidy(gam_models$right_psill_fibrosis_no_race_mod,
+                                                     parametric = T),broom::tidy(gam_models$right_psill_fibrosis_no_race_mod,
+                                                                                 parametric = F)) %>%
+  select(estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1))
+
+rl_fibrosis_race_tbl_df <- rbind.fill(broom::tidy(gam_models$left_range_fibrosis_race_mod,
+                                                  parametric = T),broom::tidy(gam_models$left_range_fibrosis_race_mod,
+                                                                              parametric = F)) %>%
+  select(term,estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1),
+         term = c(terms_with_race,"s(Slice):Fibrosis"))
+
+rr_fibrosis_race_tbl_df <- rbind.fill(broom::tidy(gam_models$right_range_fibrosis_race_mod,
+                                                  parametric = T),broom::tidy(gam_models$right_range_fibrosis_race_mod,
+                                                                              parametric = F)) %>%
+  select(estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1))
+
+rl_fibrosis_no_race_tbl_df <- rbind.fill(broom::tidy(gam_models$left_range_fibrosis_no_race_mod,
+                                                     parametric = T),broom::tidy(gam_models$left_range_fibrosis_no_race_mod,
+                                                                                parametric = F)) %>%
+  select(term,estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1),
+         term = c(terms_without_race,"s(Slice):Fibrosis")) 
+
+rr_fibrosis_no_race_tbl_df <- rbind.fill(broom::tidy(gam_models$right_range_fibrosis_no_race_mod,
+                                                     parametric = T),broom::tidy(gam_models$right_range_fibrosis_no_race_mod,
+                                                                                 parametric = F)) %>%
+  select(estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1))
+
+fibrosis_results_df <- rbind(cbind(pl_fibrosis_race_tbl_df,pr_fibrosis_race_tbl_df),
+                             cbind(pl_fibrosis_no_race_tbl_df,pr_fibrosis_no_race_tbl_df),
+                             cbind(rl_fibrosis_race_tbl_df,rr_fibrosis_race_tbl_df),
+                             cbind(rl_fibrosis_no_race_tbl_df,rr_fibrosis_no_race_tbl_df))
+
+fibrosis_results_table <- kbl(fibrosis_results_df,align = "rcccccc",digits = 5,
+                              longtable = TRUE,
+                              col.names = c("Term",rep(c("Estimate","SE","P-Value",
+                                                         "EDF","Ref. DF"),2)),
+                              caption = "Summary of Models for Fibrosis") %>%
+  kable_styling(full_width = FALSE, latex_options = c("HOLD_position","repeat_header"),
+                font_size = 9) %>%
+  add_header_above(c(" ","Left Lung" = 5,"Right Lung" = 5),bold = TRUE) %>%
+  pack_rows("Outcome: Psill | With Race",1,10) %>%
+  pack_rows("Outcome: Psill | Without Race",11,18) %>%
+  pack_rows("Outcome: Range | With Race",19,28) %>%
+  pack_rows("Outcome: Range | Without Race",29,36) %>%
+  row_spec(0, bold = TRUE)
+
+```
+
+```{r, echo = F}
+
+# Plotting table.
+fibrosis_results_table
 
 ```
 
@@ -331,6 +424,98 @@ rr_fibrosis_no_race_plot <- ggplot(rr_fibrosis_no_race_df,
 
 ```
 
+### Mediastinal Lymphadenopathy (ML)
+
+```{r, echo = F}
+
+# Making tables for Mediastinal Lymphadenopathy results. 
+
+pl_ml_race_tbl_df <- rbind.fill(broom::tidy(gam_models$left_psill_mediastinal_lymphadenopathy_race_mod,
+                                       parametric = T),broom::tidy(gam_models$left_psill_mediastinal_lymphadenopathy_race_mod,
+                                                                   parametric = F)) %>%
+  select(term,estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1),
+         term = c(terms_with_race,"s(Slice):ML"))
+
+pr_ml_race_tbl_df <- rbind.fill(broom::tidy(gam_models$right_psill_mediastinal_lymphadenopathy_race_mod,
+                                                  parametric = T),
+                                broom::tidy(gam_models$right_psill_mediastinal_lymphadenopathy_race_mod,
+                                                                              parametric = F)) %>%
+  select(estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1))
+
+pl_ml_no_race_tbl_df <- rbind.fill(broom::tidy(gam_models$left_psill_mediastinal_lymphadenopathy_no_race_mod,
+                                                     parametric = T),
+                                   broom::tidy(gam_models$left_psill_mediastinal_lymphadenopathy_no_race_mod,
+                                                                               parametric = F)) %>%
+  select(term,estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1),
+         term = c(terms_without_race,"s(Slice):ML"))
+
+pr_ml_no_race_tbl_df <- rbind.fill(broom::tidy(gam_models$right_psill_mediastinal_lymphadenopathy_no_race_mod,
+                                                     parametric = T),
+                                   broom::tidy(gam_models$right_psill_mediastinal_lymphadenopathy_no_race_mod,
+                                                                                 parametric = F)) %>%
+  select(estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1))
+
+rl_ml_race_tbl_df <- rbind.fill(broom::tidy(gam_models$left_range_mediastinal_lymphadenopathy_race_mod,
+                                                  parametric = T),
+                                broom::tidy(gam_models$left_range_mediastinal_lymphadenopathy_race_mod,
+                                                                              parametric = F)) %>%
+  select(term,estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1),
+         term = c(terms_with_race,"s(Slice):ML"))
+
+rr_ml_race_tbl_df <- rbind.fill(broom::tidy(gam_models$right_range_mediastinal_lymphadenopathy_race_mod,
+                                                  parametric = T),
+                                broom::tidy(gam_models$right_range_mediastinal_lymphadenopathy_race_mod,
+                                                                              parametric = F)) %>%
+  select(estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1))
+
+rl_ml_no_race_tbl_df <- rbind.fill(broom::tidy(gam_models$left_range_mediastinal_lymphadenopathy_no_race_mod,
+                                                     parametric = T),
+                                   broom::tidy(gam_models$left_range_mediastinal_lymphadenopathy_no_race_mod,
+                                                                                parametric = F)) %>%
+  select(term,estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1),
+         term = c(terms_without_race,"s(Slice):ML")) 
+
+rr_ml_no_race_tbl_df <- rbind.fill(broom::tidy(gam_models$right_range_mediastinal_lymphadenopathy_no_race_mod,
+                                                     parametric = T),
+                                   broom::tidy(gam_models$right_range_mediastinal_lymphadenopathy_no_race_mod,
+                                                                                 parametric = F)) %>%
+  select(estimate,std.error,p.value,edf,ref.df) %>%
+  mutate(p.value = format.pval(p.value,digits = 1))
+
+ml_results_df <- rbind(cbind(pl_ml_race_tbl_df,pr_ml_race_tbl_df),
+                             cbind(pl_ml_no_race_tbl_df,pr_ml_no_race_tbl_df),
+                             cbind(rl_ml_race_tbl_df,rr_ml_race_tbl_df),
+                             cbind(rl_ml_no_race_tbl_df,rr_ml_no_race_tbl_df))
+
+ml_results_table <- kbl(ml_results_df,align = "rcccccc",digits = 5,
+                              longtable = TRUE,
+                              col.names = c("Term",rep(c("Estimate","SE","P-Value",
+                                                         "EDF","Ref. DF"),2)),
+                              caption = "Summary of Models for Mediastinal Lymphadenopathy (ML)") %>%
+  kable_styling(full_width = FALSE, latex_options = c("HOLD_position","repeat_header"),
+                font_size = 9) %>%
+  add_header_above(c(" ","Left Lung" = 5,"Right Lung" = 5),bold = TRUE) %>%
+  pack_rows("Outcome: Psill | With Race",1,10) %>%
+  pack_rows("Outcome: Psill | Without Race",11,18) %>%
+  pack_rows("Outcome: Range | With Race",19,28) %>%
+  pack_rows("Outcome: Range | Without Race",29,36) %>%
+  row_spec(0, bold = TRUE)
+
+```
+
+```{r, echo = F}
+
+# Mediastinal Lymphadenopathy table. 
+ml_results_table
+
+```
 
 ```{r, echo = F}
 
@@ -362,8 +547,8 @@ pl_med_lym_race_plot <- ggplot(pl_med_lym_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Lung Psill Mediastinal Lymphadenopathy - With Race") +
-  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+       title = "Left Psill ML - With Race") +
+  scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank()) 
@@ -396,8 +581,8 @@ pr_med_lym_race_plot <- ggplot(pr_med_lym_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Lung Psill Mediastinal Lymphadenopathy - With Race") +
-  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+       title = "Right Psill ML - With Race") +
+  scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -429,8 +614,8 @@ pl_med_lym_no_race_plot <- ggplot(pl_med_lym_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Lung Psill Mediastinal Lymphadenopathy - No Race") +
-  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+       title = "Left Psill ML - No Race") +
+  scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank()) 
@@ -462,8 +647,8 @@ pr_med_lym_no_race_plot <- ggplot(pr_med_lym_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "RightLung Psill Mediastinal Lymphadenopathy - No Race") +
-  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+       title = "Right Psill ML - No Race") +
+  scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank()) 
@@ -496,8 +681,8 @@ rl_med_lym_race_plot <- ggplot(rl_med_lym_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Left Lung Range Mediastinal Lymphadenopathy - With Race") +
-  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+       title = "Left Range ML - With Race") +
+  scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank()) 
@@ -530,8 +715,8 @@ rr_med_lym_race_plot <- ggplot(rr_med_lym_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Right Lung Range Mediastinal Lymphadenopathy - With Race") +
-  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+       title = "Right Range ML - With Race") +
+  scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -563,8 +748,8 @@ rl_med_lym_no_race_plot <- ggplot(rl_med_lym_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "Left Lung Range Mediastinal Lymphadenopathy - No Race") +
-  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+       title = "Left Range ML - No Race") +
+  scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw()
 
@@ -595,8 +780,8 @@ rr_med_lym_no_race_plot <- ggplot(rr_med_lym_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "Right Lung Range Mediastinal Lymphadenopathy - No Race") +
-  scale_fill_discrete(name = "Med. Lymph.",labels = c("No","Yes")) +
+       title = "Right Range ML - No Race") +
+  scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() 
 
@@ -641,8 +826,8 @@ pl_trac_bronch_race_plot <- ggplot(pl_trac_bronch_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Lung Psill Traction Bronchiectasis - With Race") +
-  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+       title = "Left Psill TB - With Race") +
+  scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -675,8 +860,8 @@ pr_trac_bronch_race_plot <- ggplot(pr_trac_bronch_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Lung Psill Traction Bronchiectasis - With Race") +
-  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+       title = "Right Psill TB - With Race") +
+  scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -708,8 +893,8 @@ pl_trac_bronch_no_race_plot <- ggplot(pl_trac_bronch_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Lung Psill Traction Bronchiectasis - No Race") +
-  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+       title = "Left Psill TB - No Race") +
+  scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -741,8 +926,8 @@ pr_trac_bronch_no_race_plot <- ggplot(pr_trac_bronch_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Lung Psill Traction Bronchiectasis - No Race") +
-  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+       title = "Right Psill TB - No Race") +
+  scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -775,8 +960,8 @@ rl_trac_bronch_race_plot <- ggplot(rl_trac_bronch_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Left Lung Range Traction Bronchiectasis - With Race") +
-  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+       title = "Left Range TB - With Race") +
+  scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -809,8 +994,8 @@ rr_trac_bronch_race_plot <- ggplot(rr_trac_bronch_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Right Lung Range Traction Bronchiectasis - With Race") +
-  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+       title = "Right Range TB - With Race") +
+  scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -842,8 +1027,8 @@ rl_trac_bronch_no_race_plot <- ggplot(rl_trac_bronch_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "Left Lung Range Traction Bronchiectasis - No Race") +
-  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+       title = "Left Range TB - No Race") +
+  scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw()
 
@@ -874,8 +1059,8 @@ rr_trac_bronch_no_race_plot <- ggplot(rr_trac_bronch_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "Right Lung Range Traction Bronchiectasis - No Race") +
-  scale_fill_discrete(name = "Trac. Bronch.",labels = c("No","Yes")) +
+       title = "Right Range TB - No Race") +
+  scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw()
 
@@ -919,8 +1104,8 @@ pl_fev1_race_plot <- ggplot(pl_fev1_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Lung Psill FEV1 - With Race") +
-  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Left Psill FEV1 - With Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -953,8 +1138,8 @@ pr_fev1_race_plot <- ggplot(pr_fev1_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Lung Psill FEV1 - With Race") +
-  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Right Psill FEV1 - With Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -986,8 +1171,8 @@ pl_fev1_no_race_plot <- ggplot(pl_fev1_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Lung Psill FEV1 - No Race") +
-  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Left Psill FEV1 - No Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -1019,8 +1204,8 @@ pr_fev1_no_race_plot <- ggplot(pr_fev1_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Lung Psill FEV1 - No Race") +
-  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Right Psill FEV1 - No Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -1053,8 +1238,8 @@ rl_fev1_race_plot <- ggplot(rl_fev1_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Left Lung Range FEV1 - With Race") +
-  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Left Range FEV1 - With Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -1087,8 +1272,8 @@ rr_fev1_race_plot <- ggplot(rr_fev1_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Right Lung Range FEV1 - With Race") +
-  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Right Range FEV1 - With Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -1120,8 +1305,8 @@ rl_fev1_no_race_plot <- ggplot(rl_fev1_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "Left Lung Range FEV1 - No Race") +
-  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("o.25","0.50","0.75")) +
+       title = "Left Range FEV1 - No Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("o.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw()
 
@@ -1152,8 +1337,8 @@ rr_fev1_no_race_plot <- ggplot(rr_fev1_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "Right Lung Range FEV1 - No Race") +
-  scale_fill_discrete(name = "FEV1 Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Right Range FEV1 - No Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw()
 
@@ -1198,8 +1383,8 @@ pl_fvc_race_plot <- ggplot(pl_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Lung Psill FVC - With Race") +
-  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Left Psill FVC - With Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -1232,8 +1417,8 @@ pr_fvc_race_plot <- ggplot(pr_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Lung Psill FVC - With Race") +
-  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Right Psill FVC - With Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -1265,8 +1450,8 @@ pl_fvc_no_race_plot <- ggplot(pl_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Lung Psill FVC - No Race") +
-  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Left Psill FVC - No Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank()) 
@@ -1298,8 +1483,8 @@ pr_fvc_no_race_plot <- ggplot(pr_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Lung Psill FVC - No Race") +
-  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Right Psill FVC - No Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -1332,8 +1517,8 @@ rl_fvc_race_plot <- ggplot(rl_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Left Lung Range FVC - With Race") +
-  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Left Range FVC - With Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -1366,8 +1551,8 @@ rr_fvc_race_plot <- ggplot(rr_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Right Lung Range FVC - With Race") +
-  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Right Range FVC - With Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -1399,8 +1584,8 @@ rl_fvc_no_race_plot <- ggplot(rl_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Left Lung Range FVC - No Race") +
-  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Left Range FVC - No Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() 
 
@@ -1431,8 +1616,8 @@ rr_fvc_no_race_plot <- ggplot(rr_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Right Lung Range FVC - No Race") +
-  scale_fill_discrete(name = "FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Right Range FVC - No Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() 
 
@@ -1476,8 +1661,8 @@ pl_fev1_fvc_race_plot <- ggplot(pl_fev1_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Lung Psill FEV1/FVC - With Race") +
-  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Left Psill FEV1/FVC - With Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -1510,8 +1695,8 @@ pr_fev1_fvc_race_plot <- ggplot(pr_fev1_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Lung Psill FEV1/FVC - With Race") +
-  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Right Psill FEV1/FVC - With Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -1543,8 +1728,8 @@ pl_fev1_fvc_no_race_plot <- ggplot(pl_fev1_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Lung Psill FEV1/FVC - No Race") +
-  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Left Psill FEV1/FVC - No Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -1576,8 +1761,8 @@ pr_fev1_fvc_no_race_plot <- ggplot(pr_fev1_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Lung Psill FEV1/FVC - No Race") +
-  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Right Psill FEV1/FVC - No Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -1610,8 +1795,8 @@ rl_fev1_fvc_race_plot <- ggplot(rl_fev1_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Left Lung Range FEV1/FVC - With Race") +
-  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Left Range FEV1/FVC - With Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -1644,8 +1829,8 @@ rr_fev1_fvc_race_plot <- ggplot(rr_fev1_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Right Lung Range FEV1/FVC - With Race") +
-  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Right Range FEV1/FVC - With Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
   theme(axis.ticks.x = element_blank(),axis.text.x = element_blank())
@@ -1678,8 +1863,8 @@ rl_fev1_fvc_no_race_plot <- ggplot(rl_fev1_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "Left Lung Range FEV1/FVC - No Race") +
-  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Left Range FEV1/FVC - No Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() 
 
@@ -1711,8 +1896,8 @@ rr_fev1_fvc_no_race_plot <- ggplot(rr_fev1_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "RightLung Range FEV1/FVC - No Race") +
-  scale_fill_discrete(name = "FEV1/FVC Quantiles",labels = c("0.25","0.50","0.75")) +
+       title = "Right Range FEV1/FVC - No Race") +
+  scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw()
 

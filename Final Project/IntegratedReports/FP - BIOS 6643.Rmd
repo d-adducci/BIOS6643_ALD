@@ -85,9 +85,22 @@ After initial cleaning both data sets were combined. As there were more subject 
 
 ### Analysis
 
-Analysis utilized cubic penalized splines with 4 degrees of freedom to model the relationship between location in the lung and each of the two variogram predictors (psill and range). This approach allowed for non-linear associations between the clinical predictors and location in the lung. Outcomes for both psill and range were considered Gaussian-distributed. Models for each clinical predictor were made separately, with each outcome being having its own model, and each lung having its own model. Additionally, models including race and excluding race were compared. In total, each clinical predictor had 4 models for each outcome (right lung psill and range, left lung psill and range) including race and 4 models for each outcome excluding race. Between the six predictors this results in a total of 48 models. 
+Analysis utilized cubic penalized splines with 4 degrees of freedom to model the relationship between location in the lung and each of the two variogram predictors (psill and range). This approach allowed for non-linear associations between the clinical predictors and location in the lung. Outcomes for both psill and range were considered Gaussian-distributed. Models for each clinical predictor were made separately, with each outcome being having its own model, and each lung having its own model. Additionally, models including race and excluding race were compared. In total, each clinical predictor had 4 models for each outcome (right lung psill and range, left lung psill and range) including race and 4 models for each outcome excluding race. Between the six predictors this results in a total of 48 models. Additional models parameters include demographic data beyond race (BMI, age, sex, height), and a subject-specific random effect. 
 
-Models including and excluding race were compared with AIC, where lower scores mean better model fitting. 
+Models including and excluding race were compared with AIC, where lower scores indicate better model fitting. Plots of trend within the lung for each model were included to understand how each clinical predictor affects psill and range measurements. The VAS predictors are stratified into yes/no, and the PFT measurements are stratified into the 25th percentile, 50th percentile, and 75th percentile for subjects in the cohort. Additional literature analysis regarding the inclusion/exclusion of race as a predictor was included when discussing significance of the results. All analysis were performed in R version 4.3.1. 
+
+\singlespacing
+# Results
+
+### Direct Model Comparison 
+
+```{r, echo = F}
+
+# Making a table illustrating the AIC values for each model. 
+
+
+
+```
 
 \singlespacing
 ### Fibrosis
@@ -213,7 +226,7 @@ pl_fibrosis_race_plot <- ggplot(pl_fibrosis_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Lung Psill Fibrosis - With Race") +
+       title = "Left Psill Fibrosis - With Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -247,7 +260,7 @@ pr_fibrosis_race_plot <- ggplot(pr_fibrosis_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(x = "",y = "",
-    title = "Right Lung Psill Fibrosis - With Race") +
+    title = "Right Psill Fibrosis - With Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -280,7 +293,7 @@ pl_fibrosis_no_race_plot <- ggplot(pl_fibrosis_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Lung Psill Fibrosis - No Race") +
+       title = "Left Psill Fibrosis - No Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -313,7 +326,7 @@ pr_fibrosis_no_race_plot <- ggplot(pr_fibrosis_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(x = "",y = "",
-    title = "Right Lung Psill Fibrosis - No Race") +
+    title = "Right Psill Fibrosis - No Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -347,7 +360,7 @@ rl_fibrosis_race_plot <- ggplot(rl_fibrosis_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)", x = "",
-       title = "Left Lung Range Fibrosis - With Race") +
+       title = "Left Range Fibrosis - With Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -381,7 +394,7 @@ rr_fibrosis_race_plot <- ggplot(rr_fibrosis_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(x = "",y = "",
-    title = "Right Lung Range Fibrosis - With Race") +
+    title = "Right Range Fibrosis - With Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -414,7 +427,7 @@ rl_fibrosis_no_race_plot <- ggplot(rl_fibrosis_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(x = "Normalized Slice",y = "Predicted log(Range)",
-       title = "Left Lung Range Fibrosis - No Race") +
+       title = "Left Range Fibrosis - No Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw()
@@ -446,7 +459,7 @@ rr_fibrosis_no_race_plot <- ggplot(rr_fibrosis_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(x = "Normalized Slice", y = "",
-       title = "Right Lung Range Fibrosis - No Race") +
+       title = "Right Range Fibrosis - No Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() 

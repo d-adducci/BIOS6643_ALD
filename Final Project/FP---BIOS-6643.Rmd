@@ -20,7 +20,6 @@ library(mgcv)
 library(patchwork)
 library(plyr)
 library(knitr)
-library(table1)
 
 ```
 
@@ -35,7 +34,7 @@ project2_data <- readRDS("C:/Users/domin/Documents/Biostatistics Masters Program
 
 ```
 
-```{r, message = F, eval = F, echo = F}
+```{r, message = F, eval = F}
 
 # This code was run in another file previously. Included to illustrate what was done.
 
@@ -656,6 +655,7 @@ names(gam_models) <- c("left_psill_fibrosis_race_mod","left_psill_mediastinal_ly
 
 ```
 
+```
 
 ```{r prediction_setup, echo = F}
 
@@ -708,24 +708,6 @@ The data for this analysis was compiled from two main sources, clinical measurem
 Variogram data included information regarding the subject ID for each measurement, as well as which lung each measurement came from. Variogram measurements had three components, the range, the psill, and the slice normalized variable, which indicated location in the lung. Values closer to 0 correspond to the bottom of the lung, and values closer to 1 correspond to the top of the lung. For this analysis normalized slice values between 0.1 and 0.9 were used to avoid measurement variations of the top and bottom-most portion of scans. In general each subject had 50 slices per lung, meaning a total of 100 scans per subject. Two subjetc were dropped during initial data cleaning, one due to an outlier in the range measurement (> 300), and another due to missing data on the left lung. Out of the original 342 subject 340 were kept after dropping these two. Lastly, psill and range were log transformed due to prominant right-skew in the distribution of each.  
 
 After initial cleaning both data sets were combined. As there were more subject with clinical data than variogram data the subject IDs for variogram data were used for the combining, resulting in a composite data frame of 342 subjects. A complete case analysis was performed, meaning subjects missing any of relevant demographic data were dropped from the analysis. After dropping there were 320 subjects total. 
-
-\singlespacing
-```{r table_1, echo = F}
-
-table_1 <- table1(~ Age + BMI + Height + Gender + Fibrosis +
-                    Traction_Bronchiectasis + Med_Lymphadenopathy +
-                    POSTFEV1 + POSTFVC + POSTFEVFVC | Race, 
-                  data = project2_data, caption = "Descriptive Statistics")
-
-table_1_kbl <- t1kable(table_1,
-                       booktabs = T,) %>%
-  kable_styling(full_width = F,latex_options = c("scale_down","HOLD_position"),
-                font_size = 7)
-
-table_1_kbl
-```
-\doublespacing
-The table above shows descriptive statistics of the study cohort. The majority of subjects are non-Hispanic white, followed by Black or African American. Other makes up the smallest group, being around a tenth of the number of non-Hispanic white subjects. The average age, BMI, and height are similar between the three race groups.
 
 ### Analysis
 
@@ -3118,25 +3100,10 @@ Direct model comparison using AIC suggested that there were minimal differences 
 
 Based on model outputs from the tables provided in the results neither race category of non-Hispanic white or other was a significant predictor for the range outcome when the reference group was African American/Black. For psill models the non-Hispanic white category was generally significant while the other races category was never a significant predictor. Additionally, the interaction between the clinical predictor and normalized slice was significant in all models regardless of whether or not race was included as a predictor. From the plots the relationship between models including and excluding race had the same general trend, with the main difference being that models without race tended to have slightly narrower confidence intervals. These narrower confidence intervals gave better discrepancy in predicted outcome between the binary VAS conditions and the three levels of PFT measurements (25th percentile, 50th percentile, and 75 percentile).
 
-Beyond data analyzed in this study, past studies have noted difficulty in assessing the prevalence in sarcoidosis among different racial groups. For example, a study in the American Journal of Epidemiology noted that while African-Americans were found to have threefold higher risk of sarcoidosis compared to Caucasians, it is difficult to determine the degree that environmental exposure versus genetic susceptibility accounts for this difference [@racial_differences_sarcoidosis]. Additionally, socioeconomic status (SES) is a known predictor of health outcomes, and patients of low SES tend to have worse pulmonary function, lower baseline physical health, and higher likelihood of multi-organ disease after adjusting for comorbidities [@diversity_disparity]. In the context of this study, simply adjusting for race will likely overlook more important predictors of sarcoidosis, and obfuscate care for those who are most at risk. In another study an age-adjusted mortality rate increase of 50\% between 1988 and 2007 in the United States was observed for Caucasians and not African Americans, with the authors suggesting that access to more advanced medical technology by Caucasian patients could explain higher rates of detection and bias in diagnoses [@sarcoidosis_mortality]. As more advanced imaging options become available past assumptions regarding sarcoidosis susceptibility need careful scrutiny to avoid perpetuating bias in treatment and diagnosis. After running comparisons between models including race and models excluding race there is no tangible benefit for including race as a predictor. Additional covariates which may influence sarcoidosis should be investigated for better modeling.  
+Beyond data analyzed in this study, past studies have noted difficulty in assessing the prevalence in sarcoidosis among different racial groups. For example, a study in the American Journal of Epidemiology noted that while African-Americans were found to have threefold higher risk of sarcoidosis compared to Caucasians, it is difficult to determine the degree that environmental exposure versus genetic susceptibility accounts for this difference [@racial_differences_sarcoidosis]. Additionally, socioeconomic status (SES) is a known predictor of health outcomes, and patients of low SES tend to have worse pulmonary function, lower baseline physical health, and higher likelihood of multi-organ disease after adjusting for comorbidities [@diversity_disparity]. In the context of this study, simply adjusting for race will likely overlook more important predictors of sarcoidosis, and obfuscate care for those who are most at risk. In another study an age-adjusted mortality rate increase of 50\% between 1988 and 2007 in the United States was observed for Caucasians and not African Americans, with the authors suggesting that access to more advanced medical technology by Caucasian patients could explain higher rates of detection and bias in diagnoses [@sarcoidosis_mortality]. As more advanced imaging options become available past assumptions regarding sarcoidosis susceptibility need careful scrutiny to avoid perpetuating bias in treatment and diagnosis.  
 
 ### Relationship Between Clinical Predictors and Outcomes
 
-Differences within clinical measurements were most obvious in plots showing the relationship between the log of psill/range and normalized slice. Analysis for these plots focused on the models which did not control for race. For fibrosis subjects with no disease had lower measurements in both psill and range when moving up the lung. The lower in the lung measurements were taken the closer the two groups were. 
-
-For models where mediastinal lymphadenopathy was the primary clinical measurement psill was lower among subjects who did not have the condition compared to subjects who had the condition. In the left lung the largest difference was in the middle portion of the lung, with more similarity moving when moving towards the top and bottom most portion of the lungs. The right lung showed more consistant difference between subjects with and without mediastinal lymphadenopathy throughout the lung. For models of range both lungs had small differences between those with and without mediastinal lymphadenopathy, with subjects who did not have the condition generally having slightly lower values.  
-
-For models where traction bronchiectasis was the primary clinical measurement psill was lower among subjects who did not have the condition compared to subjects who had the condition. Both the left and right lung showed similar trends, with a steep dip in the middle of the right lung. For models of range the lower portion of the lung showed similar measurements between subjects who did and did not have traction bronchiectasis. As scans moved up both lungs there were larger differences in measurements. 
-
-For models where FEV1 was the primary clinical variable psill and range was lower in both lungs for subjects who had higher FEV1 measurements. Both outcomes followed similar trends between the left and right lung, with higher psill and range measurements in the middle portion of the lung. 
-
-For models where FVC was the primary variable psill and range was lower in both lungs for subjects who had higher FVC measurements. Differences were smaller for the range outcome compared to psill, but the same general trend was present in both outcomes where the upper and lower portions of the lung had lower measurements. 
-
-For models where FEV1/FVC was the primary variable psill and range were in general similar regardless of FEV1/FVC measurements. The largest differences were in the middle portion of the lung where higher FEV1/FVC values corresponded to lower psill and range measurements. 
-
-In summary subjects with better PFT lung function, no fibrosis, no mediastinal lymphadenopathy, and no traction bronchiectasis had smaller psill and range measurements. Differences tended to be largest in the middle portion of the lung, suggesting that scans focused on this area show the largest discrepancy among subjects with worse health. 
-
-Limitations of this analysis include lack of diversity among subjects. The majority of subjects were non-Hispanic whites, followed by African Americans/Black. The other race category incorporated multiple different races which strongly limits the inference beyond the two primary race categories mentioned previously. Additionally, the diagnosis of sarcoidosis was not explicitly incorporated into this analysis, but rather potential indicators of disease represented by the clinical measurements. Additional study will need to be performed to understand the relationship between variogram scans and sarcoidosis. Lastly, a complete case analysis was performed for better comparison of models, meaning that the sample size was smaller than originally expected. 
 
 
 \singlespacing

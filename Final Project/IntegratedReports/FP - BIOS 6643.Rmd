@@ -1,7 +1,6 @@
 ---
 title: "Final Project - BIOS 6643"
 author: "Dominic Adducci"
-date: "2023-12-09"
 output:
   pdf_document: default
 header-includes:
@@ -687,7 +686,7 @@ ID_pred <- "01S001"
 \doublespacing
 # Introduction 
 
-Sarcoidosis is a potentially lethal disease with ~ 25,000 new cases diagnosed in the United States each year. The disease is characterized by granulomas, and the vast majority (90\%) of cases primarily affect the lung. Currently, the standard in care for assessing sarcoidosis are lung images utilizing computed tomography (CT). While this method provides better characterizing of abnormalities compared to chest x-rays there are two primary problems; 1.) CT is primarily based on visual assessment, resulting in high inter- and intra-rater variation, and 2.) these visual assessments are not strongly predictive of disease course. Recently, a new method to better quantify measures of lung CT has been developed utilizing variograms. Variograms are a standard geostatistical too for measuring and modelling spatial covariance within an image, as well as spatial process as a function of distance between points. 
+Sarcoidosis is a potentially lethal disease with ~ 25,000 new cases diagnosed in the United States each year. The disease is characterized by granulomas, and the vast majority (90\%) of cases primarily affect the lung. Currently, the standard in care for assessing sarcoidosis are lung images utilizing computed tomography (CT). While this method provides better characterizing of abnormalities compared to chest x-rays there are two significant problems: 1.) CT is primarily based on visual assessment, resulting in high inter- and intra-rater variation, and 2.) these visual assessments are not strongly predictive of disease course. Recently, a new method to better quantify measures of lung CT has been developed utilizing variograms, a standard geostatistical tool for measuring and modelling spatial covariance within an image and spatial process as a function of distance between points. 
 
 Variogram data is typically represented by three parameters: 1.) the sill, 2.) the range, and 3.) the nugget. The sill is the overall variation present in an image, the range represents the spatial scale of correlation, and the nugget is the variation due to measurement error. For sufficiently high resolution images the nugget is 0, which will be assumed for this analysis. The location of each individual scan is represented by the normalized slice variable spanning 0 to 1, corresponding to the bottom and top of the lung respectively. 
 
@@ -697,25 +696,35 @@ The purpose of this analysis is to answer two primary questions of interest:
 
 *How do clinical measures of disease associate with the lungs after adjusting for demographics?*
 
-There are six total clinical measures of disease. Three of these are PFT measurements: FEV1 (Forced Expiratory Volume in 1 second), FVC (Forced Vital Capacity), and FEV1/FVC ratio (provided as a fraction). The other three are VAS (Visual Assessment Scores): fibrosis, mediastinal lymphadenopathy, and traction bronchiectasis. Demographics other than race are BMI, age, sex, and height. Analysis will involve comparing models with and without race to determine the impact of including this as a demographic feature, and plots will be presented to illustrated trends in clinical features for both sill and range. Additionally, further research on the ethical and clinical/scientific justification for inclusion of race as a predictor in sarcoidosis was performed.
+There are six total clinical measures of disease. Three of these are PFT measurements: FEV1 (Forced Expiratory Volume in 1 second), FVC (Forced Vital Capacity), and FEV1/FVC ratio (provided as a fraction). The other three are VAS (Visual Assessment Scores): fibrosis, mediastinal lymphadenopathy, and traction bronchiectasis. Demographics other than race are BMI, age, sex, and height. Analysis involved comparing models with and without race to determine the impact of including this as a demographic feature, and plots will be presented to illustrated trends in clinical features for both sill and range. Additionally, further research on the ethical and clinical/scientific justification for inclusion of race as a predictor in sarcoidosis was performed.
 
 # Methods 
 
 ### Data 
 
-The data for this analysis was compiled from two main sources, clinical measurements and variogram measurements. The clinical measurements provided the demographic data and the PFT and VAS measurements, and included 368 subjects. Cleaning the clinical data involved several steps. For simplicity in modeling VAS measurements were considered a binary indicating presence of the condition or no presence of the condition. Both traction bronchiectasis and mediastinal lymphadenopathy had four potential levels, which were then collapsed into binary indicators. Fibrosis was already a binary variable, meaning this step was not necessary for this variable. The construction of the race variable involved combining the provided race and ethnicity variables. The race categories initially had 6 possible options, Black or African American, American Indian or Alaskan Native, white, multi-racial or no primary race, Asian, and unknown. The ethnicity variable denoted whether a subject was Hispanic or not Hispanic. The race variable used in this analysis first involved separating white subjects into Hispanic white and non-Hispanic white. After this race was collapsed into three categories: 1.) non-Hispanic white, 2.) Black or African American, 3.) and other, which incorporated American Indian or Alaskan Native, multi-racial or no primary race, Asian, unknown, and Hispanic white. Two important features are that subjects who were missing race/ethnicity data were considered "NA", which is distinct from the "unknown" category, and the majority of subjects were non-Hispanic white, followed by Black or African American. The composite category of "other" had the smallest amount of subjects. 
+The data for this analysis was compiled from two main sources, clinical measurements and variogram measurements. The clinical measurements provided the demographic data and the PFT and VAS measurements, and included 368 subjects. Cleaning the clinical data involved several steps. For simplicity in modeling VAS measurements were considered a binary indicating presence of the condition or no presence of the condition. Both traction bronchiectasis and mediastinal lymphadenopathy had four potential levels, which were then collapsed into binary indicators. Fibrosis was already a binary variable, meaning this step was not necessary for this variable. The construction of the race variable involved combining the provided race and ethnicity variables. The race categories initially had 6 possible options, Black or African American, American Indian or Alaskan Native, white, multi-racial or no primary race, Asian, and unknown. The ethnicity variable denoted whether a subject was Hispanic or not Hispanic. The race variable used in this analysis first involved separating white subjects into Hispanic white and non-Hispanic white. Next, race was collapsed into three categories: 1.) non-Hispanic white, 2.) Black or African American, 3.) and other, which incorporated American Indian or Alaskan Native, multi-racial or no primary race, Asian, unknown, and Hispanic white. Two important features are that subjects who were missing race/ethnicity data were considered "NA", which is distinct from the "unknown" category, and the majority of subjects were non-Hispanic white, followed by Black or African American. The composite category of "other" had the smallest amount of subjects. 
 
-Variogram data included information regarding the subject ID for each measurement, as well as which lung each measurement came from. Variogram measurements had three components, the range, the psill, and the slice normalized variable, which indicated location in the lung. Values closer to 0 correspond to the bottom of the lung, and values closer to 1 correspond to the top of the lung. For this analysis normalized slice values between 0.1 and 0.9 were used to avoid measurement variations of the top and bottom-most portion of scans. In general each subject had 50 slices per lung, meaning a total of 100 scans per subject. Two subjetc were dropped during initial data cleaning, one due to an outlier in the range measurement (> 300), and another due to missing data on the left lung. Out of the original 342 subject 340 were kept after dropping these two. Lastly, psill and range were log transformed due to prominant right-skew in the distribution of each.  
+Variogram data included information regarding the subject ID for each measurement, as well as which lung each measurement came from. Variogram measurements had three components, the range, the psill, and the slice normalized variable, which indicated location in the lung. Values closer to 0 correspond to the bottom of the lung, and values closer to 1 correspond to the top of the lung. For this analysis normalized slice values between 0.1 and 0.9 were used to avoid measurement variations of the top and bottom-most portion of scans. In general each subject had 50 slices per lung, meaning a total of 100 scans per subject. Two subjects were dropped during initial data cleaning, one due to an outlier in the range measurement (> 300), and another due to missing data on the left lung. Out of the original 368 subject 366 were kept after dropping these two. Lastly, psill and range were log transformed due to prominent right-skew in distribution.  
 
-After initial cleaning both data sets were combined. As there were more subject with clinical data than variogram data the subject IDs for variogram data were used for the combining, resulting in a composite data frame of 342 subjects. A complete case analysis was performed, meaning subjects missing any of relevant demographic data were dropped from the analysis. After dropping there were 320 subjects total. 
+After initial cleaning both data sets were combined. As there were more subject with clinical data than variogram data the subject IDs for variogram data were used for the combining, resulting in a composite data frame of 342 subjects. A complete case analysis was performed, meaning subjects missing any of the relevant demographic data and clinical measurements were dropped from the analysis. After dropping there were 320 subjects. 
 
 \singlespacing
 ```{r table_1, echo = F}
 
+project2_tbl1_df <- project2_data %>%
+  mutate(Race = factor(Race, label= c("Black or African American","Other Races",
+                                     "Non-Hispanic White")))
+
+label(project2_tbl1_df$Traction_Bronchiectasis) <- "Traction Bronchiectasis"
+label(project2_tbl1_df$Med_Lymphadenopathy) <- "Mediastinal Lymphadenopathy"
+label(project2_tbl1_df$POSTFEV1) <- "POST FEV1"
+label(project2_tbl1_df$POSTFVC) <- "POST FVC"
+label(project2_tbl1_df$POSTFEVFVC) <- "POST FEV/FVC"
+
 table_1 <- table1(~ Age + BMI + Height + Gender + Fibrosis +
                     Traction_Bronchiectasis + Med_Lymphadenopathy +
                     POSTFEV1 + POSTFVC + POSTFEVFVC | Race, 
-                  data = project2_data, caption = "Descriptive Statistics")
+                  data = project2_tbl1_df, caption = "Descriptive Statistics")
 
 table_1_kbl <- t1kable(table_1,
                        booktabs = T,) %>%
@@ -725,11 +734,11 @@ table_1_kbl <- t1kable(table_1,
 table_1_kbl
 ```
 \doublespacing
-The table above shows descriptive statistics of the study cohort. The majority of subjects are non-Hispanic white, followed by Black or African American. Other makes up the smallest group, being around a tenth of the number of non-Hispanic white subjects. The average age, BMI, and height are similar between the three race groups.
+The table above shows descriptive statistics of the study cohort. The majority of subjects are non-Hispanic white, followed by Black or African American. Other makes up the smallest group, being around a tenth of the number of non-Hispanic white subjects. The average age, BMI, and height are similar between the three race groups. Rates of fibrosis and mediastinal lymphadenopathy hare highest in the other race category, and rate of traction bronchiectasis are highest in the Black and African American category. The white race group has the highest average PFT measurements. 
 
 ### Analysis
 
-Analysis utilized cubic penalized splines with 4 degrees of freedom to model the relationship between location in the lung and each of the two variogram predictors (psill and range). This approach allowed for non-linear associations between the clinical predictors and location in the lung. Outcomes for both psill and range were considered Gaussian-distributed. Models for each clinical predictor were made separately, with each outcome being having its own model, and each lung having its own model. Additionally, models including race and excluding race were compared. In total, each clinical predictor had 4 models for each outcome (right lung psill and range, left lung psill and range) including race and 4 models for each outcome excluding race. Between the six predictors this results in a total of 48 models. Additional models parameters include demographic data beyond race (BMI, age, sex, height), and a subject-specific random effect. 
+Analysis utilized cubic penalized splines with 4 degrees of freedom to model the relationship between location in the lung and each clinical predictor, allowing for non-linear associations between these two variables. The logged outcomes for both psill and range were considered Gaussian-distributed. Models for each clinical predictor were made separately, with each outcome being having its own model, and each lung having its own model. Additionally, models including race and excluding race were compared. In total, each clinical predictor had 4 models for each outcome (right lung psill and range, left lung psill and range) including race and 4 models for each outcome excluding race. Between the six predictors this results in a total of 48 models. Additional models parameters include demographic data beyond race (BMI, age, sex, height), and a subject-specific random effect. 
 
 Models including and excluding race were compared with AIC, where lower scores indicate better model fitting. Plots of trend within the lung for each model were included to understand how each clinical predictor affects psill and range measurements, with point estimates and 95\% confidence intervals included in the plots. The VAS predictors are stratified into yes/no, and the PFT measurements are stratified into the 25th percentile, 50th percentile, and 75th percentile for subjects in the cohort. For plots predicted values were based on a subject who is an African American/Black female who is the average age (53 years), average BMI (30.6), and average height(67 inches) for all subjects in the cohort.  
 
@@ -829,10 +838,13 @@ aic_table
 \doublespacing
 The table above compares AIC values between different models including and excluding race as a predictor. Psill models including race have a lower AIC for fibrosis, mediastinal lymphadenopahty, traction bronchiectasis, and FEV1/FVC. For FEV1 and FVC, psill models excluding race have a lower AIC. However, the delta in AIC between models including and excluding race are less than 1, suggesting that both models perform similarly. 
 
-Range models excluding race have lower AIC score compared to models including race. Again, the differences are less than 1 suggesting that these models perform similarly. Between both lungs and both outcomes models excluding race have a higher proportion of lower AIC values compared to models including race. 
+Range models excluding race have lower AIC values compared to models including race. Again, the differences are less than 1 suggesting that these models perform similarly. Between both lungs and both outcomes models excluding race have a higher proportion of lower AIC values compared to models including race. 
 
 
 \singlespacing
+
+\newpage
+
 ### Fibrosis
 
 ```{r fibrosis_table_setup, echo = F}
@@ -927,7 +939,7 @@ fibrosis_results_table
 ```
 \doublespacing
 
-The table above illustrates differences between models including and excluding race when fibrosis is the main clinical predictor. In all models the interaction between normalized slice and fibrosis is a significant predictor for range and psill values regardless of whether or not race was included as a predictor. For psill non-Hispanic white is a significant predictor for both lungs while the other race group is not. For range neither non-Hispanic white nor other race group are significant predictors in either lung. 
+The table above illustrates differences between models including and excluding race when fibrosis is the main clinical predictor. In all models the interaction between normalized slice and fibrosis is a significant predictor for range and psill values regardless of whether or not race was included as a predictor. For psill non-Hispanic white is a significant predictor for both lungs while the other race group is not. For range neither non-Hispanic white nor the other race group are significant predictors in either lung. 
 
 \singlespacing
 ```{r fibrosis_plots, echo = F, warning = F}
@@ -960,7 +972,7 @@ pl_fibrosis_race_plot <- ggplot(pl_fibrosis_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Psill Fibrosis - With Race") +
+       title = "Left Psill Fibrosis;Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -994,7 +1006,7 @@ pr_fibrosis_race_plot <- ggplot(pr_fibrosis_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(x = "",y = "",
-    title = "Right Psill Fibrosis - With Race") +
+    title = "Right Psill Fibrosis;Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1027,7 +1039,7 @@ pl_fibrosis_no_race_plot <- ggplot(pl_fibrosis_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Psill Fibrosis - No Race") +
+       title = "Left Psill Fibrosis;No Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1060,7 +1072,7 @@ pr_fibrosis_no_race_plot <- ggplot(pr_fibrosis_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(x = "",y = "",
-    title = "Right Psill Fibrosis - No Race") +
+    title = "Right Psill Fibrosis;No Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1094,7 +1106,7 @@ rl_fibrosis_race_plot <- ggplot(rl_fibrosis_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)", x = "",
-       title = "Left Range Fibrosis - With Race") +
+       title = "Left Range Fibrosis;Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1128,7 +1140,7 @@ rr_fibrosis_race_plot <- ggplot(rr_fibrosis_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(x = "",y = "",
-    title = "Right Range Fibrosis - With Race") +
+    title = "Right Range Fibrosis;Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1161,7 +1173,7 @@ rl_fibrosis_no_race_plot <- ggplot(rl_fibrosis_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(x = "Normalized Slice",y = "Predicted log(Range)",
-       title = "Left Range Fibrosis - No Race") +
+       title = "Left Range Fibrosis;No Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw()
@@ -1193,7 +1205,7 @@ rr_fibrosis_no_race_plot <- ggplot(rr_fibrosis_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Fibrosis)),alpha = 0.1,
               linetype = "dotted") +
   labs(x = "Normalized Slice", y = "",
-       title = "Right Range Fibrosis - No Race") +
+       title = "Right Range Fibrosis;No Race") +
   scale_fill_discrete(name = "Fibrosis",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() 
@@ -1208,9 +1220,12 @@ rr_fibrosis_no_race_plot <- ggplot(rr_fibrosis_no_race_df,
 
 ```
 \doublespacing
-The plots above show the trend range and psill when moving up the lung (normalized slice) when fibrosis is the main clinical predictor. Between the race and no race plots the trends are very similar, and subsequent analysis of fibrosis will consider the models with no race. For psill the left and right lung both show similar trends where those without fibrosis have noticeably lower psill when moving up the lung. In the lower portion of the lung there is almost no difference between those with and without fibrosis, with the confidence intervals overlapping. For range the left and right plots again show similar trends, where those without fibrosis have lower values compared to subjects who have fibrosis when moving up the lung. In the bottom portion of the lung there is again overlap. 
+The plots above show the trend in range and psill when moving up the lung (normalized slice) when fibrosis is the main clinical predictor. Between the race and no race plots the trends are very similar, and subsequent analysis of fibrosis will consider the models excluding race. For psill the left and right lung both show similar trends where those without fibrosis have noticeably lower psill when moving up the lung. In the lower portion of the lung there is almost no difference between those with and without fibrosis, with the confidence intervals overlapping. For range the left and right plots again show similar trends, where those without fibrosis have lower values compared to subjects who have fibrosis when moving up the lung. The bottom portion of both lungs has significant overlap in range measurements between the two groups. 
 
 \singlespacing
+
+\newpage
+
 ### Mediastinal Lymphadenopathy (ML)
 
 ```{r med_lymph_table_setup, echo = F}
@@ -1304,7 +1319,7 @@ ml_results_table
 
 ```
 \doublespacing
-The table above illustrates differences between models including and excluding race when mediastinal lymphadenopathy is the main clinical predictor. In all models the interaction between normalized slice and mediastinal lymphadenopathy is a significant predictor for range and psill values regardless of whether or not race was included as a predictor. For psill non-Hispanic white is a significant predictor for both lungs while the other race group is not. For range neither non-Hispanic white nor the other race group were significant predictors for either lung. 
+The table above illustrates differences between models including and excluding race when mediastinal lymphadenopathy is the main clinical predictor. In all models the interaction between normalized slice and mediastinal lymphadenopathy is a significant predictor for range and psill values regardless of whether or not race was included as a predictor. For psill the non-Hispanic white category is a significant predictor for both lungs while the other race category is not. For range neither non-Hispanic white nor the other race category were significant predictors for either lung. 
 
 \singlespacing
 ```{r med_lymph_plots, echo = F}
@@ -1337,7 +1352,7 @@ pl_med_lym_race_plot <- ggplot(pl_med_lym_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Psill ML - With Race") +
+       title = "Left Psill ML;Race") +
   scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1371,7 +1386,7 @@ pr_med_lym_race_plot <- ggplot(pr_med_lym_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Psill ML - With Race") +
+       title = "Right Psill ML;Race") +
   scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1404,7 +1419,7 @@ pl_med_lym_no_race_plot <- ggplot(pl_med_lym_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Psill ML - No Race") +
+       title = "Left Psill ML;No Race") +
   scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1437,7 +1452,7 @@ pr_med_lym_no_race_plot <- ggplot(pr_med_lym_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Psill ML - No Race") +
+       title = "Right Psill ML;No Race") +
   scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1471,7 +1486,7 @@ rl_med_lym_race_plot <- ggplot(rl_med_lym_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Left Range ML - With Race") +
+       title = "Left Range ML;Race") +
   scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1505,7 +1520,7 @@ rr_med_lym_race_plot <- ggplot(rr_med_lym_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Right Range ML - With Race") +
+       title = "Right Range ML;Race") +
   scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1538,7 +1553,7 @@ rl_med_lym_no_race_plot <- ggplot(rl_med_lym_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "Left Range ML - No Race") +
+       title = "Left Range ML;No Race") +
   scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw()
@@ -1570,7 +1585,7 @@ rr_med_lym_no_race_plot <- ggplot(rr_med_lym_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Med_Lymphadenopathy)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "Right Range ML - No Race") +
+       title = "Right Range ML;No Race") +
   scale_fill_discrete(name = "ML",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() 
@@ -1586,9 +1601,11 @@ rr_med_lym_no_race_plot <- ggplot(rr_med_lym_no_race_df,
 
 ```
 \doublespacing
-The plots above show the trend of range and psill when moving up the lung (normalized slice) when mediastinal lymphadenopathy is the main clinical predictor. Similar to fibrosis, the trends in plots including and excluding race are nearly the same in trend, and subsequent analysis will consider plots excluding race. For psill the left lung has more overlap for those with and without mediastinal lymphadenopathy compared to the right lung, however both models have overlap in their 95\% confidence intervals. The right lung also has a more noticeable dip in the middle portion of the lung and then a subsequent rise in psill before quickly declining compared to the left lung. For range both left and right lung have significant overlap in 95\% confidence intervals between those with and without mediastinal lymphadenopathy, with those having the condition having slightly higher range values. The left lung plateaus in the middle, while the right lung shows a dip in range values. 
+The plots above show the trend of range and psill when moving up the lung (normalized slice) when mediastinal lymphadenopathy is the main clinical predictor. Similar to fibrosis, the trends in plots including and excluding race are nearly the same, and subsequent analysis will consider plots excluding race. For psill the left lung has more overlap for those with and without mediastinal lymphadenopathy compared to the right lung, however both models have overlap in their 95\% confidence intervals. The right lung also has a more noticeable dip in the middle portion of the lung and then a subsequent rise in psill before quickly declining compared to the left lung. For range both left and right lung have significant overlap in 95\% confidence intervals between those with and without mediastinal lymphadenopathy, with those having the condition showing slightly higher range values. The left lung plateaus in the middle, while the right lung shows a dip in range values. 
 
 \singlespacing
+
+\newpage
 
 ### Traction Bronchiectasis (TB)
 
@@ -1718,7 +1735,7 @@ pl_trac_bronch_race_plot <- ggplot(pl_trac_bronch_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Psill TB - With Race") +
+       title = "Left Psill TB;Race") +
   scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1752,7 +1769,7 @@ pr_trac_bronch_race_plot <- ggplot(pr_trac_bronch_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Psill TB - With Race") +
+       title = "Right Psill TB;Race") +
   scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1785,7 +1802,7 @@ pl_trac_bronch_no_race_plot <- ggplot(pl_trac_bronch_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Psill TB - No Race") +
+       title = "Left Psill TB;No Race") +
   scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1818,7 +1835,7 @@ pr_trac_bronch_no_race_plot <- ggplot(pr_trac_bronch_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Psill TB - No Race") +
+       title = "Right Psill TB;No Race") +
   scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1852,7 +1869,7 @@ rl_trac_bronch_race_plot <- ggplot(rl_trac_bronch_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Left Range TB - With Race") +
+       title = "Left Range TB;Race") +
   scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1886,7 +1903,7 @@ rr_trac_bronch_race_plot <- ggplot(rr_trac_bronch_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Right Range TB - With Race") +
+       title = "Right Range TB;Race") +
   scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw() +
@@ -1919,7 +1936,7 @@ rl_trac_bronch_no_race_plot <- ggplot(rl_trac_bronch_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "Left Range TB - No Race") +
+       title = "Left Range TB;No Race") +
   scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw()
@@ -1951,7 +1968,7 @@ rr_trac_bronch_no_race_plot <- ggplot(rr_trac_bronch_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(Traction_Bronchiectasis)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "Right Range TB - No Race") +
+       title = "Right Range TB;No Race") +
   scale_fill_discrete(name = "TB",labels = c("No","Yes")) +
   guides(color = F) +
   theme_bw()
@@ -1966,9 +1983,11 @@ rr_trac_bronch_no_race_plot <- ggplot(rr_trac_bronch_no_race_df,
 
 ```
 \doublespacing
-The plots above show the trend of range and psill when moving up the lung (normalized slice) when traction bronchiectasis is the main clinical predictor. The trends between models including and excluding race are similar, with the psill models including race having slightly more overlap. Subsequent analysis will focus on the plots excluding race. For psill the subjects with traction bronchiectasis have higher values in both lungs compared to subjects without traction bronchiectasis. The left lung peaks in the first quarter of the lung and then decreases, while the right lung has an oscillating pattern in the middle of the lung. For range there is significant overlap in the lower portion of normalized slice for both lungs, and then a divergence, with subjects not having traction bronchiectasis having lower range values. As with psill, the right lung decreases and increases in the middle portion of the lung before steeply decreasing, while the left lung decreases after peaking before the middle portion of the lung. 
+The plots above show the trend of range and psill when moving up the lung (normalized slice) when traction bronchiectasis is the main clinical predictor. The trends between models including and excluding race are similar, with the psill models including race having slightly more overlap. Subsequent analysis will focus on the plots excluding race. For psill the subjects with traction bronchiectasis have higher values in both lungs compared to subjects without traction bronchiectasis, and in both lungs subjects with the condition increase substantially more when moving up the lung. For range there is significant overlap in the lower portion of normalized slice for both lungs, and then a divergence, with subjects not having traction bronchiectasis showing lower range values. Similar to the psill measurements subjects with the condition have increasing range values further up the lung compared to subjects without the condition. 
 
 \singlespacing
+
+\newpage
 
 ### FEV1 
 
@@ -2098,7 +2117,7 @@ pl_fev1_race_plot <- ggplot(pl_fev1_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Psill FEV1 - With Race") +
+       title = "Left Psill FEV1;Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2132,7 +2151,7 @@ pr_fev1_race_plot <- ggplot(pr_fev1_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Psill FEV1 - With Race") +
+       title = "Right Psill FEV1;Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2165,7 +2184,7 @@ pl_fev1_no_race_plot <- ggplot(pl_fev1_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Psill FEV1 - No Race") +
+       title = "Left Psill FEV1;No Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2198,7 +2217,7 @@ pr_fev1_no_race_plot <- ggplot(pr_fev1_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Psill FEV1 - No Race") +
+       title = "Right Psill FEV1;No Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2232,7 +2251,7 @@ rl_fev1_race_plot <- ggplot(rl_fev1_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Left Range FEV1 - With Race") +
+       title = "Left Range FEV1;Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2266,7 +2285,7 @@ rr_fev1_race_plot <- ggplot(rr_fev1_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Right Range FEV1 - With Race") +
+       title = "Right Range FEV1;Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2299,7 +2318,7 @@ rl_fev1_no_race_plot <- ggplot(rl_fev1_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "Left Range FEV1 - No Race") +
+       title = "Left Range FEV1;No Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("o.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw()
@@ -2331,7 +2350,7 @@ rr_fev1_no_race_plot <- ggplot(rr_fev1_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEV1)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "Right Range FEV1 - No Race") +
+       title = "Right Range FEV1;No Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw()
@@ -2347,9 +2366,12 @@ rr_fev1_no_race_plot <- ggplot(rr_fev1_no_race_df,
 
 ```
 \doublespacing
-The plots above show the trend of range and psill when moving up the lung (normalized slice) when FEV1 is the main clinical predictor. Models including race have slightly more overlap compared to models excluding race. Subsequent analysis will consider plots excluding race. For both range and psill higher FEV1 values are associated with lower predicted outcomes. For left lung psill there is a peak in the first half of the lung, and a general decreasing trend when moving up the lung.l For right lung psill there is a noticeable dip around the center of the lung. For range the left lung has a plateau in the middle of the plot before decreasing when moving up the lung, and the right lung has a dip near the center before rising slightly and then dropping off sharply when moving up the lung. 
+The plots above show the trend of range and psill when moving up the lung (normalized slice) when FEV1 is the main clinical predictor. Models including race have slightly more overlap compared to models excluding race. Subsequent analysis will consider plots excluding race. For both range and psill higher FEV1 values are associated with lower predicted outcomes. For left lung psill there is a peak in the first half of the lung, and a general decreasing trend when moving up the lung. For right lung psill there is a noticeable dip around the center of the lung. For range the left lung has a plateau in the middle of the plot before decreasing when moving up the lung, and the right lung has a dip near the center before rising slightly and then dropping off sharply when moving up the lung. 
 
 \singlespacing
+
+\newpage
+
 ### FVC
 
 ```{r fvc_table, echo = F}
@@ -2478,7 +2500,7 @@ pl_fvc_race_plot <- ggplot(pl_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Psill FVC - With Race") +
+       title = "Left Psill FVC;Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2512,7 +2534,7 @@ pr_fvc_race_plot <- ggplot(pr_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Psill FVC - With Race") +
+       title = "Right Psill FVC;Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2545,7 +2567,7 @@ pl_fvc_no_race_plot <- ggplot(pl_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Psill FVC - No Race") +
+       title = "Left Psill FVC;No Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2578,7 +2600,7 @@ pr_fvc_no_race_plot <- ggplot(pr_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Psill FVC - No Race") +
+       title = "Right Psill FVC;No Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2612,7 +2634,7 @@ rl_fvc_race_plot <- ggplot(rl_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Left Range FVC - With Race") +
+       title = "Left Range FVC;Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2646,7 +2668,7 @@ rr_fvc_race_plot <- ggplot(rr_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Right Range FVC - With Race") +
+       title = "Right Range FVC;Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2679,7 +2701,7 @@ rl_fvc_no_race_plot <- ggplot(rl_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Left Range FVC - No Race") +
+       title = "Left Range FVC;No Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() 
@@ -2711,7 +2733,7 @@ rr_fvc_no_race_plot <- ggplot(rr_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Right Range FVC - No Race") +
+       title = "Right Range FVC;No Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() 
@@ -2726,9 +2748,12 @@ rr_fvc_no_race_plot <- ggplot(rr_fvc_no_race_df,
 
 ```
 \doublespacing
-The plots above show the trend of range and psill when moving up the lung (normalized slice) when FVC is the main clinical predictor. The models excluding race have narrower 95\% confidence intervals compared to models including race. Subsequent analysis will only consider models excluding race. For both psill and range higher FVC values are associated with lower predicted outcomes. For the left lung psill there is a peak before the middle of the lung and then a decrease when moving up the lung. For the right lung there is a noticeable decrease in the middle of the lung before increasing and then subsequently decreasing sharply. For range the left lung has a plateau in the middle, while the right lung has a slight increase after the middle portion of the lung, and then a sharp decrease. 
+The plots above show the trend of range and psill when moving up the lung (normalized slice) when FVC is the main clinical predictor. The models excluding race have narrower 95\% confidence intervals compared to models including race. Subsequent analysis will only consider models excluding race. For both psill and range higher FVC values are associated with lower predicted outcomes. For left lung psill there is a peak before the middle of the lung and then a decrease when moving up the lung. For the right lung there is a noticeable decrease in the middle of the lung before increasing and then subsequently decreasing sharply. For range the left lung has a plateau in the middle, while the right lung has a slight increase after the middle portion of the lung, and then a sharp decrease. 
 
 \singlespacing
+
+\newpage
+
 ### FEV1/FVC
 
 ```{r fev1_fvc_table, echo = F}
@@ -2856,7 +2881,7 @@ pl_fev1_fvc_race_plot <- ggplot(pl_fev1_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Psill FEV1/FVC - With Race") +
+       title = "Left Psill FEV1/FVC;Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2890,7 +2915,7 @@ pr_fev1_fvc_race_plot <- ggplot(pr_fev1_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Psill FEV1/FVC - With Race") +
+       title = "Right Psill FEV1/FVC;Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2923,7 +2948,7 @@ pl_fev1_fvc_no_race_plot <- ggplot(pl_fev1_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Left Psill FEV1/FVC - No Race") +
+       title = "Left Psill FEV1/FVC;No Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2956,7 +2981,7 @@ pr_fev1_fvc_no_race_plot <- ggplot(pr_fev1_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Psill)",x = "",
-       title = "Right Psill FEV1/FVC - No Race") +
+       title = "Right Psill FEV1/FVC;No Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -2990,7 +3015,7 @@ rl_fev1_fvc_race_plot <- ggplot(rl_fev1_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Left Range FEV1/FVC - With Race") +
+       title = "Left Range FEV1/FVC;Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -3024,7 +3049,7 @@ rr_fev1_fvc_race_plot <- ggplot(rr_fev1_fvc_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "",
-       title = "Right Range FEV1/FVC - With Race") +
+       title = "Right Range FEV1/FVC;Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() +
@@ -3058,7 +3083,7 @@ rl_fev1_fvc_no_race_plot <- ggplot(rl_fev1_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "Left Range FEV1/FVC - No Race") +
+       title = "Left Range FEV1/FVC;No Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw() 
@@ -3091,7 +3116,7 @@ rr_fev1_fvc_no_race_plot <- ggplot(rr_fev1_fvc_no_race_df,
   geom_ribbon(aes(ymin = LB,ymax = UB,fill = factor(POSTFEVFVC)),alpha = 0.1,
               linetype = "dotted") +
   labs(y = "Predicted log(Range)",x = "Normalized Slice",
-       title = "Right Range FEV1/FVC - No Race") +
+       title = "Right Range FEV1/FVC;No Race") +
   scale_fill_discrete(name = "Quantiles",labels = c("0.25","0.50","0.75")) +
   guides(color = F) +
   theme_bw()
@@ -3114,15 +3139,15 @@ The plots above show the trend of range and psill when moving up the lung (norma
 
 ### Race as a Predictor
 \doublespacing
-Direct model comparison using AIC suggested that there were minimal differences between models including race and models excluding race. For example, the left lung psill model including race had an AIC of -470.2398, while the model excluding race had a psill of -470.0661, meaning that the model including race had an AIC only 0.1737 units lower than the model excluding race. Between all models only the psill models where fibrosis, mediastinal lymphadenopathy, traction bronchiectasis, and FEV1/FVC were the clinical predictors had AIC values which were slightly lower for models including race compared to models which excluded race. Psill models where FEV1 and FVC were the clinical predictors and all models for range had lower AIC values for models which excluded race. Again, the differences were all below 1. In deciding on whether to include race or not for based on AIC values models without race will have a higher proportion of lower AIC values compared to models that included race. 
+Direct model comparison using AIC suggested that there were minimal differences between models including race and models excluding race. For example, the left lung psill model including race had an AIC of -470.2398, while the model excluding race had a psill of -470.0661, meaning that the model including race had an AIC only 0.1737 units lower than the model excluding race. Between all models only the psill models where fibrosis, mediastinal lymphadenopathy, traction bronchiectasis, and FEV1/FVC were the clinical predictor had AIC values which were smaller in the models including race. Psill models where FEV1 and FVC were the clinical predictors and all models for range had lower AIC values when excluding race. Again, the differences were all below 1. In deciding on whether to include race or not for based on AIC values models that excluded race had a higher proportion of lower AIC values compared to models which included race. 
 
-Based on model outputs from the tables provided in the results neither race category of non-Hispanic white or other was a significant predictor for the range outcome when the reference group was African American/Black. For psill models the non-Hispanic white category was generally significant while the other races category was never a significant predictor. Additionally, the interaction between the clinical predictor and normalized slice was significant in all models regardless of whether or not race was included as a predictor. From the plots the relationship between models including and excluding race had the same general trend, with the main difference being that models without race tended to have slightly narrower confidence intervals. These narrower confidence intervals gave better discrepancy in predicted outcome between the binary VAS conditions and the three levels of PFT measurements (25th percentile, 50th percentile, and 75 percentile).
+Based on model outputs from the tables provided in the results neither race category was a significant predictor for the range outcome. For psill models the non-Hispanic white category was generally significant while the other races category was never a significant predictor. Additionally, the interaction between the clinical measurement and normalized slice was significant in all models regardless of whether or not race was included as a predictor. From the plots the relationship between models including and excluding race had the same general trend, with the main difference being that models without race tended to have slightly narrower confidence intervals. These narrower confidence intervals gave better discrepancy in predicted outcome between the binary VAS conditions and the three levels of PFT measurements (25th percentile, 50th percentile, and 75 percentile).
 
-Beyond data analyzed in this study, past studies have noted difficulty in assessing the prevalence in sarcoidosis among different racial groups. For example, a study in the American Journal of Epidemiology noted that while African-Americans were found to have threefold higher risk of sarcoidosis compared to Caucasians, it is difficult to determine the degree that environmental exposure versus genetic susceptibility accounts for this difference [@racial_differences_sarcoidosis]. Additionally, socioeconomic status (SES) is a known predictor of health outcomes, and patients of low SES tend to have worse pulmonary function, lower baseline physical health, and higher likelihood of multi-organ disease after adjusting for comorbidities [@diversity_disparity]. In the context of this study, simply adjusting for race will likely overlook more important predictors of sarcoidosis, and obfuscate care for those who are most at risk. In another study an age-adjusted mortality rate increase of 50\% between 1988 and 2007 in the United States was observed for Caucasians and not African Americans, with the authors suggesting that access to more advanced medical technology by Caucasian patients could explain higher rates of detection and bias in diagnoses [@sarcoidosis_mortality]. As more advanced imaging options become available past assumptions regarding sarcoidosis susceptibility need careful scrutiny to avoid perpetuating bias in treatment and diagnosis. After running comparisons between models including race and models excluding race there is no tangible benefit for including race as a predictor. Additional covariates which may influence sarcoidosis should be investigated for better modeling.  
+Beyond data analyzed in this study, past studies have noted difficulty in assessing the prevalence of sarcoidosis among different racial groups. For example, a study in the American Journal of Epidemiology noted that while African-Americans were found to have threefold higher risk of sarcoidosis compared to Caucasians, it is difficult to determine the degree that environmental exposure versus genetic susceptibility accounts for this difference [@racial_differences_sarcoidosis]. Additionally, socioeconomic status (SES) is a known predictor of health outcomes, and patients of low SES tend to have worse pulmonary function, lower baseline physical health, and higher likelihood of multi-organ disease after adjusting for comorbidities [@diversity_disparity]. In the context of this study, simply adjusting for race will likely overlook more important predictors of sarcoidosis, potentially impeding care for those who are most at risk. In another study an age-adjusted mortality rate increase of 50\% between 1988 and 2007 in the United States was observed for Caucasians and not African Americans, with the authors suggesting that access to more advanced medical technology by Caucasian patients could explain higher rates of detection and bias in diagnoses [@sarcoidosis_mortality]. As more advanced imaging options become available past assumptions regarding sarcoidosis susceptibility need careful scrutiny to avoid perpetuating bias in treatment and diagnosis. After running comparisons between models including race and models excluding race there is no tangible benefit for including race as a predictor. Additional covariates which may influence sarcoidosis should be investigated for better modeling.  
 
 ### Relationship Between Clinical Predictors and Outcomes
 
-Differences within clinical measurements were most obvious in plots showing the relationship between the log of psill/range and normalized slice. Analysis for these plots focused on the models which did not control for race. For fibrosis subjects with no disease had lower measurements in both psill and range when moving up the lung. The lower in the lung measurements were taken the closer the two groups were. 
+Differences within clinical measurements were most obvious in plots showing the relationship between the log of psill/range and normalized slice. Analysis for these plots focused on the models which did not control for race. For fibrosis, subjects with no disease had lower measurements in both psill and range when moving up the lung. The lower in the lung measurements were taken the closer the two groups were. 
 
 For models where mediastinal lymphadenopathy was the primary clinical measurement psill was lower among subjects who did not have the condition compared to subjects who had the condition. In the left lung the largest difference was in the middle portion of the lung, with more similarity moving when moving towards the top and bottom most portion of the lungs. The right lung showed more consistant difference between subjects with and without mediastinal lymphadenopathy throughout the lung. For models of range both lungs had small differences between those with and without mediastinal lymphadenopathy, with subjects who did not have the condition generally having slightly lower values.  
 
@@ -3136,8 +3161,9 @@ For models where FEV1/FVC was the primary variable psill and range were in gener
 
 In summary subjects with better PFT lung function, no fibrosis, no mediastinal lymphadenopathy, and no traction bronchiectasis had smaller psill and range measurements. Differences tended to be largest in the middle portion of the lung, suggesting that scans focused on this area show the largest discrepancy among subjects with worse health. 
 
-Limitations of this analysis include lack of diversity among subjects. The majority of subjects were non-Hispanic whites, followed by African Americans/Black. The other race category incorporated multiple different races which strongly limits the inference beyond the two primary race categories mentioned previously. Additionally, the diagnosis of sarcoidosis was not explicitly incorporated into this analysis, but rather potential indicators of disease represented by the clinical measurements. Additional study will need to be performed to understand the relationship between variogram scans and sarcoidosis. Lastly, a complete case analysis was performed for better comparison of models, meaning that the sample size was smaller than originally expected. 
+Limitations of this analysis include lack of diversity among subjects. The majority of subjects were non-Hispanic whites, followed by African Americans/Black. The other race category incorporated multiple different races, which strongly limits the inference beyond the two primary race categories mentioned previously. Additionally, the diagnosis of sarcoidosis was not explicitly incorporated into this analysis, but rather potential indicators of disease represented by the clinical measurements. Additional study will need to be performed to better understand the relationship between variogram scans and sarcoidosis. Lastly, a complete case analysis was performed for better comparison of models, meaning that the sample size was smaller than originally expected. 
 
+\newpage
 
 \singlespacing
 # References
